@@ -1,0 +1,10 @@
+---
+applications:
+- name: boarding-pass
+  memory: 64M
+  instances: 1
+  host: boarding-pass
+  buildpack: https://github.com/rwdaigle/heroku-buildpack-github-markdown
+  domain: cfapps.io
+  env:
+    STYLESHEET_URL: https://gist.githubusercontent.com/andyferra/2554919/raw/2e66cabdafe1c9a7f354aa2ebf5bc38265e638e5/github.css

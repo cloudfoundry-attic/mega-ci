@@ -46,21 +46,23 @@ version of Concourse. We'll have documentation on how to do this soon.
         --certificate-chain file://chain.pem
     ```
 
-3. Next, clone the [Concourse Git repository][concourse-github]. This contains
+3. Delete the `.pem` files from your local machine!
+
+4. Next, clone the [Concourse Git repository][concourse-github]. This contains
    the CloudFormation template that we'll use to generate the VPC that will
    contain the Concourse deployment.
 
-4. In your AWS account, open CloudFormation and click on *Create Stack*. Pick a
+5. In your AWS account, open CloudFormation and click on *Create Stack*. Pick a
    sensible name and then upload the CloudFormation template from the
    `manifests/cloudformation.json` file in the Concourse Git repository.
 
-5. CloudFormation will ask you a few questions about how you would like to
+6. CloudFormation will ask you a few questions about how you would like to
    deploy the Concourse stack. You should pick the key that you want to use,
    leave the two DNS parameters blank as we'll be setting that up with a
    different account, and set the load balancer certificate name to `sharedci`
    or whatever name you chose above in step 2.
 
-6. Click deploy and relax with [some in-flight entertainment][bob-ross]. If the
+7. Click deploy and relax with [some in-flight entertainment][bob-ross]. If the
    deploy fails then the error messages are normally at least somewhat clear as
    to the cause of the problem. If you encounter an error message that you
    don't understand then please get in contact and we'll do our best to help.
