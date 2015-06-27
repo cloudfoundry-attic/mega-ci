@@ -108,10 +108,8 @@ Follow [the guide to deploying a Concourse to an AWS VPC][deploying-concourse].
 6. Save all this and go play some table tennis while the DNS propagates. You
    should now be able to go to `<team>.ci.cf-app.com` and reach your CI server.
 
-7. Log back into your AWS account and load in the `*.ci.cf-app.com` certificate
-   (which can be found in LastPass) into your ELB. AWS is really picky about
-   the names and formats of the keys. Make sure there is no trailing whitespace
-   in the keys or certificates. Avoid using emoji for the certificate name.
+7. Log back into your AWS account and load in the certificate that you added
+   earlier to your ELB.
 
 8.  Once this is done, assuming you have an SSL listener set up for your ELB,
     you'll be able to visit `https://<team>.ci.cf-app.com`, the little lock in
