@@ -77,8 +77,8 @@ using `bosh-init`.
 
 Follow the [AWS bosh-init guide][bosh-init] that explains how to deploy a BOSH.
 You can skip the *Prepare an AWS Account* step as the CloudFormation template
-has take care of all that for you. You should give the deployment manifest a
-quick scan for values that don't make sense in your VPC e.g. key names,
+has taken care of all of that for you. You should give the deployment manifest
+a quick scan for values that don't make sense in your VPC e.g. key names,
 security group names, or elastic IPs.
 
 You can get the values for most of these from the *Resources* tab of the
@@ -100,7 +100,7 @@ Follow [the guide to deploying a Concourse to an AWS VPC][deploying-concourse].
 
 3. Log into the shared DNS account (details can be found in LastPass).
 
-4. In Route53, open up the cf.cf-app.com hosted zone.
+4. In Route53, open up the `ci.cf-app.com` hosted zone.
 
 5. Create a new record set with name `<team>.ci.cf-app.com`, type set to
    `CNAME`, and value set to the "DNS Name" you noted down earlier.
