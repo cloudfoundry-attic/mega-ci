@@ -1,0 +1,119 @@
+#!/bin/bash
+
+script_dir=$(dirname $0)
+
+command -v aws >/dev/null || { echo "aws is required"; exit 1; }
+command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
+command -v jq >/dev/null || { echo "jq is required"; exit 1; }
+command -v spiff >/dev/null || { echo "spiff is required"; exit 1; }
+
+if [ -z ${AWS_DEFAULT_REGION} ]; then
+  echo 'AWS_DEFAULT_REGION is not set'
+  exit 1
+fi
+
+if [ -z ${AWS_ACCESS_KEY_ID} ]; then
+  echo 'AWS_DEFAULT_REGION is not set'
+  exit 1
+fi
+
+if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
+  echo 'AWS_DEFAULT_REGION is not set'
+  exit 1
+fi
+
+set -x
+
+mkdir -p artifacts/keypair
+mkdir -p artifacts/deployments
+mkdir -p generated-stubs
+
+# create keypair
+if ! aws ec2 describe-key-pairs --key-names bosh; then
+  aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > artifacts/keypair/id_rsa_bosh
+fi
+
+# install certs for ELB
+if ! aws iam get-server-certificate --server-certificate-name concourse; then
+  if [ -e certs/concourse_chain.pem ]; then
+    aws iam upload-server-certificate --server-certificate-name concourse --private-key file://certs/concourse.key --certificate-body file://certs/concourse.pem  --certificate-chain file://certs/concourse_chain.pem
+  else
+    aws iam upload-server-certificate --server-certificate-name concourse --private-key file://certs/concourse.key --certificate-body file://certs/concourse.pem
+  fi
+fi
+
+# deploy infrastructure
+if ! aws cloudformation describe-stacks | jq -e '.Stacks[0].StackName == "concourse"'; then
+  aws cloudformation create-stack \
+    --stack-name concourse \
+    --template-body file://$script_dir/templates/bosh_cloud_formation.json \
+    --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse
+else
+  aws cloudformation update-stack \
+    --stack-name concourse \
+    --template-body file://$script_dir/templates/bosh_cloud_formation.json \
+    --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse
+fi
+
+running=0
+while [ ${running} == "0" ]; do
+  aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep IN_PROGRESS
+  running=$?
+  sleep 15
+done
+
+aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep "COMPLETE"
+success=$?
+
+if [ ${success} != "0" ]; then
+  echo 'Cloud formation failure'
+  exit 1
+fi
+
+# generate AWS resources stub for shared purposes
+aws cloudformation describe-stack-resources --stack-name concourse \
+  | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
+  > generated-stubs/aws-resources.json
+
+
+BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
+AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
+
+BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
+BOSH_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${BOSH_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
+
+# generate stub for BOSH Security Group Name
+cat > generated-stubs/security-groups.yml <<EOF
+{
+  "SecurityGroups": {
+    "BOSH_SECURITY_GROUP_NAME": "$BOSH_SECURITY_GROUP_NAME"
+  }
+}
+EOF
+
+# generate stub for AWS Credentials
+cat > generated-stubs/aws-credentials.yml <<EOF
+{
+  "Credentials": {
+    "AWS_ZONE": "$AWS_ZONE",
+    "AWS_DEFAULT_REGION": "$AWS_DEFAULT_REGION",
+    "AWS_ACCESS_KEY_ID": "$AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY": "$AWS_SECRET_ACCESS_KEY"
+  }
+}
+EOF
+
+# generate bosh deployment manifest
+spiff merge $script_dir/templates/bosh.yml generated-stubs/aws-credentials.yml generated-stubs/aws-resources.json generated-stubs/security-groups.yml \
+  > artifacts/deployments/bosh.yml
+
+bosh-init deploy  artifacts/deployments/bosh.yml
+
+# Target bosh
+BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
+bosh -n target $BOSH_IP
+bosh login admin admin
+
+rm -rf generated-stubs
+
+echo "BOSH director is at $BOSH_IP, username: admin, password: admin"

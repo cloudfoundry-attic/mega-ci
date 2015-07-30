@@ -1,0 +1,104 @@
+#!/bin/bash
+
+set -ex
+
+script_dir=$(dirname $0)
+
+STUB_PATH=$1
+
+if [ -z ${STUB_PATH} ]; then
+  echo 'Usage: deploy_concourse STUB_FILE'
+  exit 1
+fi
+
+if [ -z ${AWS_DEFAULT_REGION} ]; then
+  echo 'AWS_DEFAULT_REGION is not set'
+  exit 1
+fi
+
+if [ -z ${AWS_ACCESS_KEY_ID} ]; then
+  echo 'AWS_DEFAULT_REGION is not set'
+  exit 1
+fi
+
+if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
+  echo 'AWS_DEFAULT_REGION is not set'
+  exit 1
+fi
+
+STEMCELL_PATH=$(cat $STUB_PATH | jq -r .stemcell)
+CONCOURSE_RELEASE_PATH=$(cat $STUB_PATH | jq -r .concourse_release)
+GARDEN_RELEASE_PATH=$(cat $STUB_PATH | jq -r .garden_release)
+
+mkdir -p artifacts/deployments
+mkdir -p generated-stubs/concourse
+
+# generate AWS resources stub for shared purposes
+aws cloudformation describe-stack-resources --stack-name concourse \
+  | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
+  > generated-stubs/aws-resources.json
+
+# Target bosh
+BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
+bosh -n target $BOSH_IP
+
+# Obtain bosh uuid for manifest generation
+BOSH_UUID=$(bosh --no-color status --uuid) 
+cat > generated-stubs/concourse/uuid_stub.yml <<EOF
+---
+# GENERATED, NO TOUCHING
+director_uuid: $BOSH_UUID
+EOF
+
+# Generate the network for concourse
+# Note: this network range should be associated with the Resources.InternalSubnet property
+SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.InternalSubnet)
+LOAD_BALANCER=$(cat generated-stubs/aws-resources.json | jq -r .Resources.WebELBLoadBalancer)
+INTERNAL_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.InternalSecurityGroup)
+INTERNAL_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${INTERNAL_SECURITY_GROUP_ID} | jq .SecurityGroups[0].GroupName)
+cat > generated-stubs/concourse/networks_stub.yml <<EOF
+---
+# GENERATED, NO TOUCHING
+networks:
+  - name: concourse
+    type: manual
+    subnets:
+      - range: 10.0.16.0/20 
+        reserved: [10.0.16.2 - 10.0.16.9]
+        static: [10.0.16.31]
+        dns: [10.0.0.2]
+        gateway: 10.0.16.1
+        cloud_properties:
+          security_groups: [$INTERNAL_SECURITY_GROUP_NAME]
+          subnet: $SUBNET_ID
+EOF
+
+# Grab availability zone
+AWS_ZONE=$(cat generated-stubs/aws-credentials.yml | jq -r .Credentials.AWS_ZONE)
+cat > generated-stubs/concourse/aws_config_stub.yml <<EOF
+---
+# GENERATED, NO TOUCHING
+aws_config:
+  az: $AWS_ZONE
+  load_balancer: $LOAD_BALANCER
+EOF
+
+
+
+spiff merge $script_dir/templates/concourse.yml \
+  generated-stubs/concourse/aws_config_stub.yml \
+  generated-stubs/concourse/networks_stub.yml \
+  generated-stubs/concourse/uuid_stub.yml \
+  $script_dir/templates/secrets_stub.yml \
+  "$1" > artifacts/deployments/concourse.yml
+
+bosh -n deployment artifacts/deployments/concourse.yml
+bosh -n upload stemcell $STEMCELL_PATH --skip-if-exists
+bosh -n upload release $CONCOURSE_RELEASE_PATH --skip-if-exists
+bosh -n upload release $GARDEN_RELEASE_PATH --skip-if-exists
+bosh -n deploy
+
+rm -rf generated-stubs
+
+LOAD_BALANCER_DNSName=$(aws elb describe-load-balancers --load-balancer-names $LOAD_BALANCER| jq -r .LoadBalancerDescriptions[0].DNSName)
+echo "Concourse available at https://$LOAD_BALANCER_DNSName"
