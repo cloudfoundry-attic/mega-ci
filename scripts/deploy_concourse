@@ -43,7 +43,7 @@ BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 bosh -n target $BOSH_IP
 
 # Obtain bosh uuid for manifest generation
-BOSH_UUID=$(bosh --no-color status --uuid) 
+BOSH_UUID=$(bosh --no-color status --uuid)
 cat > generated-stubs/concourse/uuid_stub.yml <<EOF
 ---
 # GENERATED, NO TOUCHING
@@ -63,7 +63,7 @@ networks:
   - name: concourse
     type: manual
     subnets:
-      - range: 10.0.16.0/20 
+      - range: 10.0.16.0/20
         reserved: [10.0.16.2 - 10.0.16.9]
         static: [10.0.16.31]
         dns: [10.0.0.2]
@@ -85,11 +85,11 @@ EOF
 
 
 
-spiff merge $script_dir/templates/concourse.yml \
+spiff merge $script_dir/../templates/concourse.yml \
   generated-stubs/concourse/aws_config_stub.yml \
   generated-stubs/concourse/networks_stub.yml \
   generated-stubs/concourse/uuid_stub.yml \
-  $script_dir/templates/secrets_stub.yml \
+  $script_dir/../templates/secrets_stub.yml \
   "$1" > artifacts/deployments/concourse.yml
 
 bosh -n deployment artifacts/deployments/concourse.yml

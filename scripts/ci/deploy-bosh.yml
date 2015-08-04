@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: deployments-runtime
+  - name: mega-test
+  - name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/deploy-bosh
+
+params:
+  DEPLOYMENT_DIR:

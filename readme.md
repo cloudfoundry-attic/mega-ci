@@ -1,11 +1,4 @@
-# Boarding Pass
-
-Thank you for booking your flight with Concourse. The following document will
-guide you through getting ready for check-in.
-
-## Packing List
-
-In order to fly you will need the following:
+### Requirements
 
 * An AWS account for your Concourse deployment. It doesn't need to be empty as
   we can contain everything inside a VPC.
@@ -35,16 +28,6 @@ In order to fly you will need the following:
 
 [bosh-init-docs]: https://bosh.io/docs/install-bosh-init.html
 [spiff-releases]: https://github.com/cloudfoundry-incubator/spiff/releases
-
-## Itinerary
-
-Following these instructions will get you a BOSH and a Concourse deployment
-running in AWS that is ready to be scaled up with more workers and ATCs if
-needed.
-
-If your workload is small then you may only need a small, single-node
-deployment then consider skipping most of this and deploying a `bosh-init`
-version of Concourse. We'll have documentation on how to do this soon.
 
 ### Setting up your AWS Environment
 
@@ -87,19 +70,3 @@ An artifacts directory will be created and contain the following files:
 * deployments/concourse.yml: The bosh deployment manifest for the concourse deployment.
 * keypair/id_rsa_bosh: The ssh key used by BOSH. This is needed if you want to ssh into 
   the BOSH instance or any of the concourse instances.
-
-## Connecting Flights
-
-If you would like more information about what to do next or how to extend
-Concourse further then the following links should be helpful:
-
-* The [pipeline that builds Concourse itself][concourse-pipeline] is open
-  source and a good example of a large pipeline that has all different kinds of
-  inputs and outputs (check out the *publish* group for our release fan-out).
-
-* The [Concourse documentation][concourse-docs] should be a one stop reference
-  for working with Concourse. If something isn't clear or information is
-  missing then please let us know so that we can fix it for everyone.
-  
-[concourse-pipeline]: https://github.com/concourse/concourse/blob/master/ci/pipelines/concourse.yml
-[concourse-docs]: http://concourse.ci/
