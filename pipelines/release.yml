@@ -2,6 +2,7 @@ groups:
 - name: release
   jobs:
   - announce-rc
+  - create-release-notes
 
 resources:
 - name: mega-pm-tools
@@ -23,6 +24,11 @@ resources:
   type: time
   source:
     interval: "168h"
+- name: cf-final-bosh-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/cf-release
+
 
 jobs:
 - name: announce-rc
@@ -38,3 +44,20 @@ jobs:
     config:
       params:
         GH_ACCESS_TOKEN: {{gh_access_token}}
+- name: create-release-notes
+  plan:
+  - aggregate:
+    - get: cf-final-bosh-release
+      trigger: true
+    - get: mega-pm-tools
+  - task: create-release-notes-template
+    file: mega-pm-tools/create-release-notes-template.yml
+    config:
+      params:
+        GH_ACCESS_TOKEN: {{gh_access_token}}
+  - task: request-pm-input
+    file: mega-pm-tools/request-pm-input.yml
+    config:
+      params:
+        TRACKER_API_TOKEN: {{tracker_api_token}}
+        MEGA_PM_ID: {{mega_pm_id}}
