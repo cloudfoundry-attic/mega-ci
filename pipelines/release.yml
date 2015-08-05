@@ -1,0 +1,40 @@
+groups:
+- name: release
+  jobs:
+  - announce-rc
+
+resources:
+- name: mega-pm-tools
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/Amit-PivotalLabs/mega-pm-tools
+- name: cf-release-repo-develop
+  type: git
+  source:
+    branch: develop
+    uri: https://github.com/cloudfoundry/cf-release
+- name: cf-github-release
+  type: github-release
+  source:
+    user: cloudfoundry
+    repository: cf-release
+- name: weekly
+  type: time
+  source:
+    interval: "168h"
+
+jobs:
+- name: announce-rc
+  plan:
+  - aggregate:
+    - get: mega-pm-tools
+    - get: cf-release-repo-develop
+    - get: cf-github-release
+    - get: weekly
+      trigger: true
+  - task: announce-rc
+    file: mega-pm-tools/announce-rc.yml
+    config:
+      params:
+        GH_ACCESS_TOKEN: {{gh_access_token}}
