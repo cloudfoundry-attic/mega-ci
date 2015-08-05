@@ -31,10 +31,24 @@
 
 ### Setting up your AWS Environment
 
-Run the `deploy_bosh` script. This will execute the AWS cloud formation template
-and then create a BOSH instance. The script will print the location of the bosh
-director. The username/password is admin/admin. These can be changed by running
-`bosh create user USERNAME PASSWORD`
+Create a yaml stub that provides the following set of bosh passwords.
+
+```yaml
+bosh_credentials:
+  agent_password: REPLACE_WITH_PASSWORD
+  director_password: REPLACE_WITH_PASSWORD
+  mbus_password: REPLACE_WITH_PASSWORD
+  nats_password: REPLACE_WITH_PASSWORD
+  redis_password: REPLACE_WITH_PASSWORD
+  postgres_password: REPLACE_WITH_PASSWORD
+  registry_password: REPLACE_WITH_PASSWORD
+```
+
+Run the `deploy_bosh` script and provide the path to your bosh secrets stub. 
+This will execute the AWS cloud formation template and then create a BOSH 
+instance. The script will print the location of the bosh director. The 
+username/password is admin/admin. These can be changed by running
+`bosh create user USERNAME PASSWORD`.
 
 ### Deploying Concourse
 

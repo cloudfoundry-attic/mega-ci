@@ -2,6 +2,11 @@
 
 script_dir=$(dirname $0)
 
+if [ $# -ne 1 ]; then
+  echo 'You must provide the path to the bosh secrets stub'
+  exit 1
+fi
+
 command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
@@ -55,11 +60,13 @@ else
     --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse
 fi
 
-running=0
+aws cloudformation describe-stacks --stack-name mega-test | grep StackStatus | grep IN_PROGRESS
+running=$?
+
 while [ ${running} == "0" ]; do
+  sleep 15
   aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep IN_PROGRESS
   running=$?
-  sleep 15
 done
 
 aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep "COMPLETE"
@@ -70,11 +77,12 @@ if [ ${success} != "0" ]; then
   exit 1
 fi
 
+set -e
+
 # generate AWS resources stub for shared purposes
 aws cloudformation describe-stack-resources --stack-name concourse \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
-
 
 BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
 AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
