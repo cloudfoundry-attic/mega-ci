@@ -43,7 +43,7 @@ jobs:
     file: mega-pm-tools/announce-rc.yml
     config:
       params:
-        GH_ACCESS_TOKEN: {{gh_access_token}}
+        GH_ACCESS_TOKEN: {{release_candidate_bot_github_access_token}}
 - name: create-release-notes
   plan:
   - aggregate:
@@ -54,7 +54,7 @@ jobs:
     file: mega-pm-tools/create-release-notes-template.yml
     config:
       params:
-        GH_ACCESS_TOKEN: {{gh_access_token}}
+        GH_ACCESS_TOKEN: {{release_notes_bot_github_access_token}}
   - task: request-pm-input
     file: mega-pm-tools/request-pm-input.yml
     config:
