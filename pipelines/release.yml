@@ -29,7 +29,8 @@ jobs:
   plan:
   - aggregate:
     - get: mega-pm-tools
-    - get: cf-release-repo-develop
+    - get: cf-release-repo
+      resource: cf-release-repo-develop
     - get: cf-github-release
     - get: weekly
       trigger: true
