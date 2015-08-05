@@ -35,3 +35,4 @@ jobs:
     config:
       params:
         DEPLOYMENT_DIR: 'mega-test'
+        PATH_TO_PASSWORDS_STUB: 'stubs/bosh/passwords_stub.yml'

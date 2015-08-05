@@ -74,7 +74,7 @@ networks:
 EOF
 
 # Grab availability zone
-AWS_ZONE=$(cat generated-stubs/aws-credentials.yml | jq -r .Credentials.AWS_ZONE)
+AWS_ZONE=$(cat generated-stubs/aws-credentials  .yml | jq -r .AWSCredentials.AWS_ZONE)
 cat > generated-stubs/concourse/aws_config_stub.yml <<EOF
 ---
 # GENERATED, NO TOUCHING
