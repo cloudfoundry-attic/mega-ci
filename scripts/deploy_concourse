@@ -46,7 +46,6 @@ bosh -n target $BOSH_IP
 BOSH_UUID=$(bosh --no-color status --uuid)
 cat > generated-stubs/concourse/uuid_stub.yml <<EOF
 ---
-# GENERATED, NO TOUCHING
 director_uuid: $BOSH_UUID
 EOF
 
@@ -58,7 +57,6 @@ INTERNAL_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Res
 INTERNAL_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${INTERNAL_SECURITY_GROUP_ID} | jq .SecurityGroups[0].GroupName)
 cat > generated-stubs/concourse/networks_stub.yml <<EOF
 ---
-# GENERATED, NO TOUCHING
 networks:
   - name: concourse
     type: manual
@@ -77,7 +75,6 @@ EOF
 AWS_ZONE=$(cat generated-stubs/aws-credentials  .yml | jq -r .AWSCredentials.AWS_ZONE)
 cat > generated-stubs/concourse/aws_config_stub.yml <<EOF
 ---
-# GENERATED, NO TOUCHING
 aws_config:
   az: $AWS_ZONE
   load_balancer: $LOAD_BALANCER
