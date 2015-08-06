@@ -34,13 +34,13 @@ jobs:
   plan:
   - aggregate:
     - get: deployments-runtime
-    - get: release
     - get: mega-ci
     - get: mega-test
   - task: generate-manifest
     file: mega-ci/scripts/ci/generate-manifest.yml
     config:
       params:
+        DEPLOYMENT_DIR: mega-test
 
 
 
