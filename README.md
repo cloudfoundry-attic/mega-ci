@@ -12,7 +12,7 @@
   * AWS\_ACCESS\_KEY_ID
   * AWS\_SECRET\_ACCESS_KEY
 
-* The `bosh-ini` command line tool. Instructions for installation can be found 
+* The `bosh-init` command line tool. Instructions for installation can be found 
   [here][bosh-init-docs].
 
 * The `jq` command line tool. This can be installed by running `brew install jq` 
