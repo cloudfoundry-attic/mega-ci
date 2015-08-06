@@ -83,8 +83,6 @@ aws_config:
   load_balancer: $LOAD_BALANCER
 EOF
 
-
-
 spiff merge $script_dir/../templates/concourse.yml \
   generated-stubs/concourse/aws_config_stub.yml \
   generated-stubs/concourse/networks_stub.yml \
