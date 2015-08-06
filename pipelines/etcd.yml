@@ -2,6 +2,7 @@ groups:
 - name: etcd
   jobs:
   - create-release
+  - generate-manifest
 
 resources:
 - name: deployments-runtime
