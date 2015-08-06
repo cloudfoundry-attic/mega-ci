@@ -1,0 +1,71 @@
+groups:
+- name: etcd
+  jobs:
+  - create-release
+
+resources:
+- name: deployments-runtime
+  type: git
+  source:
+    branch: master
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/deployments-runtime.git
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/mega-ci.gi
+- name: mega-test
+  type: git
+  source:
+    branch: master
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/mega-test.git
+- name: etcd-release
+  type: git
+  source:
+    branch: master
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry-incubator/etcd-release.git
+
+jobs:
+- name: generate-manifest
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: release
+    - get: mega-ci
+    - get: mega-test
+  - task: generate-manifest
+    file: mega-ci/scripts/ci/generate-manifest.yml
+    config:
+      params:
+
+
+
+
+
+
+
+
+
+- name: create-release
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: release
+      resource: etcd-release
+      trigger: true
+  - task: create-release
+    file: mega-ci/scripts/ci/create-release.yml
+    config:
+      params:
+        RELEASE_NAME: etcd
+        RELEASE_DIR: etcd-release
+  - task: test-release
+    file: mega-ci/scripts/ci/test-release.yml
+    config:
+      params:
+        RELEASE_DIR: etcd-release

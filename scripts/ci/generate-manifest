@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -e -x
+
+source ~/.bashrc
+
+cd deployments-runtime/$DEPLOYMENT_DIR
+source aws_environment
+
+# generate resources stub
+
+mkdir ../../generated-stubs
+
+# generate AWS resources stub for shared purposes
+aws cloudformation describe-stack-resources --stack-name mega-test \
+  | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
+  > ../../generated-stubs/aws-resources.json
+
+spiff merge ../../mega-test/stubs/etcd/iaas-settings.yml \
+  ../../generated-stubs/aws-resources.json \
+  > ../../generated-stubs/iaas-settings.yml
+
+cat ../../generated-stubs/iaas-settings.yml
+
+# create iaas settings stub

@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: mega-test
+  - name: mega-ci
+  - name: deployments-runtime
+
+run:
+  path: mega-ci/scripts/ci/generate-manifest
+
+params:
+  DEPLOYMENT_DIR:
