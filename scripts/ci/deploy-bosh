@@ -4,8 +4,5 @@ set -e -x
 
 source ~/.bashrc
 
-cd deployments-runtime/$DEPLOYMENT_DIR
-source aws_environment
-
-../../mega-test/scripts/deploy_bosh $PATH_TO_PASSWORDS_STUB
+./mega-test/scripts/deploy_bosh $DEPLOYMENT_DIR
 

@@ -1,30 +1,27 @@
 ---
 name: concourse
 
-# replace with bosh status --uuid
-director_uuid: (( merge )) 
-
-# pick a sane password
-atc_db_role: &atc-db-role
-  name: atc
-  password: bF5GsAugkE6b07TAm5ITWtF9Peh5qDXB 
-
-# replace all addresses with your VPC range
-#
-# e.g. X.X.0.2 -> 10.10.0.2
-networks: (( merge ))
-
-# replace with an AZ from your account
-aws_config: (( merge ))
-
-#merge our secrets in
-secrets: (( merge ))
+director_uuid: (( merge ))
 
 releases:
   - name: concourse
     version: latest
   - name: garden-linux
     version: latest
+
+networks:
+  - name: concourse
+    type: manual
+    subnets:
+      - range: 10.0.16.0/20
+        reserved: [10.0.16.2 - 10.0.16.9]
+        static: [10.0.16.31]
+        dns: [10.0.0.2]
+        gateway: 10.0.16.1
+        cloud_properties:
+          security_groups:
+            - (( .cloud_properties.security_group_name ))
+          subnet: (( .cloud_properties.subnet_id ))
 
 jobs:
   - name: discovery
@@ -38,14 +35,6 @@ jobs:
       - name: concourse
         static_ips: (( .networks.concourse.subnets.[0].static ))
     properties:
-      blackbox:
-        expvar:
-          datadog:
-            api_key: (( secrets.blackbox.datadog_api_key ))
-        syslog:
-          destination:
-            address: (( secrets.blackbox.syslog_address ))
-            transport: (( secrets.blackbox.syslog_transport ))
       consul:
         agent:
           mode: server
@@ -64,30 +53,19 @@ jobs:
       serial: true
       max_in_flight: 1
     properties:
-      blackbox:
-        expvar:
-          datadog:
-            api_key: (( secrets.blackbox.datadog_api_key ))
-        syslog:
-          destination:
-            address: (( secrets.blackbox.syslog_address ))
-            transport: (( secrets.blackbox.syslog_transport ))
       atc:
-        basic_auth_username: (( secrets.atc.username ))
-        basic_auth_password: (( secrets.atc.password ))
+        basic_auth_username: (( atc_credentials.basic_auth_username ))
+        basic_auth_password: (( atc_credentials.basic_auth_password ))
         publicly_viewable: true
         postgresql:
-          database: (( secrets.atc.database_name ))
+          database: (( atc_credentials.db_name ))
           role:
-            name: (( secrets.atc.database_user ))
-            password: ((secrets.atc.database_password ))
-      tsa: 
-        host_key: (( secrets.tsa.private_key ))
-        authorized_keys: (( secrets.tsa.authorized_keys ))
+            name: (( atc_credentials.db_user ))
+            password: ((atc_credentials.db_password ))
+      tsa:
         atc:
-          username: (( secrets.atc.username ))
-          password: (( secrets.atc.password ))
-
+          username: (( atc_credentials.basic_auth_username ))
+          password: (( atc_credentials.basic_auth_password ))
       consul:
         agent:
           servers: {lan: (( jobs.discovery.networks.concourse.static_ips ))}
@@ -102,22 +80,12 @@ jobs:
       - {release: concourse, name: postgresql}
     networks: [{name: concourse}]
     properties:
-      blackbox:
-        expvar:
-          datadog:
-            api_key: (( secrets.blackbox.datadog_api_key ))
-        syslog:
-          destination:
-            address: (( secrets.blackbox.syslog_address ))
-            transport: (( secrets.blackbox.syslog_transport ))
-
       postgresql:
-        databases: 
-        - name: (( secrets.atc.database_name ))
-        roles: 
-        - name: (( secrets.atc.database_user ))
-          password: ((secrets.atc.database_password ))
-
+        databases:
+        - name: (( atc_credentials.db_name ))
+        roles:
+        - name: (( atc_credentials.db_user ))
+          password: ((atc_credentials.db_password ))
       consul:
         agent:
           servers: {lan: (( jobs.discovery.networks.concourse.static_ips ))}
@@ -132,25 +100,11 @@ jobs:
       - {release: garden-linux, name: garden}
     networks: [{name: concourse}]
     properties:
-      blackbox:
-        expvar:
-          datadog:
-            api_key: (( secrets.blackbox.datadog_api_key ))
-        syslog:
-          destination:
-            address: (( secrets.blackbox.syslog_address ))
-            transport: (( secrets.blackbox.syslog_transport ))
-
       garden:
         listen_network: tcp
         listen_address: 0.0.0.0:7777
         default_container_grace_time: 15m
         btrfs_store_size_mb: 100000
-
-      groundcrew:
-        tsa:
-          host_public_key: (( secrets.tsa.public_key ))
-
       consul:
         agent:
           servers: {lan: (( jobs.discovery.networks.concourse.static_ips ))}
@@ -163,22 +117,23 @@ resource_pools:
       version: latest
     cloud_properties:
       instance_type: c3.large
-      availability_zone: (( aws_config.az ))
-      elbs: [(( aws_config.load_balancer ))]
+      availability_zone: (( .cloud_properties.az ))
+      elbs:
+       - (( .cloud_properties.load_balancer ))
 
   - name: databases
     network: concourse
     stemcell: *stemcell
     cloud_properties:
       instance_type: c3.xlarge
-      availability_zone: (( aws_config.az ))
+      availability_zone: (( .cloud_properties.az ))
 
   - name: workers
     network: concourse
     stemcell: *stemcell
     cloud_properties:
       instance_type: c3.xlarge
-      availability_zone: (( aws_config.az ))
+      availability_zone: (( .cloud_properties.az ))
       ephemeral_disk:
         size: 1024000
         type: gp2
@@ -188,7 +143,7 @@ resource_pools:
     stemcell: *stemcell
     cloud_properties:
       instance_type: m3.medium
-      availability_zone: (( aws_config.az ))
+      availability_zone: (( .cloud_properties.az ))
 
 compilation:
   workers: 4
@@ -196,7 +151,7 @@ compilation:
   reuse_compilation_vms: true
   cloud_properties:
     instance_type: c3.large
-    availability_zone: (( aws_config.az ))
+    availability_zone: (( .cloud_properties.az ))
 
 update:
   canaries: 1
@@ -204,3 +159,6 @@ update:
   serial: false
   canary_watch_time: 1000-60000
   update_watch_time: 1000-60000
+
+cloud_properties: (( merge ))
+atc_credentials: (( merge ))

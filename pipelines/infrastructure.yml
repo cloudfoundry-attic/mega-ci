@@ -34,5 +34,4 @@ jobs:
     file: mega-ci/scripts/ci/deploy-bosh.yml
     config:
       params:
-        DEPLOYMENT_DIR: 'mega-test'
-        PATH_TO_PASSWORDS_STUB: 'stubs/bosh/bosh_passwords.yml'
+        DEPLOYMENT_DIR: 'deployments-runtime/mega-test'

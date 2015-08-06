@@ -13,4 +13,3 @@ run:
 
 params:
   DEPLOYMENT_DIR:
-  PATH_TO_PASSWORDS_STUB:

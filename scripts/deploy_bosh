@@ -1,49 +1,54 @@
 #!/bin/bash
 
+set -e -x
+
 script_dir=$(dirname $0)
 
 if [ $# -ne 1 ]; then
-  echo 'You must provide the path to the bosh secrets stub'
+  echo 'Expected 1 argument (path to deployment directory), received $#'
   exit 1
 fi
+deployment_dir=$1
 
 command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 command -v spiff >/dev/null || { echo "spiff is required"; exit 1; }
 
-if [ -z ${AWS_DEFAULT_REGION} ]; then
-  echo 'AWS_DEFAULT_REGION is not set'
-  exit 1
-fi
+set +x
+  source $deployment_dir/aws_environment
 
-if [ -z ${AWS_ACCESS_KEY_ID} ]; then
-  echo 'AWS_DEFAULT_REGION is not set'
-  exit 1
-fi
+  if [ -z ${AWS_DEFAULT_REGION} ]; then
+    echo 'AWS_DEFAULT_REGION is not set'
+    exit 1
+  fi
 
-if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
-  echo 'AWS_DEFAULT_REGION is not set'
-  exit 1
-fi
+  if [ -z ${AWS_ACCESS_KEY_ID} ]; then
+    echo 'AWS_DEFAULT_REGION is not set'
+    exit 1
+  fi
 
+  if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
+    echo 'AWS_DEFAULT_REGION is not set'
+    exit 1
+  fi
 set -x
 
-mkdir -p artifacts/keypair
-mkdir -p artifacts/deployments
+mkdir -p ${deployment_dir}/artifacts/keypair
+mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p generated-stubs
 
 # create keypair
 if ! aws ec2 describe-key-pairs --key-names bosh; then
-  aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > artifacts/keypair/id_rsa_bosh
+  aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > ${deployment_dir}/artifacts/keypair/id_rsa_bosh
 fi
 
 # install certs for ELB
 if ! aws iam get-server-certificate --server-certificate-name concourse; then
-  if [ -e certs/concourse_chain.pem ]; then
-    aws iam upload-server-certificate --server-certificate-name concourse --private-key file://certs/concourse.key --certificate-body file://certs/concourse.pem  --certificate-chain file://certs/concourse_chain.pem
+  if [ -e ${deployment_dir}/certs/concourse_chain.pem ]; then
+    aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/certs/concourse.key --certificate-body file://${deployment_dir}/certs/concourse.pem  --certificate-chain file://${deployment_dir}/certs/concourse_chain.pem
   else
-    aws iam upload-server-certificate --server-certificate-name concourse --private-key file://certs/concourse.key --certificate-body file://certs/concourse.pem
+    aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/certs/concourse.key --certificate-body file://${deployment_dir}/certs/concourse.pem
   fi
 fi
 
@@ -51,46 +56,46 @@ fi
 if ! aws cloudformation describe-stacks | jq -e '.Stacks[0].StackName == "concourse"'; then
   aws cloudformation create-stack \
     --stack-name concourse \
-    --template-body file://$script_dir/../templates/bosh_cloud_formation.json \
+    --template-body file://$script_dir/../templates/cloudformation.json \
     --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse
 else
   aws cloudformation update-stack \
     --stack-name concourse \
-    --template-body file://$script_dir/../templates/bosh_cloud_formation.json \
-    --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse
+    --template-body file://$script_dir/../templates/cloudformation.json \
+    --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse || true # update-stack is not idempotent :(
 fi
 
-aws cloudformation describe-stacks --stack-name mega-test | grep StackStatus | grep IN_PROGRESS
-running=$?
+start_time_in_s=$(date +%s)
+wait_time_in_s=$((30 * 60))
+deadline_in_s=$(($start_time_in_s + $wait_time_in_s))
+while aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep IN_PROGRESS ; do
+  echo "CloudFormation stack 'concourse' still in progress..."
+  current_time_in_s=$(date +%s)
+  remaining_time_in_s=$(($deadline_in_s - $current_time_in_s))
 
-while [ ${running} == "0" ]; do
-  sleep 15
-  aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep IN_PROGRESS
-  running=$?
+  if [ "$remaining_time_in_s" -gt 0 ]; then
+    echo "   Waiting ${remaining_time_in_s} more seconds."
+    sleep 15
+  else
+    echo "   Waited ${wait_time_in_s}, aborting."
+    exit 1
+  fi
 done
 
-aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep "COMPLETE"
-success=$?
-
-if [ ${success} != "0" ]; then
+if ! aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep COMPLETE ; then
   echo 'Cloud formation failure'
   exit 1
 fi
-
-set -e
 
 # generate AWS resources stub for shared purposes
 aws cloudformation describe-stack-resources --stack-name concourse \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
 
-BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
-AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
-
+# generate stub for BOSH Security Group Name
 BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
 BOSH_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${BOSH_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
-# generate stub for BOSH Security Group Name
 cat > generated-stubs/security-groups.yml <<EOF
 {
   "SecurityGroups": {
@@ -100,6 +105,9 @@ cat > generated-stubs/security-groups.yml <<EOF
 EOF
 
 # generate stub for AWS Credentials
+BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
+AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
+
 cat > generated-stubs/aws-credentials.yml <<EOF
 {
   "AWSCredentials": {
@@ -111,21 +119,22 @@ cat > generated-stubs/aws-credentials.yml <<EOF
 }
 EOF
 
-# generate bosh deployment manifest
+# generate BOSH deployment manifest
+echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/bosh.yml
 spiff merge $script_dir/../templates/bosh.yml \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/security-groups.yml \
-  "$1" \
-  > artifacts/deployments/bosh.yml
+  ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
+  >> ${deployment_dir}/artifacts/deployments/bosh.yml
 
-bosh-init deploy  artifacts/deployments/bosh.yml
+# deploy BOSH
+bosh-init deploy ${deployment_dir}/artifacts/deployments/bosh.yml
 
-# Target bosh
+# display result
 BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
-bosh -n target $BOSH_IP
-bosh login admin admin
+echo "BOSH director is at $BOSH_IP"
 
+# clean up
 rm -rf generated-stubs
 
-echo "BOSH director is at $BOSH_IP, username: admin, password: admin"
