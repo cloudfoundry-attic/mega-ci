@@ -4,7 +4,6 @@ platform: linux
 image: docker:///cloudfoundry/runtime-ci
 
 inputs:
-  - name: mega-test
   - name: mega-ci
   - name: deployments-runtime
 
