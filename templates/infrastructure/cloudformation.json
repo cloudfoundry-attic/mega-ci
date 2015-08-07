@@ -45,7 +45,7 @@
     "EtcdSubnetCIDR": {
       "Description": "CIDR block for the Etcd subnet.",
       "Type": "String",
-      "Default": "10.0.16.0/20"
+      "Default": "10.0.16.0/24"
     },
     "LoadBalancerCertName": {
       "Description": "Name of the SSL cert to use for the ELB.",
