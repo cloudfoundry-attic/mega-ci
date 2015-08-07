@@ -10,12 +10,6 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/deployments-runtime.git
-- name: mega-test
-  type: git
-  source:
-    branch: master
-    private_key: {{private_key}}
-    uri: git@github.com:cloudfoundry/mega-test.git
 - name: mega-ci
   type: git
   source:
@@ -28,10 +22,9 @@ jobs:
   plan:
   - aggregate:
     - get: deployments-runtime
-    - get: mega-test
     - get: mega-ci
   - task: deploy-bosh
     file: mega-ci/scripts/ci/deploy-bosh.yml
     config:
       params:
-        DEPLOYMENT_DIR: 'deployments-runtime/mega-test'
+        DEPLOYMENT_DIR: 'deployments-runtime/mega-ci'
