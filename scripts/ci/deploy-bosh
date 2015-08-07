@@ -4,5 +4,5 @@ set -e -x
 
 source ~/.bashrc
 
-./mega-test/scripts/deploy_bosh $DEPLOYMENT_DIR
+../deploy_bosh $DEPLOYMENT_DIR
 
