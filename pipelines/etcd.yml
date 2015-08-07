@@ -17,12 +17,6 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/mega-ci.git
-- name: mega-test
-  type: git
-  source:
-    branch: master
-    private_key: {{private_key}}
-    uri: git@github.com:cloudfoundry/mega-test.git
 - name: etcd-release
   type: git
   source:
@@ -36,7 +30,6 @@ jobs:
   - aggregate:
     - get: deployments-runtime
     - get: mega-ci
-    - get: mega-test
   - task: generate-iaas-settings-etcd
     file: mega-ci/scripts/ci/generate-manifest.yml
     config:

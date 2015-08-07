@@ -8,7 +8,7 @@ source deployments-runtime/$DEPLOYMENT_DIR/aws_environment
 
 mkdir generated-stubs
 
-aws cloudformation describe-stack-resources --stack-name mega-test \
+aws cloudformation describe-stack-resources --stack-name mega-ci \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
 
@@ -23,7 +23,7 @@ cat > generated-stubs/security-groups.yml <<EOF
 }
 EOF
 
-spiff merge mega-test/stubs/$DEPLOYMENT/iaas-settings.yml \
+spiff merge mega-ci/templates/$DEPLOYMENT/iaas-settings.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/security-groups.yml \
   > generated-stubs/iaas-settings.yml
