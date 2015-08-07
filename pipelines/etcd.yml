@@ -34,7 +34,7 @@ jobs:
     file: mega-ci/scripts/ci/generate-manifest.yml
     config:
       params:
-        DEPLOYMENT_DIR: mega-test
+        DEPLOYMENT_DIR: mega-ci
         DEPLOYMENT: etcd
         SECURITY_GROUP: EtcdSecurityGroup
         STACK_NAME: concourse
