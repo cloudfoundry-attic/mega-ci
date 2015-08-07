@@ -2,3 +2,4 @@
 artifacts
 generated-stubs
 certs
+.DS_Store

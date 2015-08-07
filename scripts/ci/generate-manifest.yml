@@ -13,3 +13,5 @@ run:
 
 params:
   DEPLOYMENT_DIR:
+  DEPLOYMENT:
+  SECURITY_GROUP:

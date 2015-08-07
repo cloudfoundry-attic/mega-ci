@@ -6,32 +6,26 @@ source ~/.bashrc
 
 source deployments-runtime/$DEPLOYMENT_DIR/aws_environment
 
-# generate resources stub
-
 mkdir generated-stubs
 
-# generate AWS resources stub for shared purposes
 aws cloudformation describe-stack-resources --stack-name mega-test \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
 
-# generate stub for BOSH Security Group Name
-ETCD_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.EtcdSecurityGroup)
-ETCD_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${ETCD_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
+SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.${SECURITY_GROUP})
+SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
 cat > generated-stubs/security-groups.yml <<EOF
 {
   "SecurityGroups": {
-    "EtcdSecurityGroup": "$ETCD_SECURITY_GROUP_NAME"
+    "$SECURITY_GROUP": "$SECURITY_GROUP_NAME"
   }
 }
 EOF
 
-spiff merge mega-test/stubs/etcd/iaas-settings.yml \
+spiff merge mega-test/stubs/$DEPLOYMENT/iaas-settings.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/security-groups.yml \
   > generated-stubs/iaas-settings.yml
 
 cat generated-stubs/iaas-settings.yml
-
-# create iaas settings stub

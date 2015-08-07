@@ -42,8 +42,8 @@
       "Type": "String",
       "Default": "10.0.2.0/24"
     },
-    "InternalSubnetCIDR": {
-      "Description": "CIDR block for the Internal subnet.",
+    "EtcdSubnetCIDR": {
+      "Description": "CIDR block for the Etcd subnet.",
       "Type": "String",
       "Default": "10.0.16.0/20"
     },
@@ -128,13 +128,13 @@
             "ToPort": "25555"
           },
           {
-            "SourceSecurityGroupId": { "Ref": "InternalSecurityGroup" },
+            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
             "IpProtocol": "tcp",
             "FromPort": "0",
             "ToPort": "65535"
           },
           {
-            "SourceSecurityGroupId": { "Ref": "InternalSecurityGroup" },
+            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -143,11 +143,11 @@
       }
     },
 
-    "InternalSecurityGroup": {
+    "EtcdSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "VpcId": { "Ref": "VPC" },
-        "GroupDescription": "Internal",
+        "GroupDescription": "Etcd",
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
@@ -209,13 +209,13 @@
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
-            "SourceSecurityGroupId": { "Ref": "InternalSecurityGroup" },
+            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
             "IpProtocol": "tcp",
             "FromPort": "0",
             "ToPort": "65535"
           },
           {
-            "SourceSecurityGroupId": { "Ref": "InternalSecurityGroup" },
+            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -279,36 +279,36 @@
       }
     },
 
-    "InternalSubnet": {
+    "EtcdSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
-        "CidrBlock": { "Ref": "InternalSubnetCIDR" },
+        "CidrBlock": { "Ref": "EtcdSubnetCIDR" },
         "VpcId": { "Ref": "VPC" },
-        "Tags": [{ "Key": "Name", "Value": "Internal" }]
+        "Tags": [{ "Key": "Name", "Value": "Etcd" }]
       }
     },
 
-    "InternalRouteTable": {
+    "EtcdRouteTable": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": { "VpcId": { "Ref": "VPC" } }
     },
 
-    "InternalRoute": {
+    "EtcdRoute": {
       "Type": "AWS::EC2::Route",
       "DependsOn": "NATInstance",
       "Properties": {
         "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": { "Ref": "InternalRouteTable" },
+        "RouteTableId": { "Ref": "EtcdRouteTable" },
         "InstanceId": { "Ref": "NATInstance" }
       }
     },
 
-    "InternalSubnetRouteTableAssociation": {
+    "EtcdSubnetRouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": { "Ref": "InternalRouteTable" },
-        "SubnetId": { "Ref": "InternalSubnet" }
+        "RouteTableId": { "Ref": "EtcdRouteTable" },
+        "SubnetId": { "Ref": "EtcdSubnet" }
       }
     },
 

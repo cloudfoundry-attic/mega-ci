@@ -1,0 +1,80 @@
+Resources:
+  EtcdSubnet: (( merge ))
+
+SecurityGroups:
+  EtcdSecurityGroup: (( merge ))
+
+iaas_settings:
+  stemcell:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    version: latest
+
+  compilation_cloud_properties:
+    instance_type: c3.large
+    availability_zone: us-east-1b
+    ephemeral_disk:
+      size: 10_240
+      type: gp2
+
+  resource_pool_cloud_properties:
+  - name: etcd_z1
+    cloud_properties:
+      instance_type: c3.large
+      availability_zone: us-east-1b
+      ephemeral_disk:
+        size: 10_240
+        type: gp2
+  - name: etcd_z2
+    cloud_properties:
+      instance_type: c3.large
+      availability_zone: us-east-1b
+      ephemeral_disk:
+        size: 10_240
+        type: gp2
+  stemcell:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    version: latest
+
+  subnet_configs:
+  - name: etcd1
+    subnets:
+    - cloud_properties:
+        subnet: (( Resources.EtcdSubnet ))
+        security_groups:
+        - (( SecurityGroups.EtcdSecurityGroup ))
+      range: 10.0.16.0/24
+      gateway: 10.0.16.1
+      dns: [10.0.0.2]
+      reserved:
+      - 10.0.16.2-10.0.16.3
+      - 10.0.16.10-10.0.16.254
+      static:
+      - 10.0.16.4-10.0.16.9
+  - name: etcd2
+    subnets:
+    - cloud_properties:
+        subnet: (( Resources.EtcdSubnet ))
+        security_groups:
+        - (( SecurityGroups.EtcdSecurityGroup ))
+      range: 10.0.16.0/24
+      gateway: 10.0.16.1
+      dns: [10.0.0.2]
+      reserved:
+      - 10.0.16.2-10.0.16.3
+      - 10.0.16.15-10.0.16.254
+      static:
+      - 10.0.16.10-10.0.16.14
+  - name: compilation
+    subnets:
+    - cloud_properties:
+        subnet: (( Resources.EtcdSubnet ))
+        security_groups:
+        - (( SecurityGroups.EtcdSecurityGroup ))
+      range: 10.0.16.0/24
+      gateway: 10.0.16.1
+      dns: [10.0.0.2]
+      reserved:
+      - 10.0.16.2-10.0.16.3
+      - 10.0.16.20-10.0.16.254
+      static:
+      - 10.0.16.15-10.0.16.19

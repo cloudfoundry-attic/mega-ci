@@ -37,11 +37,13 @@ jobs:
     - get: deployments-runtime
     - get: mega-ci
     - get: mega-test
-  - task: generate-manifest
+  - task: generate-iaas-settings-etcd
     file: mega-ci/scripts/ci/generate-manifest.yml
     config:
       params:
         DEPLOYMENT_DIR: mega-test
+        DEPLOYMENT: etcd
+        SECURITY_GROUP: EtcdSecurityGroup
 
 
 
