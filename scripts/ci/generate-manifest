@@ -8,7 +8,7 @@ source deployments-runtime/$DEPLOYMENT_DIR/aws_environment
 
 mkdir generated-stubs
 
-aws cloudformation describe-stack-resources --stack-name mega-ci \
+aws cloudformation describe-stack-resources --stack-name $STACK_NAME \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
 

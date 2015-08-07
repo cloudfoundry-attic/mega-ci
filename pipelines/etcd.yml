@@ -37,6 +37,7 @@ jobs:
         DEPLOYMENT_DIR: mega-test
         DEPLOYMENT: etcd
         SECURITY_GROUP: EtcdSecurityGroup
+        STACK_NAME: concourse
 
 
 
