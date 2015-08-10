@@ -1,8 +1,8 @@
 groups:
 - name: etcd
   jobs:
-  - create-release
-  - generate-manifest
+  - test-etcd
+  # - create-release
 
 resources:
 - name: deployments-runtime
@@ -25,44 +25,46 @@ resources:
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 
 jobs:
-- name: generate-manifest
+- name: test-etcd
   plan:
   - aggregate:
     - get: deployments-runtime
     - get: mega-ci
-  - task: generate-iaas-settings-etcd
-    file: mega-ci/scripts/ci/generate-manifest.yml
-    config:
-      params:
-        DEPLOYMENT_DIR: mega-ci
-        DEPLOYMENT: etcd
-        SECURITY_GROUP: EtcdSecurityGroup
-        STACK_NAME: concourse
-
-
-
-
-
-
-
-
-
-- name: create-release
-  plan:
   - aggregate:
-    - get: deployments-runtime
-    - get: mega-ci
-    - get: release
-      resource: etcd-release
-      trigger: true
-  - task: create-release
-    file: mega-ci/scripts/ci/create-release.yml
-    config:
-      params:
-        RELEASE_NAME: etcd
-        RELEASE_DIR: etcd-release
-  - task: test-release
-    file: mega-ci/scripts/ci/test-release.yml
-    config:
-      params:
-        RELEASE_DIR: etcd-release
+    - task: generate-iaas-settings-etcd
+      file: mega-ci/scripts/ci/generate-iaas-settings.yml
+      config:
+        params:
+          DEPLOYMENT_DIR: mega-ci
+          DEPLOYMENT: etcd
+          SECURITY_GROUP: EtcdSecurityGroup
+          STACK_NAME: concourse
+    - task: generate-iaas-settings-turbulence
+      file: mega-ci/scripts/ci/generate-iaas-settings.yml
+      config:
+        params:
+          DEPLOYMENT_DIR: mega-ci
+          DEPLOYMENT: turbulence
+          SECURITY_GROUP: EtcdSecurityGroup
+          STACK_NAME: concourse
+
+# This is probably unecessary given that ginkgo creates the release
+# - name: create-release
+#   plan:
+#   - aggregate:
+#     - get: deployments-runtime
+#     - get: mega-ci
+#     - get: release
+#       resource: etcd-release
+#       trigger: true
+#   - task: create-release
+#     file: mega-ci/scripts/ci/create-release.yml
+#     config:
+#       params:
+#         RELEASE_NAME: etcd
+#         RELEASE_DIR: etcd-release
+#   - task: test-release
+#     file: mega-ci/scripts/ci/test-release.yml
+#     config:
+#       params:
+#         RELEASE_DIR: etcd-release

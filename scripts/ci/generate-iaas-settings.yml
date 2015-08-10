@@ -8,7 +8,7 @@ inputs:
   - name: deployments-runtime
 
 run:
-  path: mega-ci/scripts/ci/generate-manifest
+  path: mega-ci/scripts/ci/generate-iaas-settings
 
 params:
   DEPLOYMENT_DIR:
