@@ -14,7 +14,7 @@ iaas_settings:
 
   compilation_cloud_properties:
     instance_type: c3.large
-    availability_zone: (( AvailaibilityZones.EtcdSubnet ))
+    availability_zone: (( AvailabilityZones.EtcdSubnet ))
     ephemeral_disk:
       size: 10_240
       type: gp2
@@ -23,7 +23,7 @@ iaas_settings:
   - name: turbulence
     cloud_properties:
       instance_type: m3.medium
-      availability_zone: (( AvailaibilityZones.EtcdSubnet ))
+      availability_zone: (( AvailabilityZones.EtcdSubnet ))
 
   stemcell:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
