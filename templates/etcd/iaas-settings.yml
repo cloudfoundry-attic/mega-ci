@@ -14,7 +14,7 @@ iaas_settings:
 
   compilation_cloud_properties:
     instance_type: c3.large
-    availability_zone: AvailabilityZones.EtcdSubnet
+    availability_zone: (( AvailabilityZones.EtcdSubnet ))
     ephemeral_disk:
       size: 10_240
       type: gp2
@@ -23,14 +23,14 @@ iaas_settings:
   - name: etcd_z1
     cloud_properties:
       instance_type: c3.large
-      availability_zone: AvailabilityZones.EtcdSubnet
+      availability_zone: (( AvailabilityZones.EtcdSubnet ))
       ephemeral_disk:
         size: 10_240
         type: gp2
   - name: etcd_z2
     cloud_properties:
       instance_type: c3.large
-      availability_zone: AvailabilityZones.EtcdSubnet
+      availability_zone: (( AvailabilityZones.EtcdSubnet ))
       ephemeral_disk:
         size: 10_240
         type: gp2
