@@ -37,6 +37,7 @@ jobs:
         params:
           DEPLOYMENT_DIR: mega-ci
           DEPLOYMENT: etcd
+          SUBNET: EtcdSubnet
           SECURITY_GROUP: EtcdSecurityGroup
           STACK_NAME: concourse
     - task: generate-iaas-settings-turbulence
@@ -45,6 +46,7 @@ jobs:
         params:
           DEPLOYMENT_DIR: mega-ci
           DEPLOYMENT: turbulence
+          SUBNET: EtcdSubnet
           SECURITY_GROUP: EtcdSecurityGroup
           STACK_NAME: concourse
 

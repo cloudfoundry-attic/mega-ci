@@ -4,6 +4,9 @@ Resources:
 SecurityGroups:
   EtcdSecurityGroup: (( merge ))
 
+AvailabilityZones:
+  EtcdSubnet: (( merge ))
+
 iaas_settings:
   stemcell:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
@@ -11,7 +14,7 @@ iaas_settings:
 
   compilation_cloud_properties:
     instance_type: c3.large
-    availability_zone: us-east-1b
+    availability_zone: AvailabilityZones.EtcdSubnet
     ephemeral_disk:
       size: 10_240
       type: gp2
@@ -20,14 +23,14 @@ iaas_settings:
   - name: etcd_z1
     cloud_properties:
       instance_type: c3.large
-      availability_zone: us-east-1b
+      availability_zone: AvailabilityZones.EtcdSubnet
       ephemeral_disk:
         size: 10_240
         type: gp2
   - name: etcd_z2
     cloud_properties:
       instance_type: c3.large
-      availability_zone: us-east-1b
+      availability_zone: AvailabilityZones.EtcdSubnet
       ephemeral_disk:
         size: 10_240
         type: gp2

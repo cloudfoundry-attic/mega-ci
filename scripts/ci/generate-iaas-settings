@@ -15,10 +15,16 @@ aws cloudformation describe-stack-resources --stack-name $STACK_NAME \
 SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.${SECURITY_GROUP})
 SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
+SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.$SUBNET)
+AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
+
 cat > generated-stubs/security-groups.yml <<EOF
 {
   "SecurityGroups": {
     "$SECURITY_GROUP": "$SECURITY_GROUP_NAME"
+  },
+  "AvailabilityZones": {
+    "$SUBNET": "$AWS_ZONE"
   }
 }
 EOF
