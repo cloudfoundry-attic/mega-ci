@@ -13,11 +13,11 @@ networks:
   - name: concourse
     type: manual
     subnets:
-      - range: 10.0.16.0/20
-        reserved: [10.0.16.2 - 10.0.16.9]
-        static: [10.0.16.31]
+      - range: 10.0.17.0/24
+        reserved: [10.0.17.2 - 10.0.17.9]
+        static: [10.0.17.31]
         dns: [10.0.0.2]
-        gateway: 10.0.16.1
+        gateway: 10.0.17.1
         cloud_properties:
           security_groups:
             - (( .cloud_properties.security_group_name ))

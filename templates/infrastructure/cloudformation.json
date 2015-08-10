@@ -42,6 +42,11 @@
       "Type": "String",
       "Default": "10.0.2.0/24"
     },
+    "ConcourseSubnetCIDR": {
+      "Description": "CIDR block for the Concourse subnet.",
+      "Type": "String",
+      "Default": "10.0.17.0/24"
+    },
     "EtcdSubnetCIDR": {
       "Description": "CIDR block for the Etcd subnet.",
       "Type": "String",
@@ -128,6 +133,18 @@
             "ToPort": "25555"
           },
           {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
             "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
             "IpProtocol": "tcp",
             "FromPort": "0",
@@ -143,11 +160,11 @@
       }
     },
 
-    "EtcdSecurityGroup": {
+    "ConcourseSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "VpcId": { "Ref": "VPC" },
-        "GroupDescription": "Etcd",
+        "GroupDescription": "Concourse",
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
@@ -158,6 +175,35 @@
           },
           {
             "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1"
+          }
+        ]
+      }
+    },
+
+    "EtcdSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "Etcd",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.0.15.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.0.15.0/24",
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -209,13 +255,13 @@
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
-            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
             "IpProtocol": "tcp",
             "FromPort": "0",
             "ToPort": "65535"
           },
           {
-            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -279,6 +325,39 @@
       }
     },
 
+    "ConcourseSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "ConcourseSubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "Concourse" }]
+      }
+    },
+
+    "ConcourseRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": { "VpcId": { "Ref": "VPC" } }
+    },
+
+    "ConcourseRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "NATInstance",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": { "Ref": "ConcourseRouteTable" },
+        "InstanceId": { "Ref": "NATInstance" }
+      }
+    },
+
+    "ConcourseSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "ConcourseRouteTable" },
+        "SubnetId": { "Ref": "ConcourseSubnet" }
+      }
+    },
+
     "EtcdSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
@@ -286,29 +365,6 @@
         "CidrBlock": { "Ref": "EtcdSubnetCIDR" },
         "VpcId": { "Ref": "VPC" },
         "Tags": [{ "Key": "Name", "Value": "Etcd" }]
-      }
-    },
-
-    "EtcdRouteTable": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": { "VpcId": { "Ref": "VPC" } }
-    },
-
-    "EtcdRoute": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": "NATInstance",
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": { "Ref": "EtcdRouteTable" },
-        "InstanceId": { "Ref": "NATInstance" }
-      }
-    },
-
-    "EtcdSubnetRouteTableAssociation": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "RouteTableId": { "Ref": "EtcdRouteTable" },
-        "SubnetId": { "Ref": "EtcdSubnet" }
       }
     },
 

@@ -73,10 +73,10 @@ aws cloudformation describe-stack-resources --stack-name concourse \
   > generated-stubs/aws-resources.json
 
 # Generate the cloud propeties stub
-SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.InternalSubnet)
+SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.ConcourseSubnet)
 
-INTERNAL_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.InternalSecurityGroup)
-INTERNAL_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${INTERNAL_SECURITY_GROUP_ID} | jq .SecurityGroups[0].GroupName)
+CONCOURSE_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.ConcourseSecurityGroup)
+CONCOURSE_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${CONCOURSE_SECURITY_GROUP_ID} | jq .SecurityGroups[0].GroupName)
 
 AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
 
@@ -85,7 +85,7 @@ LOAD_BALANCER=$(cat generated-stubs/aws-resources.json | jq -r .Resources.WebELB
 cat > generated-stubs/cloud_properties.yml <<EOF
 ---
 cloud_properties:
-  security_group_name: $INTERNAL_SECURITY_GROUP_NAME
+  security_group_name: $CONCOURSE_SECURITY_GROUP_NAME
   subnet_id: $SUBNET_ID
   az: $AWS_ZONE
   load_balancer: $LOAD_BALANCER
@@ -93,7 +93,7 @@ EOF
 
 # Generate Concourse manifest
 echo "# GENERATED, NO TOUCHING" > ${deployment_dir}/artifacts/deployments/concourse.yml
-spiff merge $script_dir/../templates/concourse.yml \
+spiff merge $script_dir/../templates/infrastructure/concourse.yml \
   generated-stubs/director_uuid.yml \
   generated-stubs/cloud_properties.yml \
   ${deployment_dir}/stubs/concourse/atc_credentials.yml \

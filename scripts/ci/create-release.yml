@@ -8,7 +8,7 @@ inputs:
   - name: mega-ci
 
 run:
-  path: mega-ci/scripts/ci/create_release
+  path: mega-ci/scripts/ci/create-release
 
 params:
   RELEASE_NAME:
