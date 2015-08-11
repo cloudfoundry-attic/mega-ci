@@ -8,7 +8,7 @@ source deployments-runtime/mega-ci/bosh_environment
 
 cat > eats_config.json <<EOF
 {
-  "bosh_target": "$BOSH_TARGET",
+  "bosh_target": "$BOSH_DIRECTOR",
   "iaas_settings_etcd_stub_path": "$PWD/$IAAS_SETTINGS_ETCD",
   "iaas_settings_turbulence_stub_path": "$PWD/$IAAS_SETTINGS_TURBULENCE",
   "cpi_release_url": "$CPI_RELEASE_URL",

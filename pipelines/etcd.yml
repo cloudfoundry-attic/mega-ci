@@ -54,7 +54,6 @@ jobs:
     file: mega-ci/scripts/ci/run-eats.yml
     config:
       params:
-        BOSH_TARGET: {{mega-ci_bosh}}
         CPI_RELEASE_NAME: bosh-warden-cpi
         CPI_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=21
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml

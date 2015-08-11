@@ -14,7 +14,6 @@ run:
   path: mega-ci/scripts/ci/run-eats
 
 params:
-  BOSH_TARGET:
   CPI_RELEASE_NAME:
   CPI_RELEASE_URL:
   IAAS_SETTINGS_TURBULENCE:
