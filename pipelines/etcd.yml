@@ -30,6 +30,7 @@ jobs:
   - aggregate:
     - get: deployments-runtime
     - get: mega-ci
+    - get: etcd-release
   - aggregate:
     - task: generate-iaas-settings-etcd
       file: mega-ci/scripts/ci/generate-iaas-settings.yml
@@ -49,6 +50,17 @@ jobs:
           SUBNET: EtcdSubnet
           SECURITY_GROUP: EtcdSecurityGroup
           STACK_NAME: concourse
+  - task: run-eats
+    file: mega-ci/scripts/ci/run-eats.yml
+    config:
+      params:
+        BOSH_TARGET: {{ mega-ci.bosh }}
+        CPI_RELEASE_NAME: bosh-warden-cpi
+        CPI_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=21
+        IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
+        IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
+        DEFAULT_TIMEOUT: 15m
+
 
 # This is probably unecessary given that ginkgo creates the release
 # - name: create-release

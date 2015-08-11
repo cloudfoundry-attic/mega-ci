@@ -197,13 +197,13 @@
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
-            "CidrIp": "10.0.15.0/24",
+            "CidrIp": "10.0.16.0/24",
             "IpProtocol": "tcp",
             "FromPort": "0",
             "ToPort": "65535"
           },
           {
-            "CidrIp": "10.0.15.0/24",
+            "CidrIp": "10.0.16.0/24",
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -213,6 +213,18 @@
             "IpProtocol": "icmp",
             "FromPort": "-1",
             "ToPort": "-1"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
           }
         ]
       }

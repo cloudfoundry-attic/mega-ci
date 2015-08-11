@@ -1,0 +1,23 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: mega-ci
+  - name: deployments-runtime
+  - name: etcd-release
+  - name: generate-iaas-settings-etcd
+  - name: generate-iaas-settings-turbulence
+
+run:
+  path: mega-ci/scripts/ci/run-eats
+
+params:
+  BOSH_TARGET:
+  CPI_RELEASE_NAME:
+  CPI_RELEASE_URL:
+  IAAS_SETTINGS_TURBULENCE:
+  IAAS_SETTINGS_ETCD:
+  DEFAULT_TIMEOUT:
+
