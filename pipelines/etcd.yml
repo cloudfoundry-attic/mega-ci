@@ -2,7 +2,6 @@ groups:
 - name: etcd
   jobs:
   - test-etcd
-  # - create-release
 
 resources:
 - name: deployments-runtime
@@ -59,25 +58,3 @@ jobs:
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
         DEFAULT_TIMEOUT: 15m
-
-
-# This is probably unecessary given that ginkgo creates the release
-# - name: create-release
-#   plan:
-#   - aggregate:
-#     - get: deployments-runtime
-#     - get: mega-ci
-#     - get: release
-#       resource: etcd-release
-#       trigger: true
-#   - task: create-release
-#     file: mega-ci/scripts/ci/create-release.yml
-#     config:
-#       params:
-#         RELEASE_NAME: etcd
-#         RELEASE_DIR: etcd-release
-#   - task: test-release
-#     file: mega-ci/scripts/ci/test-release.yml
-#     config:
-#       params:
-#         RELEASE_DIR: etcd-release
