@@ -4,7 +4,11 @@ set -e -x
 
 source ~/.bashrc
 
+echo "Sourcing bosh_environment"
+set +x
 source deployments-runtime/mega-ci/bosh_environment
+set -x
+echo "Done sourcing bosh_environment"
 
 cat > eats_config.json <<EOF
 {

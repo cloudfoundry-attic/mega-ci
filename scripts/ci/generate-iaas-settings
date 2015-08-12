@@ -4,7 +4,11 @@ set -e -x
 
 source ~/.bashrc
 
+echo "Sourcing aws_environment"
+set +x
 source deployments-runtime/$DEPLOYMENT_DIR/aws_environment
+set -x
+echo "Done sourcing aws_environment"
 
 mkdir generated-stubs
 
