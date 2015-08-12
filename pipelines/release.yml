@@ -3,6 +3,7 @@ groups:
   jobs:
   - announce-rc
   - create-release-notes
+  - update-pws-status
 
 resources:
 - name: mega-pm-tools
@@ -58,6 +59,18 @@ jobs:
         GH_ACCESS_TOKEN: {{release_notes_bot_github_access_token}}
   - task: request-pm-input
     file: mega-pm-tools/request-pm-input.yml
+    config:
+      params:
+        TRACKER_API_TOKEN: {{tracker_api_token}}
+        MEGA_PM_ID: {{mega_pm_id}}
+- name: update-pws-status
+  plan:
+  - aggregate:
+    - get: cf-final-bosh-release
+      trigger: true
+    - get: mega-pm-tools
+  - task: update-pws-status
+    file: mega-pm-tools/request-pws-status-update.yml
     config:
       params:
         TRACKER_API_TOKEN: {{tracker_api_token}}
