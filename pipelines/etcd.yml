@@ -65,8 +65,6 @@ jobs:
   plan:
   - aggregate:
     - get: deployments-runtime
-      passed: [test-etcd]
-      trigger: false
     - get: mega-ci
   - task: clean
     privileged: true
