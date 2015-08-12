@@ -1,27 +1,12 @@
 #!/bin/bash
 
-set -e -x
+set -x
 
 source ~/.bashrc
 
 source deployments-runtime/mega-ci/bosh_environment
 
-cat > eats_config.json <<EOF
-{
-  "bosh_target": "$BOSH_DIRECTOR",
-  "iaas_settings_etcd_stub_path": "$PWD/$IAAS_SETTINGS_ETCD",
-  "iaas_settings_turbulence_stub_path": "$PWD/$IAAS_SETTINGS_TURBULENCE",
-  "cpi_release_url": "$CPI_RELEASE_URL",
-  "cpi_release_name": "$CPI_RELEASE_NAME",
-  "bosh_operation_timeout": "$BOSH_OPERATION_TIMEOUT"
-}
-EOF
+bosh target $BOSH_DIRECTOR
 
-cat eats_config.json
-
-cd etcd-release
-
-EATS_CONFIG=$PWD/../eats_config.json ./scripts/test
-
-
+bosh deployments
 

@@ -2,6 +2,7 @@ groups:
 - name: etcd
   jobs:
   - test-etcd
+  - clean-deployment
 
 resources:
 - name: deployments-runtime
@@ -59,6 +60,14 @@ jobs:
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
         BOSH_OPERATION_TIMEOUT: 20m
-  - task: clean-deployment
+
+- name: clean-deployment
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+      passed: [test-etcd]
+      trigger: false
+    - get: mega-ci
+  - task: clean
     privileged: true
     file: mega-ci/scripts/ci/clean-deployment.yml
