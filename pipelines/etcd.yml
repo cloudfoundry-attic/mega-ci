@@ -30,6 +30,7 @@ jobs:
     - get: deployments-runtime
     - get: mega-ci
     - get: etcd-release
+      trigger: true
   - aggregate:
     - task: generate-iaas-settings-etcd
       file: mega-ci/scripts/ci/generate-iaas-settings.yml
@@ -57,4 +58,4 @@ jobs:
         CPI_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=21
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
-        DEFAULT_TIMEOUT: 15m
+        BOSH_OPERATION_TIMEOUT: 15m

@@ -13,7 +13,7 @@ cat > eats_config.json <<EOF
   "iaas_settings_turbulence_stub_path": "$PWD/$IAAS_SETTINGS_TURBULENCE",
   "cpi_release_url": "$CPI_RELEASE_URL",
   "cpi_release_name": "$CPI_RELEASE_NAME",
-  "default_timeout": "$DEFAULT_TIMEOUT"
+  "bosh_operation_timeout": "$BOSH_OPERATION_TIMEOUT"
 }
 EOF
 
