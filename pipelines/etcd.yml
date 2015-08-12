@@ -59,3 +59,6 @@ jobs:
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
         BOSH_OPERATION_TIMEOUT: 20m
+  - task: clean-deployment
+    privileged: true
+    file: mega-ci/scripts/ci/clean-deployment.yml
