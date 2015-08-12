@@ -58,4 +58,4 @@ jobs:
         CPI_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/bosh-warden-cpi-release?v=21
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
-        BOSH_OPERATION_TIMEOUT: 15m
+        BOSH_OPERATION_TIMEOUT: 20m
