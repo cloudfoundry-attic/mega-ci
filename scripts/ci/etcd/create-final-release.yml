@@ -2,12 +2,11 @@
 platform: linux
 
 inputs:
-  - name: etcd-release
   - name: mega-ci
   - name: etcd-release-pipeline-branch
 
 run:
-  path: mega-ci/scripts/ci/etcd/create_final_release
+  path: mega-ci/scripts/ci/etcd/create-final-release
 
 params:
   ETCD_RELEASE_DIR: 

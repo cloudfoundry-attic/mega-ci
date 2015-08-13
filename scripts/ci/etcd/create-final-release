@@ -5,7 +5,6 @@ source ~/.bashrc
 
 cd $ETCD_RELEASE_DIR
 
-ETCD_RELEASE_OUT="../create-release.out"
 for i in {1..5}; do
   echo "Syncing blobs; attempt $i"
   bosh -n --parallel 10 sync blobs && break
@@ -13,7 +12,7 @@ done
 
 for i in {1..5}; do
   echo "Creating release, attempt $i"
-  bosh -n create release --with-tarball --final | tee -a $ETCD_RELEASE_OUT
+  bosh -n create release --with-tarball --final
   EXIT_STATUS=${PIPESTATUS[0]}
   if [ "$EXIT_STATUS" = "0" ]; then
     break
