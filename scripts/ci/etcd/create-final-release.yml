@@ -3,7 +3,7 @@ platform: linux
 
 inputs:
   - name: mega-ci
-  - name: etcd-release-pipeline-branch
+  - name: etcd-release
 
 run:
   path: mega-ci/scripts/ci/etcd/create-final-release
