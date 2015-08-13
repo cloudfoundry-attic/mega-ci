@@ -53,7 +53,7 @@ if ! aws iam get-server-certificate --server-certificate-name concourse; then
 fi
 
 # deploy infrastructure
-if ! aws cloudformation describe-stacks | jq -e '.Stacks[0].StackName == "concourse"'; then
+if ! aws cloudformation describe-stacks --stack-name concourse ; then
   aws cloudformation create-stack \
     --stack-name concourse \
     --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
