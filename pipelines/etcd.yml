@@ -66,6 +66,9 @@ jobs:
   - aggregate:
     - get: deployments-runtime
     - get: mega-ci
+    - get: etcd-release
+      trigger: true
+      passed: [test-etcd]
   - task: clean
     privileged: true
     file: mega-ci/scripts/ci/clean-deployment.yml
