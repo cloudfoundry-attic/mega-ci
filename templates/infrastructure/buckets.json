@@ -1,0 +1,112 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "S3 buckets for cf release",
+
+  "Resources": {
+    "ConcourseUser": {
+      "Type" : "AWS::IAM::User"
+    },  
+    "ConcourseAccessKey": {
+      "Type" : "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref": "ConcourseUser" }
+      }
+    },
+    "EtcdVersionBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : "mega-ci-etcd-release-versions"
+      }
+    },
+    "EtcdReleasesBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : "mega-ci-etcd-candidate-releases"
+      }
+    },
+    "EtcdVersionBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Id" : "etc-release-version-bucket-policy",
+          "Statement" : [ { 
+            "Sid" : "AllowReadWrite",
+            "Action" : [
+              "s3:GetObject",
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "ConcourseUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "EtcdVersionBucket" } , "/*" ]
+            ] }
+          },
+          { 
+            "Sid" : "AllowList",
+            "Action" : [
+              "s3:ListBucket"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "ConcourseUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "EtcdVersionBucket" } ]
+            ] }
+          }] 
+        },
+        "Bucket" : { "Ref" : "EtcdVersionBucket" }
+      }
+    },
+    "EtcdReleasesBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Id" : "etcd-candidate-releases-bucket-policy",
+          "Statement" : [ { 
+            "Sid" : "AllowWrite",
+            "Action" : [
+              "s3:GetObject",
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "ConcourseUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "EtcdReleasesBucket" } , "/*" ]
+            ] }
+          },
+          { 
+            "Sid" : "AllowList",
+            "Action" : [
+              "s3:ListBucket"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "ConcourseUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "EtcdReleasesBucket" } ]
+            ] }
+          }]
+        },
+        "Bucket" : { "Ref" : "EtcdReleasesBucket" }
+      }
+    }
+
+  },
+
+  "Outputs" : {
+    "ConcourseAccessKeyID": {
+      "Description": "Access Key ID",
+      "Value": { "Ref": "ConcourseAccessKey" }
+    },
+    "ConcourseSecretAccessKey" : {
+      "Description" : "Secret Key",
+      "Value": { "Fn::GetAtt" : [ "ConcourseAccessKey", "SecretAccessKey"]} 
+    }
+  }
+}
