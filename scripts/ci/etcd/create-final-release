@@ -6,8 +6,7 @@ source ~/.bashrc
 cd $ETCD_RELEASE_DIR
 
 for i in {1..5}; do
-  echo "Creating release, attempt $i"
-  bosh -n create release --with-tarball --final
+  bosh -n create release --with-tarball
   EXIT_STATUS=${PIPESTATUS[0]}
   if [ "$EXIT_STATUS" = "0" ]; then
     break
@@ -19,4 +18,18 @@ if [ ! "$EXIT_STATUS" = "0" ]; then
   exit $EXIT_STATUS
 fi
 
+dev_release=$(ls dev_releases/etcd/ | grep .tgz)
 
+for i in {1..5}; do
+  echo "Creating release, attempt $i"
+  bosh -n finalize release dev_releases/etcd/$dev_release
+  EXIT_STATUS=${PIPESTATUS[0]}
+  if [ "$EXIT_STATUS" = "0" ]; then
+    break
+  fi
+done
+
+if [ ! "$EXIT_STATUS" = "0" ]; then
+  echo "Failed to Create ETCD Release"
+  exit $EXIT_STATUS
+fi
