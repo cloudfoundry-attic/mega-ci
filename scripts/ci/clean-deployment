@@ -25,7 +25,7 @@ for i in $turbulence_deployments; do
 done
 
 echo "Cleaning all unused releases"
-bosh cleanup --all
+bosh -n cleanup --all
 
 echo "Checking etcd and turbulence release count"
 etcd_deployment_count=$(bosh deployments | grep 'etcd-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
