@@ -26,6 +26,7 @@ resources:
 
 jobs:
 - name: test-etcd
+  public: true
   plan:
   - aggregate:
     - get: deployments-runtime
