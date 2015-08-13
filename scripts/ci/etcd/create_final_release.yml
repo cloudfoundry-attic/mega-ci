@@ -1,0 +1,13 @@
+---
+platform: linux
+
+inputs:
+  - name: etcd-release
+  - name: mega-ci
+  - name: deployments-runtime
+
+run:
+  path: mega-ci/scripts/ci/etcd/create_final_release
+
+params:
+  ETCD_RELEASE_DIR: 
