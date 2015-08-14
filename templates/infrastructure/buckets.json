@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "S3 buckets for cf release",
+  "Description": "S3 buckets for etcd release ci",
 
   "Resources": {
     "ConcourseUser": {
