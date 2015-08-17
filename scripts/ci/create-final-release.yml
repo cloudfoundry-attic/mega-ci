@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: mega-ci
+  - name: deployments-runtime
+  - name: runtime-credentials
+  - name: release-repo
+
+run:
+  path: mega-ci/scripts/ci/create-final-release
+
+params:
+  RELEASE_NAME:
+  PRIVATE_YML_PATH:

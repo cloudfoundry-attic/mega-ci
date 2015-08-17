@@ -3,6 +3,7 @@ groups:
   jobs:
   - test-etcd
   - clean-deployment
+  - cut-final-release
 
 resources:
 - name: deployments-runtime
@@ -11,6 +12,12 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/deployments-runtime.git
+- name: runtime-credentials
+  type: git
+  source:
+    branch: master
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/runtime-credentials.git
 - name: mega-ci
   type: git
   source:
@@ -20,7 +27,7 @@ resources:
 - name: etcd-release
   type: git
   source:
-    branch: master
+    branch: develop
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 
@@ -71,5 +78,21 @@ jobs:
       trigger: true
       passed: [test-etcd]
   - task: clean
-    privileged: true
     file: mega-ci/scripts/ci/clean-deployment.yml
+
+- name: cut-final-release
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: deployments-runtime
+    - get: runtime-credentials
+    - get: release-repo
+      resource: etcd-release
+      passed: [test-etcd]
+      trigger: true
+  - task: create-final-release-tarball
+    file: mega-ci/scripts/ci/create-final-release.yml
+    config:
+      params:
+        RELEASE_NAME: etcd
+        PRIVATE_YML_PATH: etcd-release/private.yml

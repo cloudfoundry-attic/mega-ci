@@ -3,7 +3,9 @@ set -e -x
 
 source ~/.bashrc
 
-cd $ETCD_RELEASE_DIR
+cd release-repo
+
+cp ../runtime-credentials/$PRIVATE_YML_PATH ./config
 
 for i in {1..5}; do
   bosh -n create release --with-tarball
@@ -14,15 +16,15 @@ for i in {1..5}; do
 done
 
 if [ ! "$EXIT_STATUS" = "0" ]; then
-  echo "Failed to Create ETCD Release"
+  echo "Failed to Create $RELEASE_NAME Release"
   exit $EXIT_STATUS
 fi
 
-dev_release=$(ls dev_releases/etcd/ | grep .tgz)
+dev_release=$(ls dev_releases/$RELEASE_NAME/ | grep .tgz)
 
 for i in {1..5}; do
   echo "Creating release, attempt $i"
-  bosh -n finalize release dev_releases/etcd/$dev_release
+  bosh -n finalize release dev_releases/$RELEASE_NAME/$dev_release
   EXIT_STATUS=${PIPESTATUS[0]}
   if [ "$EXIT_STATUS" = "0" ]; then
     break
@@ -30,6 +32,6 @@ for i in {1..5}; do
 done
 
 if [ ! "$EXIT_STATUS" = "0" ]; then
-  echo "Failed to Create ETCD Release"
+  echo "Failed to Create $RELEASE_NAME Release"
   exit $EXIT_STATUS
 fi
