@@ -99,5 +99,5 @@ jobs:
         PRIVATE_YML_PATH: etcd-release/private.yml
   - put: etcd-release
     params:
-      repository: release-repo
-      tag: version_number
+      repository: create-final-release/release-repo
+      tag: create-final-release/release-repo/version_number
