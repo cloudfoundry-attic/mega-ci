@@ -22,10 +22,6 @@ resources:
     user: cloudfoundry
     repository: cf-release
     access_token: {{release_candidate_bot_github_access_token}}
-- name: weekly
-  type: time
-  source:
-    interval: "168h"
 - name: cf-final-bosh-release
   type: bosh-io-release
   source:
@@ -39,8 +35,6 @@ jobs:
     - get: mega-pm-tools
     - get: cf-release-repo-develop
     - get: cf-github-release
-    - get: weekly
-      trigger: true
   - task: announce-rc
     file: mega-pm-tools/announce-rc.yml
     config:
