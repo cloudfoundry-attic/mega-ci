@@ -44,8 +44,10 @@ git config user.email "cf-mega@pivotal.io"
 git commit -m "Final release ${new_release_version}"
 commit_sha=$(git rev-parse HEAD)
 
-git branch -D master
 git checkout master
 git merge --ff-only ${commit_sha}
+
+git checkout develop
+git merge master -m "Merge final release ${new_release_version}"
 
 echo ${new_release_version} > version_number
