@@ -50,4 +50,4 @@ git merge --ff-only ${commit_sha}
 git checkout develop
 git merge master -m "Merge final release ${new_release_version}"
 
-echo ${new_release_version} > version_number
+echo ${new_release_version} > ../version_number

@@ -100,4 +100,4 @@ jobs:
   - put: etcd-release
     params:
       repository: release-repo
-      tag: release-repo/version_number
+      tag: version_number
