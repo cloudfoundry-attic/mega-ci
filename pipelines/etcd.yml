@@ -81,6 +81,7 @@ jobs:
     file: mega-ci/scripts/ci/clean-deployment.yml
 
 - name: cut-final-release
+  public: true
   plan:
   - aggregate:
     - get: mega-ci
@@ -90,9 +91,13 @@ jobs:
       resource: etcd-release
       passed: [test-etcd]
       trigger: true
-  - task: create-final-release-tarball
+  - task: create-final-release
     file: mega-ci/scripts/ci/create-final-release.yml
     config:
       params:
         RELEASE_NAME: etcd
         PRIVATE_YML_PATH: etcd-release/private.yml
+  - put: etcd-release
+      params:
+        repository: release-repo
+        tag: release-repo/version_number

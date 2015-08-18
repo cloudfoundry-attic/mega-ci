@@ -35,3 +35,17 @@ if [ ! "$EXIT_STATUS" = "0" ]; then
   echo "Failed to Create $RELEASE_NAME Release"
   exit $EXIT_STATUS
 fi
+
+new_release_version=$(find releases -regex ".*${RELEASE_NAME}-[0-9]*.yml" | sort | tail -n 1 | egrep -o "${RELEASE_NAME}-[0-9]+" | egrep -o "[0-9]+")
+
+git add .final_builds releases
+git config user.name "CF MEGA BOT"
+git config user.email "cf-mega@pivotal.io"
+git commit -m "Final release ${new_release_version}"
+commit_sha=$(git rev-parse HEAD)
+
+git branch -D master
+git checkout master
+git merge --ff-only ${commit_sha}
+
+echo ${new_release_version} > version_number
