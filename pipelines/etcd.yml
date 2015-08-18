@@ -98,6 +98,6 @@ jobs:
         RELEASE_NAME: etcd
         PRIVATE_YML_PATH: etcd-release/private.yml
   - put: etcd-release
-      params:
-        repository: release-repo
-        tag: release-repo/version_number
+    params:
+      repository: release-repo
+      tag: release-repo/version_number
