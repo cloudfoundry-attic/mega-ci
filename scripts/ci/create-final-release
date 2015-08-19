@@ -8,23 +8,7 @@ cd release-repo
 cp ../runtime-credentials/$PRIVATE_YML_PATH ./config
 
 for i in {1..5}; do
-  bosh -n create release --with-tarball
-  EXIT_STATUS=${PIPESTATUS[0]}
-  if [ "$EXIT_STATUS" = "0" ]; then
-    break
-  fi
-done
-
-if [ ! "$EXIT_STATUS" = "0" ]; then
-  echo "Failed to Create $RELEASE_NAME Release"
-  exit $EXIT_STATUS
-fi
-
-dev_release=$(ls dev_releases/$RELEASE_NAME/ | grep .tgz)
-
-for i in {1..5}; do
-  echo "Creating release, attempt $i"
-  bosh -n finalize release dev_releases/$RELEASE_NAME/$dev_release
+  bosh -n create release --with-tarball --final
   EXIT_STATUS=${PIPESTATUS[0]}
   if [ "$EXIT_STATUS" = "0" ]; then
     break
@@ -49,5 +33,7 @@ git merge --ff-only ${commit_sha}
 
 git checkout develop
 git merge master -m "Merge final release ${new_release_version}"
+
+git checkout master
 
 echo ${new_release_version} > version_number
