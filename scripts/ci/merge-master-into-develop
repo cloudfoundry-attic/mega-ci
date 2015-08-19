@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e -x
+
+source ~/.bashrc
+
+cd release-repo
+
+git config user.name "CF MEGA BOT"
+git config user.email "cf-mega@pivotal.io"
+
+git merge --no-edit origin/master

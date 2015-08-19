@@ -24,10 +24,17 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/mega-ci.git
-- name: etcd-release
+- name: etcd-release-develop
   type: git
   source:
     branch: develop
+    fetch: [master]
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry-incubator/etcd-release.git
+- name: etcd-release-master
+  type: git
+  source:
+    branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 
@@ -38,7 +45,7 @@ jobs:
   - aggregate:
     - get: deployments-runtime
     - get: mega-ci
-    - get: etcd-release
+    - get: etcd-release-develop
       trigger: true
   - aggregate:
     - task: generate-iaas-settings-etcd
@@ -74,7 +81,7 @@ jobs:
   - aggregate:
     - get: deployments-runtime
     - get: mega-ci
-    - get: etcd-release
+    - get: etcd-release-develop
       trigger: true
       passed: [test-etcd]
   - task: clean
@@ -88,7 +95,7 @@ jobs:
     - get: deployments-runtime
     - get: runtime-credentials
     - get: release-repo
-      resource: etcd-release
+      resource: etcd-release-develop
       passed: [test-etcd]
       trigger: true
   - task: create-final-release
@@ -97,7 +104,21 @@ jobs:
       params:
         RELEASE_NAME: etcd
         PRIVATE_YML_PATH: etcd-release/private.yml
-  - put: etcd-release
+  - put: etcd-release-master
     params:
       repository: create-final-release/release-repo
       tag: create-final-release/release-repo/version_number
+
+- name: merge-master-into-develop
+  public: true
+  plan:
+  - aggregate:
+    - get: etcd-release-master
+      trigger: true
+    - get: release-repo
+      resource: etcd-release-develop
+  - task: merge-master-into-develop
+    file: mega-ci/scripts/ci/merge-master-into-develop.yml
+  - put: etcd-release-develop
+    params:
+      repository: merge-master-into-develop/release-repo
