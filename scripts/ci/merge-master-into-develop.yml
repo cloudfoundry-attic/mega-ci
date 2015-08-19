@@ -4,6 +4,7 @@ platform: linux
 image: docker:///cloudfoundry/runtime-ci
 
 inputs:
+  - name: mega-ci
   - name: release-repo
 
 run:
