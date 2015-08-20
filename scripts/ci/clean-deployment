@@ -19,7 +19,7 @@ for i in $etcd_deployments; do
 done
 
 echo "Cleaning turbulence deployments"
-turbulence_deployments=$(bosh deployments | grep 'turbulence-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | awk '{print $2}')
+turbulence_deployments=$(bosh deployments | grep 'turb-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | awk '{print $2}')
 for i in $turbulence_deployments; do
   bosh -n delete deployment $i
 done
@@ -29,7 +29,7 @@ bosh -n cleanup --all
 
 echo "Checking etcd and turbulence release count"
 etcd_deployment_count=$(bosh deployments | grep 'etcd-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
-turbulence_deployment_count=$(bosh deployments | grep 'turbulence-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
+turbulence_deployment_count=$(bosh deployments | grep 'turb-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
 
 if [ $(($etcd_deployment_count + $turbulence_deployment_count)) -gt 10 ]
 then
