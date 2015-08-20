@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
 
-  "Description": "Infrastructure for BOSH and Concourse",
+  "Description": "Infrastructure for BOSH, Concourse and CF deployment",
 
   "Parameters": {
     "KeyName": {
@@ -15,6 +15,12 @@
       "Type": "String",
       "Default": ""
     },
+    "CFHostedZoneName": {
+      "Description": "Route53 Hosted Zone in which to register the CF ELB's DNS record.",
+      "Type": "String",
+      "Default": "etcd-cf-deployment.ci.cf-app.com"
+    },
+
     "ELBRecordSetName": {
       "Description": "(Optional) Route53 Record Set name for the ELB.",
       "Type": "String",
@@ -51,6 +57,11 @@
       "Description": "CIDR block for the Etcd subnet.",
       "Type": "String",
       "Default": "10.0.16.0/24"
+    },
+    "CFSubnetCIDR": {
+      "Description": "CIDR block for the CF Deployment subnet.",
+      "Type": "String",
+      "Default": "10.0.15.0/24"
     },
     "LoadBalancerCertName": {
       "Description": "Name of the SSL cert to use for the ELB.",
@@ -155,6 +166,18 @@
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "CFPrivateSecurityGroup" },
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "CFPrivateSecurityGroup" },
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
           }
         ]
       }
@@ -229,6 +252,35 @@
         ]
       }
     },
+    
+    "CFPrivateSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "cCF Private Security Group",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.0.15.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.0.15.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.0.15.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "4443",
+            "ToPort": "4443"
+          }
+        ]
+      }
+    },
 
     "WebSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
@@ -254,6 +306,35 @@
             "IpProtocol": "tcp",
             "FromPort": "443",
             "ToPort": "443"
+          }
+        ]
+      }
+    },
+
+    "CFPublicSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "CF Public Security Group",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "80",
+            "ToPort": "80"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "443",
+            "ToPort": "443"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "4443",
+            "ToPort": "4443"
           }
         ]
       }
@@ -380,6 +461,16 @@
       }
     },
 
+    "CFSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "CFSubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "cf1" }]
+      }
+    },
+
     "LoadBalancerSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
@@ -488,9 +579,34 @@
       }
     },
 
+    "CFEIPRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Condition": "CreateRecordSet",
+      "Properties": {
+        "HostedZoneName": { "Ref": "CFHostedZoneName" },
+        "RecordSets": [
+          {
+            "Name": "*",
+            "Type": "A",
+            "TTL": "300",
+            "ResourceRecords" : [ 
+              { "Ref": "CFEIP" }
+            ]
+          }
+        ]
+      }
+    },
+
     "MicroEIP": {
       "Type": "AWS::EC2::EIP",
       "Properties": { "Domain": "vpc" }
+    },
+
+    "CFEIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": { 
+        "Domain": "vpc"
+      }
     }
-  }
+  } 
 }

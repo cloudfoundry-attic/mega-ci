@@ -36,6 +36,7 @@ set -x
 
 mkdir -p ${deployment_dir}/artifacts/keypair
 mkdir -p ${deployment_dir}/artifacts/deployments
+mkdir -p ${deployment_dir}/generated-stubs/cf
 mkdir -p generated-stubs
 
 # create keypair
@@ -104,6 +105,17 @@ cat > generated-stubs/security-groups.yml <<EOF
 }
 EOF
 
+# generate CF deploment stub for HAProxy IP
+CF_EIP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFEIP)
+cat > ${deployment_dir}/generated-stubs/cf/HAProxy-ip.yml <<EOF
+---
+jobs:
+  ha_proxy_z1:
+    default_networks: cf1
+      - name: cf1
+        static_ips: "$CF_EIP"
+EOF
+
 # generate stub for AWS Credentials
 BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
 AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
@@ -117,6 +129,18 @@ cat > generated-stubs/aws-credentials.yml <<EOF
     "AWS_SECRET_ACCESS_KEY": "$AWS_SECRET_ACCESS_KEY"
   }
 }
+EOF
+
+# generate CF AWS ZONE Stub
+CFSubnet=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnet)
+cat > ${deployment_dir}/generated-stubs/cf/aws-zone.yml<<EOF
+---
+properties:
+  template_only:
+    aws:
+      availability_zone: $AWS_ZONE
+      subnet_ids:
+        cf1: $CFSubnet
 EOF
 
 # generate BOSH deployment manifest
@@ -134,6 +158,13 @@ bosh-init deploy ${deployment_dir}/artifacts/deployments/bosh.yml
 # display result
 BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 echo "BOSH director is at $BOSH_IP"
+
+# generate director uuid stub for cf
+BOSH_DIRECTOR_UUID=$(bosh status --uuid)
+cat > ${deployment_dir}/generated-stubs/cf/director-uuid.yml <<EOF
+---
+director_uuid: $BOSH_DIRECTOR_UUID
+EOF
 
 # clean up
 rm -rf generated-stubs
