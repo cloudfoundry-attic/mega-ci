@@ -101,7 +101,6 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: deployments-runtime
     - get: runtime-credentials
     - get: release-repo
       resource: etcd-release-develop
