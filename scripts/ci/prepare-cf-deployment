@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e -x
+
+cd cf-deployment
+
+mkdir -p outputs/manifests
+
+./scripts/prepare-deployment aws ../cf-release ../etcd-release ../$STUB_PATH > outputs/manifests/cf.yml

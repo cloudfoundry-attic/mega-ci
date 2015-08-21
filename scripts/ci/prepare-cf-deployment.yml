@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: mega-ci
+  - name: etcd-release
+  - name: cf-release
+  - name: cf-deployment
+
+run:
+  path: mega-ci/scripts/ci/prepare-cf-deployment
+
+params:
+  STUB_PATH:

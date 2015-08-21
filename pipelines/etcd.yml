@@ -5,6 +5,7 @@ groups:
   - clean-deployment
   - create-final-release
   - merge-master-into-develop
+  - deploy-and-test-with-cf
 
 resources:
 - name: deployments-runtime
@@ -45,6 +46,30 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
+- name: cf-release
+  type: git
+  source:
+    branch: release-candidate
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/cf-release.git
+- name: cf-deployment
+  type: git
+  source:
+    branch: develop
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/cf-deployment.git
+- name: etcd-cf-deployment
+  type: bosh-deployment
+  source:
+    target: {{bosh_director}}
+    username: {{bosh_username}}
+    password: {{bosh_password}}
+    deployment: cf-etcd
+    ignore_ssl: true
+- name: aws-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 jobs:
 - name: test-etcd
@@ -86,6 +111,7 @@ jobs:
         BOSH_OPERATION_TIMEOUT: 20m
 
 - name: clean-deployment
+  public: true
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -95,6 +121,30 @@ jobs:
       passed: [test-etcd]
   - task: clean
     file: mega-ci/scripts/ci/clean-deployment.yml
+
+- name: deploy-and-test-with-cf
+  public: true
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [test-etcd]
+      trigger: true
+    - get: cf-release
+    - get: cf-deployment
+    - get: aws-stemcell
+  - task: prepare-cf-deployment
+    file: mega-ci/scripts/ci/prepare-cf-deployment.yml
+    config:
+      params:
+        STUB_PATH: deployments-runtime/mega-ci/stubs/cf/cf-stub.yml
+  - put: etcd-cf-deployment
+    params:
+      manifest: cf-deployment/outputs/manifests/cf.yml
+      stemcells: [aws-stemcell/*.tgz]
+      releases: [cf-deployment/outputs/releases/*.tgz]
 
 - name: create-final-release
   public: true
