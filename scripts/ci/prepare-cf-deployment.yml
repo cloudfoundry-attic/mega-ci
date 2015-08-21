@@ -8,6 +8,7 @@ inputs:
   - name: etcd-release
   - name: cf-release
   - name: cf-deployment
+  - name: deployments-runtime
 
 run:
   path: mega-ci/scripts/ci/prepare-cf-deployment
