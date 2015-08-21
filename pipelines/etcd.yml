@@ -55,7 +55,7 @@ resources:
 - name: cf-deployment
   type: git
   source:
-    branch: develop
+    branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: etcd-cf-deployment
