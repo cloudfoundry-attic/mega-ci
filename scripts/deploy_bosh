@@ -83,6 +83,11 @@ while aws cloudformation describe-stacks --stack-name concourse | grep StackStat
   fi
 done
 
+if aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep ROLLBACK ; then
+  echo 'Cloud formation failure'
+  exit 1
+fi
+
 if ! aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep COMPLETE ; then
   echo 'Cloud formation failure'
   exit 1
@@ -111,7 +116,7 @@ cat > ${deployment_dir}/generated-stubs/cf/HAProxy-ip.yml <<EOF
 ---
 jobs:
   ha_proxy_z1:
-    default_networks: cf1
+    default_networks:
       - name: cf1
         static_ips: "$CF_EIP"
 EOF
@@ -145,7 +150,8 @@ EOF
 
 # generate BOSH deployment manifest
 echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/bosh.yml
-spiff merge $script_dir/../templates/infrastructure/bosh.yml \
+spiff merge $script_dir/../templates/infrastructure/bosh-init.yml \
+  $script_dir/../templates/infrastructure/bosh.yml \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/security-groups.yml \

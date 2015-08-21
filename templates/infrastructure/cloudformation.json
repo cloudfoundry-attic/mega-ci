@@ -348,14 +348,8 @@
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
-            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
-            "IpProtocol": "tcp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
-            "IpProtocol": "udp",
+            "CidrIp": { "Ref": "VPCCIDR" },
+            "IpProtocol": "-1",
             "FromPort": "0",
             "ToPort": "65535"
           }
@@ -418,6 +412,21 @@
       }
     },
 
+    "PublicRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": { "VpcId": { "Ref": "VPC" } }
+    },
+
+    "PublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "NATInstance",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "InstanceId": { "Ref": "NATInstance" }
+      }
+    },
+
     "ConcourseSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
@@ -428,25 +437,10 @@
       }
     },
 
-    "ConcourseRouteTable": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": { "VpcId": { "Ref": "VPC" } }
-    },
-
-    "ConcourseRoute": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": "NATInstance",
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": { "Ref": "ConcourseRouteTable" },
-        "InstanceId": { "Ref": "NATInstance" }
-      }
-    },
-
     "ConcourseSubnetRouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": { "Ref": "ConcourseRouteTable" },
+        "RouteTableId": { "Ref": "PublicRouteTable" },
         "SubnetId": { "Ref": "ConcourseSubnet" }
       }
     },
@@ -468,6 +462,14 @@
         "CidrBlock": { "Ref": "CFSubnetCIDR" },
         "VpcId": { "Ref": "VPC" },
         "Tags": [{ "Key": "Name", "Value": "cf1" }]
+      }
+    },
+
+    "CFSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "CFSubnet" }
       }
     },
 
@@ -579,20 +581,22 @@
       }
     },
 
+    "CFHostedZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": { "Ref": "CFHostedZoneName" }
+      }
+    },
+
     "CFEIPRecordSet": {
       "Type": "AWS::Route53::RecordSet",
-      "Condition": "CreateRecordSet",
       "Properties": {
-        "HostedZoneName": { "Ref": "CFHostedZoneName" },
-        "RecordSets": [
-          {
-            "Name": "*",
-            "Type": "A",
-            "TTL": "300",
-            "ResourceRecords" : [ 
-              { "Ref": "CFEIP" }
-            ]
-          }
+        "HostedZoneId": { "Ref": "CFHostedZone" },
+        "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFHostedZoneName"} ,"."]] },
+        "Type": "A",
+        "TTL": "300",
+        "ResourceRecords" : [
+          { "Ref": "CFEIP" }
         ]
       }
     },
