@@ -10,3 +10,5 @@ cd cf-deployment
 mkdir -p outputs/manifests
 
 ./scripts/prepare_deployment aws ../cf-release ../etcd-release ../stub.yml > outputs/manifests/cf.yml
+
+cat outputs/manifests/cf.yml
