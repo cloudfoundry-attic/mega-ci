@@ -64,7 +64,7 @@ resources:
     target: {{bosh_director}}
     username: {{bosh_username}}
     password: {{bosh_password}}
-    deployment: cf-etcd
+    deployment: etcd-cf-deployment
     ignore_ssl: true
 - name: aws-stemcell
   type: bosh-io-stemcell

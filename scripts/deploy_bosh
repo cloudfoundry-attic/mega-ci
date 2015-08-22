@@ -138,12 +138,13 @@ EOF
 
 # generate CF AWS ZONE Stub
 CFSubnet=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnet)
+CF_AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $CFSubnet | jq -r .Subnets[0].AvailabilityZone)
 cat > ${deployment_dir}/generated-stubs/cf/aws-zone.yml<<EOF
 ---
 properties:
   template_only:
     aws:
-      availability_zone: $AWS_ZONE
+      availability_zone: $CF_AWS_ZONE
       subnet_ids:
         cf1: $CFSubnet
 EOF
