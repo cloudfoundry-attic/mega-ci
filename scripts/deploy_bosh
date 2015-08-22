@@ -116,9 +116,9 @@ cat > ${deployment_dir}/generated-stubs/cf/HAProxy-ip.yml <<EOF
 ---
 jobs:
   ha_proxy_z1:
-    default_networks:
-      - name: cf1
-        static_ips: "$CF_EIP"
+    networks:
+      - name: elastic
+        static_ips: [$CF_EIP]
 EOF
 
 # generate stub for AWS Credentials
