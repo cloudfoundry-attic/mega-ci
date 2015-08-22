@@ -140,6 +140,7 @@ jobs:
     config:
       params:
         STUB_PATH: deployments-runtime/mega-ci/stubs/cf/cf-stub.yml
+        STUB_PARTS_PATH: deployments-runtime/mega-ci/generated-stubs/cf
   - put: etcd-cf-deployment
     params:
       manifest: cf-deployment/outputs/manifests/cf.yml

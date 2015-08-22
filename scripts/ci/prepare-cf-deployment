@@ -3,8 +3,10 @@ set -e -x
 
 source ~/.bashrc
 
+spiff merge $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
+
 cd cf-deployment
 
 mkdir -p outputs/manifests
 
-./scripts/prepare_deployment aws ../cf-release ../etcd-release ../$STUB_PATH > outputs/manifests/cf.yml
+./scripts/prepare_deployment aws ../cf-release ../etcd-release ../stub.yml > outputs/manifests/cf.yml
