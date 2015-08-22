@@ -143,9 +143,9 @@ jobs:
         STUB_PARTS_PATH: deployments-runtime/mega-ci/generated-stubs/cf
   - put: etcd-cf-deployment
     params:
-      manifest: cf-deployment/outputs/manifests/cf.yml
+      manifest: prepare-cf-deployment/cf-deployment/outputs/manifests/cf.yml
       stemcells: [aws-stemcell/*.tgz]
-      releases: [cf-deployment/outputs/releases/*.tgz]
+      releases: [prepare-cf-deployment/cf-deployment/outputs/releases/*.tgz]
 
 - name: create-final-release
   public: true
