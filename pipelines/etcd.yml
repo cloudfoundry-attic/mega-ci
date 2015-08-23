@@ -167,6 +167,22 @@ jobs:
     params:
       repository: create-final-release/release-repo
       tag: create-final-release/release-repo/version_number
+  - task: run-cats
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        ENVIRONMENT: mega-ci
+        DEPLOYMENT_NAME: etcd-release-develop
+        COMMAND: run errand acceptance_tests
+    ensure:
+      task: delete-deployment
+      file: mega-ci/scripts/ci/run-bosh-command.yml
+      config:
+        params:
+          ENVIRONMENT: mega-ci
+          DEPLOYMENT_NAME: etcd-release-develop
+          COMMAND: delete deployment etcd-release-develop
+
 
 - name: merge-master-into-develop
   public: true

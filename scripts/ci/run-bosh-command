@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e -x
+
+source ~/.bashrc
+
+source ./deployments-runtime/$ENVIRONMENT/bosh_environment
+
+bosh download manifest $DEPLOYMENT_NAME manifest.yml
+
+bosh -n --color -t $BOSH_DIRECTOR -d manifest.yml $COMMAND

@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: deployments-runtime
+  - name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/run-bosh-command
+
+params:
+  ENVIRONMENT:
+  DEPLOYMENT_NAME:
+  COMMAND:
