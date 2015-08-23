@@ -144,38 +144,8 @@
             "ToPort": "25555"
           },
           {
-            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
-            "IpProtocol": "tcp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
-            "IpProtocol": "udp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
-            "IpProtocol": "tcp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "SourceSecurityGroupId": { "Ref": "EtcdSecurityGroup" },
-            "IpProtocol": "udp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "SourceSecurityGroupId": { "Ref": "CFPrivateSecurityGroup" },
-            "IpProtocol": "tcp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "SourceSecurityGroupId": { "Ref": "CFPrivateSecurityGroup" },
-            "IpProtocol": "udp",
+            "CidrIp": { "Ref": "VPCCIDR" },
+            "IpProtocol": "-1",
             "FromPort": "0",
             "ToPort": "65535"
           }
@@ -252,35 +222,6 @@
         ]
       }
     },
-    
-    "CFPrivateSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "VpcId": { "Ref": "VPC" },
-        "GroupDescription": "cCF Private Security Group",
-        "SecurityGroupEgress": [],
-        "SecurityGroupIngress": [
-          {
-            "CidrIp": "10.0.15.0/24",
-            "IpProtocol": "tcp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "CidrIp": "10.0.15.0/24",
-            "IpProtocol": "tcp",
-            "FromPort": "0",
-            "ToPort": "65535"
-          },
-          {
-            "CidrIp": "10.0.15.0/24",
-            "IpProtocol": "tcp",
-            "FromPort": "4443",
-            "ToPort": "4443"
-          }
-        ]
-      }
-    },
 
     "WebSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
@@ -311,7 +252,7 @@
       }
     },
 
-    "CFPublicSecurityGroup": {
+    "CFSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "VpcId": { "Ref": "VPC" },
