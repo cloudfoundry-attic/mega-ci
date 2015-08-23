@@ -3,7 +3,7 @@ set -e -x
 
 source ~/.bashrc
 
-spiff merge ./meta-ci/templates/bosh/bosh-deployment.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
+spiff merge ./mega-ci/templates/bosh/bosh-deployment.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
 
 cd cf-deployment
 
