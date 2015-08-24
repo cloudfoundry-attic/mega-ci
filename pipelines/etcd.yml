@@ -151,7 +151,7 @@ jobs:
     config:
       params:
         ENVIRONMENT: mega-ci
-        DEPLOYMENT_NAME: etcd-release-develop
+        DEPLOYMENT_NAME: etcd-cf-deployment
         COMMAND: run errand acceptance_tests
     ensure:
       task: delete-deployment
@@ -159,7 +159,7 @@ jobs:
       config:
         params:
           ENVIRONMENT: mega-ci
-          DEPLOYMENT_NAME: etcd-release-develop
+          DEPLOYMENT_NAME: etcd-cf-deployment
           COMMAND: delete deployment etcd-release-develop
 
 - name: create-final-release
