@@ -137,7 +137,7 @@ EOF
 # generate CF Resources Stub
 CF_Subnet=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnet)
 CF_AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $CF_Subnet | jq -r .Subnets[0].AvailabilityZone)
-CF_EIP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFEIP)
+CF_ELB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFLoadBalancer)
 CF_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSecurityGroup)
 CF_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${CF_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
@@ -145,8 +145,8 @@ cat > ${deployment_dir}/generated-stubs/cf/cf-resources.yml<<EOF
 ---
 cf_resources:
   availability_zone: $CF_AWS_ZONE
+  elb: $CF_ELB
   security_group_name: $CF_SECURITY_GROUP_NAME
-  static_ip: $CF_EIP
   subnet_id: $CF_Subnet
 EOF
 
