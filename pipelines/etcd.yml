@@ -160,7 +160,7 @@ jobs:
         params:
           ENVIRONMENT: mega-ci
           DEPLOYMENT_NAME: etcd-cf-deployment
-          COMMAND: delete deployment etcd-release-develop
+          COMMAND: delete deployment etcd-cf-deployment
 
 - name: create-final-release
   public: true
