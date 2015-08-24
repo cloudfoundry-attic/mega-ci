@@ -44,7 +44,16 @@ if ! aws ec2 describe-key-pairs --key-names bosh; then
   aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > ${deployment_dir}/artifacts/keypair/id_rsa_bosh
 fi
 
-# install certs for ELB
+# install certs for CF ELB
+if ! aws iam get-server-certificate --server-certificate-name cf; then
+  if [ -e ${deployment_dir}/certs/cf_chain.pem ]; then
+    aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem  --certificate-chain file://${deployment_dir}/certs/cf_chain.pem
+  else
+    aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
+  fi
+fi
+
+# install certs for Concourse ELB
 if ! aws iam get-server-certificate --server-certificate-name concourse; then
   if [ -e ${deployment_dir}/certs/concourse_chain.pem ]; then
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/certs/concourse.key --certificate-body file://${deployment_dir}/certs/concourse.pem  --certificate-chain file://${deployment_dir}/certs/concourse_chain.pem
@@ -58,12 +67,12 @@ if ! aws cloudformation describe-stacks --stack-name concourse ; then
   aws cloudformation create-stack \
     --stack-name concourse \
     --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
-    --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse
+    --parameters file://${deployment_dir}/cloud_formation/properties.json
 else
   aws cloudformation update-stack \
     --stack-name concourse \
     --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
-    --parameters ParameterKey=LoadBalancerCertName,ParameterValue=concourse || true # update-stack is not idempotent :(
+    --parameters file://${deployment_dir}/cloud_formation/properties.json || true # update-stack is not idempotent :(
 fi
 
 start_time_in_s=$(date +%s)

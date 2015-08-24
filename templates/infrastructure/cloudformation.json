@@ -10,15 +10,15 @@
       "Default": "bosh"
     },
 
-    "HostedZoneName": {
-      "Description": "(Optional) Route53 Hosted Zone in which to register the ELB's DNS record.",
+    "ConcourseHostedZoneName": {
+      "Description": "(Optional) Route53 Hosted Zone in which to register the Concourse ELB's DNS record.",
       "Type": "String",
       "Default": ""
     },
     "CFHostedZoneName": {
       "Description": "Route53 Hosted Zone in which to register the CF ELB's DNS record.",
       "Type": "String",
-      "Default": "etcd-cf-deployment.ci.cf-app.com"
+      "Default": ""
     },
 
     "ELBRecordSetName": {
@@ -63,8 +63,13 @@
       "Type": "String",
       "Default": "10.0.15.0/24"
     },
-    "LoadBalancerCertName": {
-      "Description": "Name of the SSL cert to use for the ELB.",
+    "ConcourseLoadBalancerCertName": {
+      "Description": "Name of the SSL cert to use for the concourse ELB.",
+      "Type": "String",
+      "Default": "concourse"
+    },
+    "CFLoadBalancerCertName": {
+      "Description": "Name of the SSL cert to use for the CF ELB.",
       "Type": "String",
       "Default": ""
     }
@@ -88,7 +93,7 @@
       "Fn::And": [
         {
           "Fn::Not": [
-            { "Fn::Equals": [{ "Ref": "HostedZoneName" }, ""] }
+            { "Fn::Equals": [{ "Ref": "ConcourseHostedZoneName" }, ""] }
           ]
         },
         {
@@ -223,7 +228,7 @@
       }
     },
 
-    "WebSecurityGroup": {
+    "LoadBalancerSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "VpcId": { "Ref": "VPC" },
@@ -247,6 +252,12 @@
             "IpProtocol": "tcp",
             "FromPort": "443",
             "ToPort": "443"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "4443",
+            "ToPort": "4443"
           }
         ]
       }
@@ -260,7 +271,7 @@
         "SecurityGroupEgress": [],
         "SecurityGroupIngress": [
           {
-            "CidrIp": "0.0.0.0/0",
+            "CidrIp": "10.0.0.0/16",
             "IpProtocol": "-1",
             "FromPort": "0",
             "ToPort": "65535"
@@ -435,12 +446,12 @@
       }
     },
 
-    "WebELBLoadBalancer": {
+    "ConcourseLoadBalancer": {
       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
 
       "Properties": {
         "Subnets": [{ "Ref": "LoadBalancerSubnet" }],
-        "SecurityGroups": [{ "Ref": "WebSecurityGroup" }],
+        "SecurityGroups": [{ "Ref": "LoadBalancerSecurityGroup" }],
 
         "HealthCheck": {
           "HealthyThreshold": "2",
@@ -472,7 +483,7 @@
                   },
                   ":server-certificate/",
                   {
-                    "Ref":"LoadBalancerCertName"
+                    "Ref":"ConcourseLoadBalancerCertName"
                   }
                 ]
               ]
@@ -482,11 +493,11 @@
       }
     },
 
-    "WebELBRecordSet": {
+    "ConcourseELBRecordSet": {
       "Type": "AWS::Route53::RecordSetGroup",
       "Condition": "CreateRecordSet",
       "Properties": {
-        "HostedZoneName": { "Ref": "HostedZoneName" },
+        "HostedZoneName": { "Ref": "ConcourseHostedZoneName" },
         "RecordSets": [
           {
             "Name": { "Ref": "ELBRecordSetName" },
@@ -494,16 +505,84 @@
             "AliasTarget": {
               "HostedZoneId": {
                 "Fn::GetAtt": [
-                  "WebELBLoadBalancer",
+                  "ConcourseLoadBalancer",
                   "CanonicalHostedZoneNameID"
                 ]
               },
               "DNSName": {
                 "Fn::GetAtt": [
-                  "WebELBLoadBalancer",
+                  "ConcourseLoadBalancer",
                   "CanonicalHostedZoneName"
                 ]
               }
+            }
+          }
+        ]
+      }
+    },
+
+    "CFLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+
+      "Properties": {
+        "Subnets": [{ "Ref": "LoadBalancerSubnet" }],
+        "SecurityGroups": [{ "Ref": "LoadBalancerSecurityGroup" }],
+
+        "HealthCheck": {
+          "HealthyThreshold": "2",
+          "Interval": "30",
+          "Target": "tcp:80",
+          "Timeout": "5",
+          "UnhealthyThreshold": "10"
+        },
+
+        "Listeners": [
+          {
+            "Protocol": "http",
+            "LoadBalancerPort": "80",
+            "InstanceProtocol": "http",
+            "InstancePort": "80"
+          },
+          {
+            "Protocol": "https",
+            "LoadBalancerPort": "443",
+            "InstanceProtocol": "http",
+            "InstancePort": "80",
+            "SSLCertificateId" : {
+              "Fn::Join":[
+                "",
+                [
+                  "arn:aws:iam::",
+                  {
+                    "Ref":"AWS::AccountId"
+                  },
+                  ":server-certificate/",
+                  {
+                    "Ref":"CFLoadBalancerCertName"
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "Protocol" : "ssl",
+            "LoadBalancerPort" : "4443",
+            "InstanceProtocol": "tcp",
+            "InstancePort" : "80",
+            "SSLCertificateId" : {
+              "Fn::Join":[
+                "",
+                [
+                  "arn:aws:iam::",
+                  {
+                    "Ref":"AWS::AccountId"
+                  },
+                  ":server-certificate/",
+                  {
+                    "Ref":"CFLoadBalancerCertName"
+                  }
+                ]
+              ]
             }
           }
         ]
@@ -522,10 +601,10 @@
       "Properties": {
         "HostedZoneId": { "Ref": "CFHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFHostedZoneName"} ,"."]] },
-        "Type": "A",
+        "Type": "CNAME",
         "TTL": "300",
         "ResourceRecords" : [
-          { "Ref": "CFEIP" }
+          { "Fn::GetAtt": ["CFLoadBalancer","CanonicalHostedZoneName"] }
         ]
       }
     },
@@ -533,13 +612,6 @@
     "MicroEIP": {
       "Type": "AWS::EC2::EIP",
       "Properties": { "Domain": "vpc" }
-    },
-
-    "CFEIP": {
-      "Type": "AWS::EC2::EIP",
-      "Properties": { 
-        "Domain": "vpc"
-      }
     }
   } 
 }
