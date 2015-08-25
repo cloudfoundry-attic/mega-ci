@@ -9,6 +9,11 @@ cd cf-deployment
 
 mkdir -p outputs/manifests
 
+for i in `seq 1 10`;
+do
+  bosh sync blobs
+done
+
 ./scripts/prepare_deployment aws ../cf-release ../etcd-release ../stub.yml > outputs/manifests/cf.yml
 
 cat outputs/manifests/cf.yml
