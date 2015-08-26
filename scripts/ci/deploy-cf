@@ -5,7 +5,7 @@ source ~/.bashrc
 source ./deployments-runtime/mega-ci/bosh_environment
 
 bosh target $BOSH_DIRECTOR
-bosh upload stemcell https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+bosh upload stemcell https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent --skip-if-exists
 
 spiff merge ./mega-ci/templates/bosh/bosh-deployment.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
 
