@@ -2,7 +2,7 @@
 set -e -x
 
 source ~/.bashrc
-source ./deployments-runtime/mega-ci/bosh_environments
+source ./deployments-runtime/mega-ci/bosh_environment
 
 bosh target $BOSH_DIRECTOR
 bosh upload stemcell https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
