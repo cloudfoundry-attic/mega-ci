@@ -58,14 +58,6 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
-- name: etcd-cf-deployment
-  type: bosh-deployment
-  source:
-    target: {{bosh_director}}
-    username: {{bosh_username}}
-    password: {{bosh_password}}
-    deployment: etcd-cf-deployment
-    ignore_ssl: true
 - name: aws-stemcell
   type: bosh-io-stemcell
   source:
@@ -135,17 +127,12 @@ jobs:
     - get: cf-release
     - get: cf-deployment
     - get: aws-stemcell
-  - task: prepare-cf-deployment
-    file: mega-ci/scripts/ci/prepare-cf-deployment.yml
+  - task: deploy-cf
+    file: mega-ci/scripts/ci/deploy-cf.yml
     config:
       params:
         STUB_PATH: deployments-runtime/mega-ci/stubs/cf/cf-stub.yml
         STUB_PARTS_PATH: deployments-runtime/mega-ci/generated-stubs/cf
-  - put: etcd-cf-deployment
-    params:
-      manifest: prepare-cf-deployment/cf-deployment/outputs/manifests/cf.yml
-      stemcells: [aws-stemcell/*.tgz]
-      releases: [prepare-cf-deployment/cf-deployment/outputs/releases/*.tgz]
   - task: run-cats
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
@@ -153,7 +140,7 @@ jobs:
         ENVIRONMENT: mega-ci
         DEPLOYMENT_NAME: etcd-cf-deployment
         COMMAND: run errand acceptance_tests
-    ensure:
+    on_success:
       task: delete-deployment
       file: mega-ci/scripts/ci/run-bosh-command.yml
       config:
