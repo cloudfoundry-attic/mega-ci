@@ -11,7 +11,7 @@ inputs:
   - name: deployments-runtime
 
 run:
-  path: mega-ci/scripts/ci/prepare-cf-deployment
+  path: mega-ci/scripts/ci/deploy-cf
 
 params:
   STUB_PATH:

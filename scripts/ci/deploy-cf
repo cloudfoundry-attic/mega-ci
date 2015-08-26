@@ -2,6 +2,10 @@
 set -e -x
 
 source ~/.bashrc
+source ./deployments-runtime/mega-ci/bosh_environments
+
+bosh target $BOSH_DIRECTOR
+bosh upload stemcell https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 spiff merge ./mega-ci/templates/bosh/bosh-deployment.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
 
@@ -23,6 +27,6 @@ pushd ../etcd-release
   done
 popd
 
-./scripts/prepare_deployment aws ../cf-release ../etcd-release ../stub.yml > outputs/manifests/cf.yml
+./scripts/deploy aws ../cf-release ../etcd-release ../stub.yml
 
 cat outputs/manifests/cf.yml
