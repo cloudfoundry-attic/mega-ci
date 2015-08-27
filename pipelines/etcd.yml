@@ -66,6 +66,7 @@ resources:
 jobs:
 - name: test-etcd
   public: true
+  serial: true
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -104,6 +105,7 @@ jobs:
 
 - name: clean-deployment
   public: true
+  serial: true
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -116,6 +118,7 @@ jobs:
 
 - name: deploy-and-test-with-cf
   public: true
+  serial: true
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -151,6 +154,7 @@ jobs:
 
 - name: create-final-release
   public: true
+  serial: true
   plan:
   - aggregate:
     - get: mega-ci
@@ -173,6 +177,7 @@ jobs:
 
 - name: merge-master-into-develop
   public: true
+  serial: true
   plan:
   - aggregate:
     - get: mega-ci
