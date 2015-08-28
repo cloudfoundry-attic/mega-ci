@@ -1,0 +1,150 @@
+---
+name: bosh
+
+releases:
+- name: bosh
+  url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=191
+  sha1: 23a87c37286ca82c9e2d095924eaebc25e66432b
+- name: bosh-aws-cpi
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=27
+  sha1: 25d386229c4fb43048d9b3c5e4bdda8ec1ea6df8
+
+resource_pools:
+- name: vms
+  network: private
+  stemcell:
+    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3030
+    sha1: 71f01b76bb9e0529b9dba8cb935175e3b5e38025
+  cloud_properties:
+    instance_type: m3.xlarge
+    ephemeral_disk: {size: 25_000, type: gp2}
+    availability_zone: (( AWSCredentials.AWS_ZONE ))
+
+disk_pools:
+- name: disks
+  disk_size: 20_000
+  cloud_properties: {type: gp2}
+
+networks:
+- name: private
+  type: manual
+  subnets:
+  - range: 10.0.0.0/24
+    gateway: 10.0.0.1
+    dns: [10.0.0.2]
+    cloud_properties: {subnet: (( Resources.BOSHSubnet )) }
+- name: public
+  type: vip
+
+jobs:
+- name: bosh
+  instances: 1
+
+  templates:
+  - {name: nats, release: bosh}
+  - {name: redis, release: bosh}
+  - {name: postgres, release: bosh}
+  - {name: blobstore, release: bosh}
+  - {name: director, release: bosh}
+  - {name: health_monitor, release: bosh}
+  - {name: registry, release: bosh}
+  - {name: cpi, release: bosh-aws-cpi}
+
+  resource_pool: vms
+  persistent_disk_pool: disks
+
+  networks:
+  - name: private
+    static_ips: [10.0.0.6]
+    default: [dns, gateway]
+  - name: public
+    static_ips: [(( Resources.MicroEIP ))]
+
+  properties:
+    nats:
+      address: 127.0.0.1
+      user: nats
+      password: (( bosh_credentials.nats_password ))
+
+    redis:
+      listen_addresss: 127.0.0.1
+      address: 127.0.0.1
+      password: (( bosh_credentials.redis_password ))
+
+    postgres: &db
+      host: 127.0.0.1
+      user: postgres
+      password: (( bosh_credentials.postgres_password ))
+      database: bosh
+      adapter: postgres
+
+    registry:
+      address: 10.0.0.6
+      host: 10.0.0.6
+      db: *db
+      http:
+        user: admin
+        password: (( bosh_credentials.registry_password ))
+        port: 25777
+      username: admin
+      password: (( bosh_credentials.registry_password ))
+      port: 25777
+
+    blobstore:
+      address: 10.0.0.6
+      port: 25250
+      provider: dav
+      director:
+        user: director
+        password: (( bosh_credentials.director_password ))
+      agent:
+        user: agent
+        password: (( bosh_credentials.agent_password ))
+
+    director:
+      address: 127.0.0.1
+      name: my-bosh
+      db: *db
+      cpi_job: cpi
+      max_threads: 10
+
+    hm:
+      director_account:
+        user: admin
+        password: (( bosh_credentials.director_password ))
+      resurrector_enabled: true
+
+    aws: &aws
+      access_key_id: (( AWSCredentials.AWS_ACCESS_KEY_ID ))
+      secret_access_key: (( AWSCredentials.AWS_SECRET_ACCESS_KEY ))
+      default_key_name: bosh
+      default_security_groups: [(( SecurityGroups.BOSH_SECURITY_GROUP_NAME ))]
+      region: (( AWSCredentials.AWS_DEFAULT_REGION ))
+
+    agent:
+      mbus: (( "nats://nats:" bosh_credentials.nats_password "@10.0.0.6:4222" ))
+
+    ntp: &ntp [0.pool.ntp.org, 1.pool.ntp.org]
+
+cloud_provider:
+  template: {name: cpi, release: bosh-aws-cpi}
+
+  ssh_tunnel:
+    host: (( Resources.MicroEIP ))
+    port: 22
+    user: vcap
+    private_key: ../keypair/id_rsa_bosh
+
+  mbus: (( "https://mbus:" bosh_credentials.mbus_password "@" Resources.MicroEIP ":6868" ))
+
+  properties:
+    aws: *aws
+    agent:
+      mbus: (( "https://mbus:" bosh_credentials.mbus_password "@0.0.0.0:6868" ))
+    blobstore: {provider: local, path: /var/vcap/micro_bosh/data/cache}
+    ntp: *ntp
+
+bosh_credentials: (( merge ))
+AWSCredentials: (( merge ))
+Resources: (( merge ))
+SecurityGroups: (( merge ))

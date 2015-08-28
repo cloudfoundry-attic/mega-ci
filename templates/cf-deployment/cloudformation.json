@@ -1,0 +1,402 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Infrastructure for BOSH and CF deployment",
+
+  "Parameters": {
+    "KeyName": {
+      "Description": "SSH Keypair to use for instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "bosh"
+    },
+
+    "CFHostedZoneName": {
+      "Description": "Route53 Hosted Zone in which to register the CF ELB's DNS record.",
+      "Type": "String",
+      "Default": ""
+    },
+
+    "BOSHInboundCIDR": {
+      "Description": "CIDR to permit access to BOSH (e.g. 205.103.216.37/32 for your specific IP)",
+      "Type": "String",
+      "Default": "0.0.0.0/0"
+    },
+
+    "VPCCIDR": {
+      "Description": "CIDR block for the VPC.",
+      "Type": "String",
+      "Default": "10.0.0.0/16"
+    },
+    "BOSHSubnetCIDR": {
+      "Description": "CIDR block for the BOSH subnet.",
+      "Type": "String",
+      "Default": "10.0.0.0/24"
+    },
+    "LoadBalancerSubnetCIDR": {
+      "Description": "CIDR block for the BOSH subnet.",
+      "Type": "String",
+      "Default": "10.0.2.0/24"
+    },
+    "CFSubnetCIDR": {
+      "Description": "CIDR block for the CF Deployment subnet.",
+      "Type": "String",
+      "Default": "10.0.15.0/24"
+    },
+    "CFLoadBalancerCertName": {
+      "Description": "Name of the SSL cert to use for the CF ELB.",
+      "Type": "String",
+      "Default": ""
+    }
+  },
+
+  "Mappings": {
+    "AWSNATAMI" : {
+      "us-east-1":      { "AMI": "ami-ad227cc4" },
+      "us-west-1":      { "AMI": "ami-d69aad93" },
+      "us-west-2":      { "AMI": "ami-f032acc0" },
+      "eu-west-1":      { "AMI": "ami-f3e30084" },
+      "ap-southeast-1": { "AMI": "ami-f22772a0" },
+      "ap-southeast-2": { "AMI": "ami-3bae3201" },
+      "ap-northeast-1": { "AMI": "ami-cd43d9cc" },
+      "sa-east-1":      { "AMI": "ami-d78325ca" }
+    }
+  },
+
+  "Resources": {
+    "VPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": { "CidrBlock": { "Ref": "VPCCIDR" } }
+    },
+
+    "VPCGatewayInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway"
+    },
+
+    "VPCGatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "InternetGatewayId": { "Ref": "VPCGatewayInternetGateway" }
+      }
+    },
+
+    "BOSHSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "BOSH",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": { "Ref": "BOSHInboundCIDR" },
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22"
+          },
+          {
+            "CidrIp": { "Ref": "BOSHInboundCIDR" },
+            "IpProtocol": "tcp",
+            "FromPort": "6868",
+            "ToPort": "6868"
+          },
+          {
+            "CidrIp": { "Ref": "BOSHInboundCIDR" },
+            "IpProtocol": "tcp",
+            "FromPort": "25555",
+            "ToPort": "25555"
+          },
+          {
+            "CidrIp": { "Ref": "VPCCIDR" },
+            "IpProtocol": "-1",
+            "FromPort": "0",
+            "ToPort": "65535"
+          }
+        ]
+      }
+    },
+
+    
+    "LoadBalancerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "Web",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "80",
+            "ToPort": "80"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "2222",
+            "ToPort": "2222"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "443",
+            "ToPort": "443"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "tcp",
+            "FromPort": "4443",
+            "ToPort": "4443"
+          }
+        ]
+      }
+    },
+
+    "CFSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "CF Public Security Group",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.0.0.0/16",
+            "IpProtocol": "-1",
+            "FromPort": "0",
+            "ToPort": "65535"
+          }
+        ]
+      }
+    },
+
+    "NATSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "NAT",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": { "Ref": "VPCCIDR" },
+            "IpProtocol": "-1",
+            "FromPort": "0",
+            "ToPort": "65535"
+          }
+        ]
+      }
+    },
+
+    "BOSHSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "CidrBlock": { "Ref": "BOSHSubnetCIDR" },
+        "Tags": [{ "Key": "Name", "Value": "BOSH" }]
+      }
+    },
+
+    "BOSHRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": { "VpcId": { "Ref": "VPC" } }
+    },
+
+    "BOSHRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "VPCGatewayInternetGateway",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "VPCGatewayInternetGateway" },
+        "RouteTableId": { "Ref": "BOSHRouteTable" }
+      }
+    },
+
+    "BOSHSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "BOSHRouteTable" },
+        "SubnetId": { "Ref": "BOSHSubnet" }
+      }
+    },
+
+    "NATInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "m3.medium",
+        "SubnetId": { "Ref": "BOSHSubnet" },
+        "ImageId" : {
+          "Fn::FindInMap": ["AWSNATAMI", { "Ref" : "AWS::Region" }, "AMI"]
+        },
+        "KeyName": { "Ref" : "KeyName" },
+        "SecurityGroupIds": [{ "Ref": "NATSecurityGroup" }],
+        "SourceDestCheck": false,
+        "Tags": [{ "Key": "Name", "Value": "NAT" }]
+      }
+    },
+
+    "NATEIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "InstanceId": { "Ref": "NATInstance" }
+      }
+    },
+
+    "PublicRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": { "VpcId": { "Ref": "VPC" } }
+    },
+
+    "PublicRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "NATInstance",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "InstanceId": { "Ref": "NATInstance" }
+      }
+    },
+
+    "CFSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "CFSubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "cf1" }]
+      }
+    },
+
+    "CFSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "CFSubnet" }
+      }
+    },
+
+    "LoadBalancerSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "LoadBalancerSubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "LoadBalancer" }]
+      }
+    },
+
+    "LoadBalancerRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": { "VpcId": { "Ref": "VPC" } }
+    },
+
+    "LoadBalancerRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "VPCGatewayInternetGateway",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": { "Ref": "VPCGatewayInternetGateway" },
+        "RouteTableId": { "Ref": "LoadBalancerRouteTable" }
+      }
+    },
+
+    "LoadBalancerSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "LoadBalancerRouteTable" },
+        "SubnetId": { "Ref": "LoadBalancerSubnet" }
+      }
+    },
+
+    "CFLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+
+      "Properties": {
+        "Subnets": [{ "Ref": "LoadBalancerSubnet" }],
+        "SecurityGroups": [{ "Ref": "LoadBalancerSecurityGroup" }],
+
+        "HealthCheck": {
+          "HealthyThreshold": "2",
+          "Interval": "30",
+          "Target": "tcp:80",
+          "Timeout": "5",
+          "UnhealthyThreshold": "10"
+        },
+
+        "Listeners": [
+          {
+            "Protocol": "http",
+            "LoadBalancerPort": "80",
+            "InstanceProtocol": "http",
+            "InstancePort": "80"
+          },
+          {
+            "Protocol": "https",
+            "LoadBalancerPort": "443",
+            "InstanceProtocol": "http",
+            "InstancePort": "80",
+            "SSLCertificateId" : {
+              "Fn::Join":[
+                "",
+                [
+                  "arn:aws:iam::",
+                  {
+                    "Ref":"AWS::AccountId"
+                  },
+                  ":server-certificate/",
+                  {
+                    "Ref":"CFLoadBalancerCertName"
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "Protocol" : "ssl",
+            "LoadBalancerPort" : "4443",
+            "InstanceProtocol": "tcp",
+            "InstancePort" : "80",
+            "SSLCertificateId" : {
+              "Fn::Join":[
+                "",
+                [
+                  "arn:aws:iam::",
+                  {
+                    "Ref":"AWS::AccountId"
+                  },
+                  ":server-certificate/",
+                  {
+                    "Ref":"CFLoadBalancerCertName"
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "CFHostedZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": { "Ref": "CFHostedZoneName" }
+      }
+    },
+
+    "CFEIPRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "HostedZoneId": { "Ref": "CFHostedZone" },
+        "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFHostedZoneName"} ,"."]] },
+        "Type": "CNAME",
+        "TTL": "300",
+        "ResourceRecords" : [
+          { "Fn::GetAtt": ["CFLoadBalancer","CanonicalHostedZoneName"] }
+        ]
+      }
+    },
+
+    "MicroEIP": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": { "Domain": "vpc" }
+    }
+  } 
+}
