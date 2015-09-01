@@ -68,6 +68,18 @@
       "Description": "Password of the ccdb admin user",
       "Type": "String",
       "Default": ""
+    },
+
+    "UAADBUsername": {
+      "Description": "Name of the uaadb admin user",
+      "Type": "String",
+      "Default": ""
+    },
+
+    "UAADBPassword": {
+      "Description": "Password of the uaadb admin user",
+      "Type": "String",
+      "Default": ""
     }
   },
 
@@ -438,10 +450,10 @@
       "Properties": { "Domain": "vpc" }
     },
 
-    "CCDBParamaterGroup": {
+    "DBParamaterGroup": {
       "Type": "AWS::RDS::DBParameterGroup",
       "Properties" : {
-        "Description" : "Utf8 settings for the ccdb",
+        "Description" : "Utf8 settings for the ccdb and uaadb",
         "Family" : "MySQL5.5",
         "Parameters": {
           "character_set_server": "utf8",
@@ -451,10 +463,10 @@
       }
     },
 
-    "CCDBSubnetGroup": {
+    "DBSubnetGroup": {
       "Type" : "AWS::RDS::DBSubnetGroup",
       "Properties" : {
-        "DBSubnetGroupDescription" : "ccdb",
+        "DBSubnetGroupDescription" : "db",
         "SubnetIds" : [
           { "Ref" : "CFSubnetAZ1" },
           { "Ref" : "CFSubnetAZ2" }  
@@ -462,10 +474,10 @@
       }
     },
 
-    "CCDBSecurityGroup": {
+    "DBSecurityGroup": {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
-         "GroupDescription" : "ccdb security group",
+         "GroupDescription" : "db security group",
          "SecurityGroupIngress" : [
            {
              "CidrIp": { "Ref" : "VPCCIDR" },
@@ -484,8 +496,9 @@
         "AllocatedStorage" : "100",
         "DBInstanceClass" : "db.m1.large",
         "DBName": "ccdb",
-        "DBParameterGroupName": { "Ref" : "CCDBParamaterGroup" },
-        "DBSubnetGroupName": { "Ref" : "CCDBSubnetGroup" },
+        "DBInstanceIdentifier": "ccdb",
+        "DBParameterGroupName": { "Ref" : "DBParamaterGroup" },
+        "DBSubnetGroupName": { "Ref" : "DBSubnetGroup" },
         "Engine" : "MySQL",
         "EngineVersion" : "5.5",
         "Iops" : "1000",
@@ -493,7 +506,28 @@
         "MasterUserPassword" : { "Ref" : "CCDBPassword" },
         "MultiAZ": "true",
         "VPCSecurityGroups": [
-          { "Ref" : "CCDBSecurityGroup" } 
+          { "Ref" : "DBSecurityGroup" } 
+        ]
+      }
+    },
+
+    "UAADB" : {
+      "Type" : "AWS::RDS::DBInstance",
+      "Properties" : {
+        "AllocatedStorage" : "100",
+        "DBInstanceClass" : "db.m1.large",
+        "DBName": "uaadb",
+        "DBInstanceIdentifier": "uaadb",
+        "DBParameterGroupName": { "Ref" : "DBParamaterGroup" },
+        "DBSubnetGroupName": { "Ref" : "DBSubnetGroup" },
+        "Engine" : "MySQL",
+        "EngineVersion" : "5.5",
+        "Iops" : "1000",
+        "MasterUsername" : { "Ref" : "UAADBUsername" },
+        "MasterUserPassword" : { "Ref" : "UAADBPassword" },
+        "MultiAZ": "true",
+        "VPCSecurityGroups": [
+          { "Ref" : "DBSecurityGroup" } 
         ]
       }
     }
