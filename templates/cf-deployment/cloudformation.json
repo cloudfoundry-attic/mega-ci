@@ -16,6 +16,12 @@
       "Default": ""
     },
 
+    "CFAppsDomainHostedZoneName": {
+      "Description": "Route53 Hosted Zone in which to register the CF Apps domain ELB's DNS record.",
+      "Type": "String",
+      "Default": ""
+    },
+
     "BOSHInboundCIDR": {
       "Description": "CIDR to permit access to BOSH (e.g. 205.103.216.37/32 for your specific IP)",
       "Type": "String",
@@ -432,11 +438,44 @@
       }
     },
 
-    "CFEIPRecordSet": {
+    "CFRecordSet": {
       "Type": "AWS::Route53::RecordSet",
       "Properties": {
         "HostedZoneId": { "Ref": "CFHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFHostedZoneName"} ,"."]] },
+        "Type": "CNAME",
+        "TTL": "300",
+        "ResourceRecords" : [
+          { "Fn::GetAtt": ["CFLoadBalancer","CanonicalHostedZoneName"] }
+        ]
+      }
+    },
+
+    "BoshRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "HostedZoneId": { "Ref": "CFHostedZone" },
+        "Name": { "Fn::Join" : [ "", [ "bosh.", {"Ref" : "CFHostedZoneName"} ,"."]] },
+        "Type": "CNAME",
+        "TTL": "300",
+        "ResourceRecords" : [
+          {"Ref" : "MicroEIP"}
+        ]
+      }
+    },
+
+    "CFAppsDomainHostedZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": { "Ref": "CFAppsDomainHostedZoneName" }
+      }
+    },
+
+    "CFAppsRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "HostedZoneId": { "Ref": "CFAppsDomainHostedZone" },
+        "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFAppsDomainHostedZoneName"} ,"."]] },
         "Type": "CNAME",
         "TTL": "300",
         "ResourceRecords" : [
@@ -469,7 +508,7 @@
         "DBSubnetGroupDescription" : "db",
         "SubnetIds" : [
           { "Ref" : "CFSubnetAZ1" },
-          { "Ref" : "CFSubnetAZ2" }  
+          { "Ref" : "CFSubnetAZ2" }
         ]
       }
     },
@@ -506,7 +545,7 @@
         "MasterUserPassword" : { "Ref" : "CCDBPassword" },
         "MultiAZ": "true",
         "VPCSecurityGroups": [
-          { "Ref" : "DBSecurityGroup" } 
+          { "Ref" : "DBSecurityGroup" }
         ]
       }
     },
@@ -527,7 +566,7 @@
         "MasterUserPassword" : { "Ref" : "UAADBPassword" },
         "MultiAZ": "true",
         "VPCSecurityGroups": [
-          { "Ref" : "DBSecurityGroup" } 
+          { "Ref" : "DBSecurityGroup" }
         ]
       }
     }

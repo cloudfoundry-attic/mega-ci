@@ -1,0 +1,227 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "S3 buckets for cf",
+
+  "Parameters": {
+    "CCBuildpacksBucketName": {
+      "Description": "Bucket name for storage of cc buildpacks",
+      "Type": "String",
+      "Default": ""
+    },
+    "CCDropletsBucketName": {
+      "Description": "Bucket name for storage of cc droplets",
+      "Type": "String",
+      "Default": ""
+    },
+    "CCPackagesBucketName": {
+      "Description": "Bucket name for storage of cc packages",
+      "Type": "String",
+      "Default": ""
+    },
+    "CCResourcesBucketName": {
+      "Description": "Bucket name for storage of cc resources",
+      "Type": "String",
+      "Default": ""
+    }
+  },
+
+  "Resources": {
+    "CFUser": {
+      "Type" : "AWS::IAM::User"
+    },
+
+    "CFAccessKey": {
+      "Type" : "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref": "CFUser" }
+      }
+    },
+
+    "CCBuildpacksBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : { "Ref": "CCBuildpacksBucketName" }
+      }
+    },
+
+    "CCDropletsBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : { "Ref": "CCDropletsBucketName" }
+      }
+    },
+
+    "CCPackagesBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : { "Ref": "CCPackagesBucketName" }
+      }
+    },
+
+    "CCResourcesBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : { "Ref": "CCResourcesBucketName" }
+      }
+    },
+
+    "CCBuildpacksBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Id" : "a1-cc-buildpacks-bucket-policy",
+          "Statement" : [ {
+            "Sid" : "AllowReadWrite",
+            "Action" : [
+              "s3:GetObject",
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCBuildpacksBucket" } , "/*" ]
+            ] }
+          },
+          {
+            "Sid" : "AllowList",
+            "Action" : [
+              "s3:ListBucket"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCBuildpacksBucket" } ]
+            ] }
+          }]
+        },
+        "Bucket" : { "Ref" : "CCBuildpacksBucket" }
+      }
+    },
+
+    "CCDropletsBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Id" : "a1-cc-droplets-bucket-policy",
+          "Statement" : [ {
+            "Sid" : "AllowReadWrite",
+            "Action" : [
+              "s3:GetObject",
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } , "/*" ]
+            ] }
+          },
+          {
+            "Sid" : "AllowList",
+            "Action" : [
+              "s3:ListBucket"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } ]
+            ] }
+          }]
+        },
+        "Bucket" : { "Ref" : "CCDropletsBucket" }
+      }
+    },
+
+    "CCResourcesBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Id" : "a1-cc-resources-bucket-policy",
+          "Statement" : [ {
+            "Sid" : "AllowReadWrite",
+            "Action" : [
+              "s3:GetObject",
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCPackagesBucket" } , "/*" ]
+            ] }
+          },
+          {
+            "Sid" : "AllowList",
+            "Action" : [
+              "s3:ListBucket"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCPackagesBucket" } ]
+            ] }
+          }]
+        },
+        "Bucket" : { "Ref" : "CCPackagesBucket" }
+      }
+    },
+
+    "CCResourcesBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Id" : "a1-cc-resources-bucket-policy",
+          "Statement" : [ {
+            "Sid" : "AllowReadWrite",
+            "Action" : [
+              "s3:GetObject",
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } , "/*" ]
+            ] }
+          },
+          {
+            "Sid" : "AllowList",
+            "Action" : [
+              "s3:ListBucket"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "CFUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } ]
+            ] }
+          }]
+        },
+        "Bucket" : { "Ref" : "CCResourcesBucket" }
+      }
+    }
+  },
+
+  "Outputs" : {
+    "CFDeploymentAccessKeyID": {
+      "Description": "Access Key ID",
+      "Value": { "Ref": "CFAccessKey" }
+    },
+    "CFDeploymentSecretAccessKey" : {
+      "Description" : "Secret Key",
+      "Value": { "Fn::GetAtt" : [ "CFAccessKey", "SecretAccessKey"]}
+    }
+  }
+}
