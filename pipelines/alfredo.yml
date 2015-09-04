@@ -56,6 +56,7 @@ jobs:
     file: mega-ci/scripts/ci/deploy-cf.yml
     config:
       params:
+        ENVIRONMENT: alfredo
         STUB_PATH: deployments-runtime/alfredo/stubs/cf/cf-stub.yml
         STUB_PARTS_PATH: deployments-runtime/alfredo/generated-stubs/cf
   - task: cleanup

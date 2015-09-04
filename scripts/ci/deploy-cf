@@ -2,7 +2,7 @@
 set -e -x
 
 source ~/.bashrc
-source ./deployments-runtime/mega-ci/bosh_environment
+source ./deployments-runtime/${ENVIRONMENT}/bosh_environment
 
 bosh target $BOSH_DIRECTOR
 bosh upload stemcell stemcell/*.tgz --skip-if-exists

@@ -15,5 +15,6 @@ run:
   path: mega-ci/scripts/ci/deploy-cf
 
 params:
+  ENVIRONMENT:
   STUB_PATH:
   STUB_PARTS_PATH:
