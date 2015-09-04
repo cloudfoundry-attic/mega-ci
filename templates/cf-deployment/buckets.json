@@ -5,23 +5,27 @@
   "Parameters": {
     "CCBuildpacksBucketName": {
       "Description": "Bucket name for storage of cc buildpacks",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
     "CCDropletsBucketName": {
       "Description": "Bucket name for storage of cc droplets",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
     "CCPackagesBucketName": {
       "Description": "Bucket name for storage of cc packages",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
     "CCResourcesBucketName": {
       "Description": "Bucket name for storage of cc resources",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
+    },
+    "CloudFrontOriginAccessIdentityId": {
+      "Description": "Cloud Front Origin Access Identifier",
+      "Type": "String"
+    },
+    "AwsAccountId": {
+      "Description": "Account Id Authorized for Signing Urls",
+      "Type": "String"
     }
   },
 
@@ -133,13 +137,26 @@
             "Resource" : { "Fn::Join" : [
               "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } ]
             ] }
+          },
+          {
+            "Sid" : "CloudFrontGetBucket",
+            "Action" : [
+              "s3:GetObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::Join" : [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",  { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } , "/*" ]
+            ] }
           }]
         },
         "Bucket" : { "Ref" : "CCDropletsBucket" }
       }
     },
 
-    "CCResourcesBucketPolicy": {
+    "CCPackagesBucketPolicy": {
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
         "PolicyDocument" : {
@@ -207,9 +224,72 @@
             "Resource" : { "Fn::Join" : [
               "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } ]
             ] }
+          },
+          {
+            "Sid" : "CloudFrontGetBucket",
+            "Action" : [
+              "s3:GetObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::Join" : [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",  { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } , "/*" ]
+            ] }
           }]
         },
         "Bucket" : { "Ref" : "CCResourcesBucket" }
+      }
+    },
+
+    "CCResourcesCloudFront" : {
+      "Type" : "AWS::CloudFront::Distribution",
+      "Properties" : {
+        "DistributionConfig" : {
+          "Origins" : [ {
+            "DomainName": { "Fn::Join" : [ ".", [ { "Ref": "CCResourcesBucketName" }, "s3.amazonaws.com" ] ] },
+            "Id" : "ResourcesDistribution",
+            "S3OriginConfig" : {
+              "OriginAccessIdentity": { "Fn::Join" : [ "/", [ "origin-access-identity/cloudfront", { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
+            }
+          }],
+          "Enabled" : "true",
+          "PriceClass" : "PriceClass_100",
+          "DefaultCacheBehavior" : {
+            "TargetOriginId" : "ResourcesDistribution",
+            "ForwardedValues" : {
+              "QueryString" : "false"
+            },
+            "TrustedSigners" : [ { "Ref": "AwsAccountId" } ],
+            "ViewerProtocolPolicy" : "https-only"
+          }
+        }
+      }
+    },
+
+    "CCDropletsCloudFront" : {
+      "Type" : "AWS::CloudFront::Distribution",
+      "Properties" : {
+        "DistributionConfig" : {
+          "Origins" : [ {
+            "DomainName": { "Fn::Join" : [ ".", [ { "Ref": "CCDropletsBucketName" }, "s3.amazonaws.com" ] ] },
+            "Id" : "DropletsDistribution",
+            "S3OriginConfig" : {
+              "OriginAccessIdentity": { "Fn::Join" : [ "/", [ "origin-access-identity/cloudfront", { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
+            }
+          }],
+          "Enabled" : "true",
+          "PriceClass" : "PriceClass_100",
+          "DefaultCacheBehavior" : {
+            "TargetOriginId" : "DropletsDistribution",
+            "ForwardedValues" : {
+              "QueryString" : "false"
+            },
+            "TrustedSigners" : [ { "Ref": "AwsAccountId" } ],
+            "ViewerProtocolPolicy" : "https-only"
+          }
+        }
       }
     }
   },
@@ -222,6 +302,14 @@
     "CFDeploymentSecretAccessKey" : {
       "Description" : "Secret Key",
       "Value": { "Fn::GetAtt" : [ "CFAccessKey", "SecretAccessKey"]}
+    },
+    "CloudFrontResourcesDomainName" : {
+      "Description" : "Domain Name for Resources Cloud Front Distribution",
+      "Value": { "Fn::GetAtt" : [ "CCResourcesCloudFront", "DomainName"]}
+    },
+    "CloudFrontDropletsDomainName" : {
+      "Description" : "Domain Name for Droplets Cloud Front Distribution",
+      "Value": { "Fn::GetAtt" : [ "CCDropletsCloudFront", "DomainName"]}
     }
   }
 }

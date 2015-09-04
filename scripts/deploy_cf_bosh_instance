@@ -16,11 +16,6 @@ deploy_buckets() {
   fi
 
   wait_for_deployment cf-deployment-buckets
-
-  mkdir -p ${deployment_dir}/artifacts/iam-users
-
-  aws cloudformation describe-stacks --stack-name cf-deployment-buckets \
-      > ${deployment_dir}/artifacts/iam-users/etcd-buckets.json
 }
 
 deploy_bosh_and_cf() {
@@ -48,29 +43,29 @@ wait_for_deployment() {
   deadline_in_s=$(($start_time_in_s + $wait_time_in_s))
   while aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep IN_PROGRESS ; do
     echo "CloudFormation stack 'cf-deployment' still in progress..."
-    current_time_in_s=$(date +%s)
-    remaining_time_in_s=$(($deadline_in_s - $current_time_in_s))
-
-    if [ "$remaining_time_in_s" -gt 0 ]; then
-      echo "   Waiting ${remaining_time_in_s} more seconds."
-      sleep 15
-    else
-      echo "   Waited ${wait_time_in_s}, aborting."
-      exit 1
-    fi
+    sleep 15
   done
+
+  if aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep ROLLBACK ; then
+    echo 'Cloud formation failure'
+    exit 1
+  fi
+
+  if ! aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep COMPLETE ; then
+    echo 'Cloud formation failure'
+    exit 1
+  fi
 }
 
 set -e -x
 
 script_dir=$(dirname $0)
 
-if [ $# -ne 2 ]; then
-  echo 'Expected 2 arguments (path to deployment directory) (cf deployment name), received $#'
+if [ $# -ne 1 ]; then
+  echo 'Expected 1 argument (path to deployment directory), received $#'
   exit 1
 fi
 deployment_dir=$1
-cf_deployment_name=$2
 
 command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
@@ -99,7 +94,7 @@ set -x
 mkdir -p ${deployment_dir}/artifacts/keypair
 mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p ${deployment_dir}/generated-stubs/cf
-mkdir -p generated-stubs/${cf_deployment_name}
+mkdir -p generated-stubs
 
 # create keypair
 if ! aws ec2 describe-key-pairs --key-names bosh; then
@@ -115,26 +110,16 @@ fi
 deploy_bosh_and_cf
 deploy_buckets
 
-if aws cloudformation describe-stacks --stack-name cf-deployment | grep StackStatus | grep ROLLBACK ; then
-  echo 'Cloud formation failure'
-  exit 1
-fi
-
-if ! aws cloudformation describe-stacks --stack-name cf-deployment | grep StackStatus | grep COMPLETE ; then
-  echo 'Cloud formation failure'
-  exit 1
-fi
-
 # generate AWS resources stub for shared purposes
 aws cloudformation describe-stack-resources --stack-name cf-deployment \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
-  > generated-stubs/${cf_deployment_name}/aws-resources.json
+  > generated-stubs/aws-resources.json
 
 # generate stub for BOSH Security Group Name
-BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
+BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
 BOSH_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${BOSH_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
-cat > generated-stubs/${cf_deployment_name}/security-groups.yml <<EOF
+cat > generated-stubs/security-groups.yml <<EOF
 {
   "SecurityGroups": {
     "BOSH_SECURITY_GROUP_NAME": "$BOSH_SECURITY_GROUP_NAME"
@@ -143,10 +128,10 @@ cat > generated-stubs/${cf_deployment_name}/security-groups.yml <<EOF
 EOF
 
 # generate stub for AWS Credentials
-BOSH_SUBNET_ID=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.BOSHSubnet)
+BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
 AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
 
-cat > generated-stubs/${cf_deployment_name}/aws-credentials.yml <<EOF
+cat > generated-stubs/aws-credentials.yml <<EOF
 {
   "AWSCredentials": {
     "AWS_ZONE": "$AWS_ZONE",
@@ -158,24 +143,38 @@ cat > generated-stubs/${cf_deployment_name}/aws-credentials.yml <<EOF
 EOF
 
 # generate CF Resources Stub
-CF_Subnet_1=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.CFSubnetAZ1)
+aws cloudformation describe-stacks --stack-name cf-deployment-buckets \
+  | jq '.Stacks[0].Outputs|map({key: .OutputKey, value: .OutputValue}) | from_entries as $body | {Outputs: $body}' \
+  > generated-stubs/outputs.json
+CF_CloudFrontResources=$(cat generated-stubs/outputs.json | jq -r .Outputs.CloudFrontResourcesDomainName)
+CF_CloudFrontDroplets=$(cat generated-stubs/outputs.json | jq -r .Outputs.CloudFrontDropletsDomainName)
+CF_BlobstoreAccessKey=$(cat generated-stubs/outputs.json | jq -r .Outputs.CFDeploymentAccessKeyID)
+CF_BlobstoreSecretKey=$(cat generated-stubs/outputs.json | jq -r .Outputs.CFDeploymentSecretAccessKey)
+
+CF_Subnet_1=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnetAZ1)
 CF_AWS_ZONE_1=$(aws ec2 describe-subnets --subnet-ids $CF_Subnet_1 | jq -r .Subnets[0].AvailabilityZone)
-CF_Subnet_2=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.CFSubnetAZ2)
+CF_Subnet_2=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnetAZ2)
 CF_AWS_ZONE_2=$(aws ec2 describe-subnets --subnet-ids $CF_Subnet_2 | jq -r .Subnets[0].AvailabilityZone)
-CF_ELB=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.CFLoadBalancer)
-CF_SECURITY_GROUP_ID=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.CFSecurityGroup)
+CF_ELB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFLoadBalancer)
+CF_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSecurityGroup)
 CF_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${CF_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
 cat > ${deployment_dir}/generated-stubs/cf/cf-resources.yml<<EOF
 ---
 cf_resources:
   subnets:
-    - subnet_id: $CF_Subnet_1
-      availability_zone: $CF_AWS_ZONE_1
-    - subnet_id: $CF_Subnet_2
-      availability_zone: $CF_AWS_ZONE_2
+    - subnet_id: ${CF_Subnet_1}
+      availability_zone: ${CF_AWS_ZONE_1}
+    - subnet_id: ${CF_Subnet_2}
+      availability_zone: ${CF_AWS_ZONE_2}
   elb: $CF_ELB
-  security_group_name: $CF_SECURITY_GROUP_NAME
+  security_group_name: ${CF_SECURITY_GROUP_NAME}
+  blobstore:
+    access_key: ${CF_BlobstoreAccessKey}
+    secret_key: ${CF_BlobstoreSecretKey}
+  cloud_front:
+    resources: ${CF_CloudFrontResources}
+    droplets: ${CF_CloudFrontDroplets}
 EOF
 
 cat ${deployment_dir}/cloud_formation/properties.json | \
@@ -183,34 +182,34 @@ cat ${deployment_dir}/cloud_formation/properties.json | \
   > ${deployment_dir}/generated-stubs/cf/cf-cloud-formation-inputs.json
 
 # generate CF database stub
-CCDB=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.CCDB)
-UAADB=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.UAADB)
+CCDB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CCDB)
+UAADB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.UAADB)
 CCDB_INFO=$(aws rds describe-db-instances --db-instance-identifier ccdb)
-CCDB_HOST=$(echo $CCDB_INFO | jq -r '.DBInstances[0].Endpoint.Address')
-CCDB_PORT=$(echo $CCDB_INFO | jq -r '.DBInstances[0].Endpoint.Port')
+CCDB_HOST=$(echo ${CCDB_INFO} | jq -r '.DBInstances[0].Endpoint.Address')
+CCDB_PORT=$(echo ${CCDB_INFO} | jq -r '.DBInstances[0].Endpoint.Port')
 
 UAADB_INFO=$(aws rds describe-db-instances --db-instance-identifier uaadb)
-UAADB_HOST=$(echo $UAADB_INFO | jq -r '.DBInstances[0].Endpoint.Address')
-UAADB_PORT=$(echo $UAADB_INFO | jq -r '.DBInstances[0].Endpoint.Port')
+UAADB_HOST=$(echo ${UAADB_INFO} | jq -r '.DBInstances[0].Endpoint.Address')
+UAADB_PORT=$(echo ${UAADB_INFO} | jq -r '.DBInstances[0].Endpoint.Port')
 
 cat > ${deployment_dir}/generated-stubs/cf/cf-databases.yml<<EOF
 ---
 cf_databases:
-  ccdb_database: $CCDB
-  ccdb_host: $CCDB_HOST
-  ccdb_port: $CCDB_PORT
-  uaadb_database: $UAADB
-  uaadb_host: $UAADB_HOST
-  uaadb_port: $UAADB_PORT
+  ccdb_database: ${CCDB}
+  ccdb_host: ${CCDB_HOST}
+  ccdb_port: ${CCDB_PORT}
+  uaadb_database: ${UAADB}
+  uaadb_host: ${UAADB_HOST}
+  uaadb_port: ${UAADB_PORT}
 EOF
 
 # generate BOSH deployment manifest
 echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/bosh.yml
 spiff merge $script_dir/../templates/cf-deployment/bosh-init.yml \
   $script_dir/../templates/cf-deployment/bosh.yml \
-  generated-stubs/${cf_deployment_name}/aws-credentials.yml \
-  generated-stubs/${cf_deployment_name}/aws-resources.json \
-  generated-stubs/${cf_deployment_name}/security-groups.yml \
+  generated-stubs/aws-credentials.yml \
+  generated-stubs/aws-resources.json \
+  generated-stubs/security-groups.yml \
   ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
   >> ${deployment_dir}/artifacts/deployments/bosh.yml
 
@@ -218,7 +217,7 @@ spiff merge $script_dir/../templates/cf-deployment/bosh-init.yml \
 bosh-init deploy ${deployment_dir}/artifacts/deployments/bosh.yml
 
 # display result
-BOSH_IP=$(cat generated-stubs/${cf_deployment_name}/aws-resources.json | jq -r .Resources.MicroEIP)
+BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 echo "BOSH director is at $BOSH_IP"
 
 # generate director uuid stub for cf

@@ -41,9 +41,15 @@
     },
 
     "LoadBalancerSubnetCIDR": {
-      "Description": "CIDR block for the BOSH subnet.",
+      "Description": "CIDR block for the LoadBalancer subnet.",
       "Type": "String",
       "Default": "10.0.2.0/24"
+    },
+
+    "LoadBalancerSubnetCIDR2": {
+      "Description": "CIDR block for the LoadBalancer subnet.",
+      "Type": "String",
+      "Default": "10.0.3.0/24"
     },
 
     "CFSubnet1CIDR": {
@@ -61,31 +67,27 @@
     "CFLoadBalancerCertName": {
       "Description": "Name of the SSL cert to use for the CF ELB.",
       "Type": "String",
-      "Default": ""
+      "Default": "cf"
     },
 
     "CCDBUsername": {
       "Description": "Name of the ccdb admin user",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
 
     "CCDBPassword": {
       "Description": "Password of the ccdb admin user",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
 
     "UAADBUsername": {
       "Description": "Name of the uaadb admin user",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     },
 
     "UAADBPassword": {
       "Description": "Password of the uaadb admin user",
-      "Type": "String",
-      "Default": ""
+      "Type": "String"
     }
   },
 
@@ -333,7 +335,7 @@
     "LoadBalancerSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "AvailabilityZone": { "Fn::GetAtt" : [ "CFSubnetAZ1", "AvailabilityZone" ] } ,
         "CidrBlock": { "Ref": "LoadBalancerSubnetCIDR" },
         "VpcId": { "Ref": "VPC" },
         "Tags": [{ "Key": "Name", "Value": "LoadBalancer" }]
@@ -363,11 +365,31 @@
       }
     },
 
+    "LoadBalancerSubnet2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::GetAtt" : [ "CFSubnetAZ2", "AvailabilityZone" ] } ,
+        "CidrBlock": { "Ref": "LoadBalancerSubnetCIDR2" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "LoadBalancer" }]
+      }
+    },
+
+    "LoadBalancerSubnetRouteTableAssociation2": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "LoadBalancerRouteTable" },
+        "SubnetId": { "Ref": "LoadBalancerSubnet2" }
+      }
+    },
+
     "CFLoadBalancer": {
       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
 
       "Properties": {
-        "Subnets": [{ "Ref": "LoadBalancerSubnet" }],
+        "ConnectionSettings": { "IdleTimeout" : 300 },
+        "CrossZone": true,
+        "Subnets": [{ "Ref": "LoadBalancerSubnet" }, { "Ref": "LoadBalancerSubnet2" }],
         "SecurityGroups": [{ "Ref": "LoadBalancerSecurityGroup" }],
 
         "HealthCheck": {
