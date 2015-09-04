@@ -30,6 +30,7 @@ resources:
 
 jobs:
 - name: announce-rc
+  public: true
   plan:
   - aggregate:
     - get: mega-pm-tools
@@ -41,6 +42,7 @@ jobs:
       params:
         GH_ACCESS_TOKEN: {{release_candidate_bot_github_access_token}}
 - name: create-release-notes
+  public: true
   plan:
   - aggregate:
     - get: cf-final-bosh-release
@@ -58,6 +60,7 @@ jobs:
         TRACKER_API_TOKEN: {{tracker_api_token}}
         MEGA_PM_ID: {{mega_pm_id}}
 - name: update-pws-status
+  public: true
   plan:
   - aggregate:
     - get: cf-final-bosh-release
