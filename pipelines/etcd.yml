@@ -129,7 +129,8 @@ jobs:
       trigger: true
     - get: cf-release
     - get: cf-deployment
-    - get: aws-stemcell
+    - get: stemcell
+      resource: aws-stemcell
   - task: deploy-etcd-cf
     file: mega-ci/scripts/ci/deploy-etcd-cf.yml
     config:
