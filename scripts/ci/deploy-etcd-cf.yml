@@ -4,15 +4,15 @@ platform: linux
 image: docker:///cloudfoundry/runtime-ci
 
 inputs:
-  - name: deployments-runtime
   - name: cf-deployment
   - name: cf-release
+  - name: deployments-runtime
   - name: etcd-release
   - name: mega-ci
   - name: stemcell
 
 run:
-  path: mega-ci/scripts/ci/deploy-cf
+  path: mega-ci/scripts/ci/deploy-etcd-cf
 
 params:
   STUB_PATH:

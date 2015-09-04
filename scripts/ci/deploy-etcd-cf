@@ -18,6 +18,13 @@ pushd ../cf-release
   done
 popd
 
-./scripts/deploy aws ../cf-release ../etcd-release/*.tgz ../stub.yml
+pushd ../etcd-release
+  for i in `seq 1 5`;
+  do
+    bosh -n --parallel 10 sync blobs && break
+  done
+popd
+
+./scripts/deploy aws ../cf-release ../etcd-release ../stub.yml
 
 cat outputs/manifests/cf.yml

@@ -130,8 +130,8 @@ jobs:
     - get: cf-release
     - get: cf-deployment
     - get: aws-stemcell
-  - task: deploy-cf
-    file: mega-ci/scripts/ci/deploy-cf.yml
+  - task: deploy-etcd-cf
+    file: mega-ci/scripts/ci/deploy-etcd-cf.yml
     config:
       params:
         STUB_PATH: deployments-runtime/mega-ci/stubs/cf/cf-stub.yml
