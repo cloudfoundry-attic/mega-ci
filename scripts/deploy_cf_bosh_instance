@@ -221,7 +221,7 @@ BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 echo "BOSH director is at $BOSH_IP"
 
 # generate director uuid stub for cf
-BOSH_DIRECTOR_UUID=$(bosh status --uuid)
+BOSH_DIRECTOR_UUID=$(bosh -t ${BOSH_IP} status --uuid)
 cat > ${deployment_dir}/generated-stubs/cf/director-uuid.yml <<EOF
 ---
 director_uuid: $BOSH_DIRECTOR_UUID

@@ -19,6 +19,10 @@
       "Description": "Bucket name for storage of cc resources",
       "Type": "String"
     },
+    "AcceptanceTestLogsBucketName": {
+      "Description": "Bucket name for storage of acceptance test logs",
+      "Type": "String"
+    },
     "CloudFrontOriginAccessIdentityId": {
       "Description": "Cloud Front Origin Access Identifier",
       "Type": "String"
@@ -34,10 +38,21 @@
       "Type" : "AWS::IAM::User"
     },
 
+    "LogsUser": {
+      "Type" : "AWS::IAM::User"
+    },
+
     "CFAccessKey": {
       "Type" : "AWS::IAM::AccessKey",
       "Properties": {
         "UserName": { "Ref": "CFUser" }
+      }
+    },
+
+    "LogsAccessKey": {
+      "Type" : "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref": "LogsUser" }
       }
     },
 
@@ -69,11 +84,38 @@
       }
     },
 
+    "AcceptanceTestLogsBucket": {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : { "Ref": "AcceptanceTestLogsBucketName" }
+      }
+    },
+
+    "AcceptanceTestLogsBucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Statement" : [ {
+            "Action" : [
+              "s3:PutObject"
+            ],
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : { "Fn::GetAtt" : [ "LogsUser", "Arn" ] }
+            },
+            "Resource" : { "Fn::Join" : [
+              "", [ "arn:aws:s3:::", { "Ref" : "AcceptanceTestLogsBucket" } , "/*" ]
+            ] }
+          }]
+        },
+        "Bucket" : { "Ref" : "AcceptanceTestLogsBucket" }
+      }
+    },
+
     "CCBuildpacksBucketPolicy": {
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
         "PolicyDocument" : {
-          "Id" : "a1-cc-buildpacks-bucket-policy",
           "Statement" : [ {
             "Sid" : "AllowReadWrite",
             "Action" : [
@@ -110,7 +152,6 @@
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
         "PolicyDocument" : {
-          "Id" : "a1-cc-droplets-bucket-policy",
           "Statement" : [ {
             "Sid" : "AllowReadWrite",
             "Action" : [
@@ -160,7 +201,6 @@
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
         "PolicyDocument" : {
-          "Id" : "a1-cc-resources-bucket-policy",
           "Statement" : [ {
             "Sid" : "AllowReadWrite",
             "Action" : [
@@ -197,7 +237,6 @@
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
         "PolicyDocument" : {
-          "Id" : "a1-cc-resources-bucket-policy",
           "Statement" : [ {
             "Sid" : "AllowReadWrite",
             "Action" : [
@@ -302,6 +341,14 @@
     "CFDeploymentSecretAccessKey" : {
       "Description" : "Secret Key",
       "Value": { "Fn::GetAtt" : [ "CFAccessKey", "SecretAccessKey"]}
+    },
+    "LogsUserAccessKeyID": {
+      "Description": "Access Key ID",
+      "Value": { "Ref": "LogsAccessKey" }
+    },
+    "LogsUserSecretAccessKey" : {
+      "Description" : "Secret Key",
+      "Value": { "Fn::GetAtt" : [ "LogsAccessKey", "SecretAccessKey"]}
     },
     "CloudFrontResourcesDomainName" : {
       "Description" : "Domain Name for Resources Cloud Front Distribution",

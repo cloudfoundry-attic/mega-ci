@@ -11,6 +11,7 @@ run:
   path: mega-ci/scripts/ci/run-bosh-command
 
 params:
-  ENVIRONMENT:
-  DEPLOYMENT_NAME:
   COMMAND:
+  DEPLOYMENT_NAME:
+  LOGS_DIR:
+  ENVIRONMENT:

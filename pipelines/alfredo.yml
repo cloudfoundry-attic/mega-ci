@@ -36,7 +36,13 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-
+- name: acceptance-tests-logs
+  type: s3
+  source:
+    bucket: {{logs_bucket}}
+    regexp: "*.tgz"
+    access_key_id: {{access_key}}
+    secret_access_key: {{secret_key}}
 jobs:
 - name: deploy-and-test-alfredo
   public: false
@@ -66,10 +72,39 @@ jobs:
         ENVIRONMENT: alfredo
         DEPLOYMENT_NAME: cf-alfredo
         COMMAND: cleanup
-  - task: run-cats
+  - task: acceptance-tests-1
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
         ENVIRONMENT: alfredo
+        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-1
         DEPLOYMENT_NAME: cf-alfredo
-        COMMAND: run errand acceptance_tests
+        LOGS_DIR: acceptance-tests-1
+    ensure:
+      put: acceptance-tests-logs
+      params:
+        from: acceptance-tests-1/*.tgz
+  - task: acceptance-tests-2
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        ENVIRONMENT: alfredo
+        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-2
+        DEPLOYMENT_NAME: cf-alfredo
+        LOGS_DIR: acceptance-tests-2
+    ensure:
+      put: acceptance-tests-logs
+      params:
+        from: acceptance-tests-2/*.tgz
+  - task: acceptance-tests-3
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        ENVIRONMENT: alfredo
+        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-3
+        DEPLOYMENT_NAME: cf-alfredo
+        LOGS_DIR: acceptance-tests-3
+    ensure:
+      put: acceptance-tests-logs
+      params:
+        from: acceptance-tests-3/*.tgz
