@@ -95,18 +95,33 @@
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
         "PolicyDocument" : {
-          "Statement" : [ {
-            "Action" : [
-              "s3:PutObject"
-            ],
-            "Effect" : "Allow",
-            "Principal" : {
-              "AWS" : { "Fn::GetAtt" : [ "LogsUser", "Arn" ] }
+          "Statement" : [
+            {
+              "Action" : [
+                "s3:GetObject",
+                "s3:PutObject"
+              ],
+              "Effect" : "Allow",
+              "Principal" : {
+                "AWS" : { "Fn::GetAtt" : [ "LogsUser", "Arn" ] }
+              },
+              "Resource" : { "Fn::Join" : [
+                "", [ "arn:aws:s3:::", { "Ref" : "AcceptanceTestLogsBucket" } , "/*" ]
+              ] }
             },
-            "Resource" : { "Fn::Join" : [
-              "", [ "arn:aws:s3:::", { "Ref" : "AcceptanceTestLogsBucket" } , "/*" ]
-            ] }
-          }]
+            {
+              "Action" : [
+                "s3:ListBucket"
+              ],
+              "Effect" : "Allow",
+              "Principal" : {
+                "AWS" : { "Fn::GetAtt" : [ "LogsUser", "Arn" ] }
+              },
+              "Resource" : { "Fn::Join" : [
+                "", [ "arn:aws:s3:::", { "Ref" : "AcceptanceTestLogsBucket" } ]
+              ] }
+            }
+          ]
         },
         "Bucket" : { "Ref" : "AcceptanceTestLogsBucket" }
       }
