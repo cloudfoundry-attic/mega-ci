@@ -39,7 +39,7 @@ resources:
 
 jobs:
 - name: deploy-and-test-alfredo
-  public: true
+  public: false
   serial: true
   plan:
   - aggregate:

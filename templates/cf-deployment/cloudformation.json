@@ -478,7 +478,7 @@
       "Properties": {
         "HostedZoneId": { "Ref": "CFHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "bosh.", {"Ref" : "CFHostedZoneName"} ,"."]] },
-        "Type": "CNAME",
+        "Type": "A",
         "TTL": "300",
         "ResourceRecords" : [
           {"Ref" : "MicroEIP"}
