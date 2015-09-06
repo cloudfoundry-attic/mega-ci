@@ -102,6 +102,16 @@
           ]
         }
       ]
+    },
+    "CreateCFHostedZone": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "CFHostedZoneName" }, ""] }
+      ]
+    },
+    "CreateCFLoadBalancer": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "CFLoadBalancerCertName" }, ""] }
+      ]
     }
   },
 
@@ -523,6 +533,7 @@
 
     "CFLoadBalancer": {
       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Condition": "CreateCFLoadBalancer",
 
       "Properties": {
         "Subnets": [{ "Ref": "LoadBalancerSubnet" }],
@@ -591,6 +602,7 @@
 
     "CFHostedZone": {
       "Type": "AWS::Route53::HostedZone",
+      "Condition": "CreateCFHostedZone",
       "Properties": {
         "Name": { "Ref": "CFHostedZoneName" }
       }
@@ -598,6 +610,7 @@
 
     "CFEIPRecordSet": {
       "Type": "AWS::Route53::RecordSet",
+      "Condition": "CreateCFHostedZone",
       "Properties": {
         "HostedZoneId": { "Ref": "CFHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFHostedZoneName"} ,"."]] },

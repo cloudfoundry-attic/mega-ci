@@ -45,7 +45,7 @@ if ! aws ec2 describe-key-pairs --key-names bosh; then
 fi
 
 # install certs for CF ELB
-if ! aws iam get-server-certificate --server-certificate-name cf; then
+if [ -e ${deployments_dir}/certs/cf.key ] && ! aws iam get-server-certificate --server-certificate-name cf; then
   if [ -e ${deployment_dir}/certs/cf_chain.pem ]; then
     aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem  --certificate-chain file://${deployment_dir}/certs/cf_chain.pem
   else
@@ -64,32 +64,32 @@ fi
 
 # deploy infrastructure
 if ! aws cloudformation describe-stacks --stack-name concourse ; then
-  aws cloudformation create-stack \
-    --stack-name concourse \
-    --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
-    --parameters file://${deployment_dir}/cloud_formation/properties.json
+  if [ -e ${deployment_dir}/cloud_formation/properties.json ]; then
+    aws cloudformation create-stack \
+      --stack-name concourse \
+      --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
+      --parameters file://${deployment_dir}/cloud_formation/properties.json
+  else
+    aws cloudformation create-stack \
+      --stack-name concourse \
+      --template-body file://$script_dir/../templates/infrastructure/cloudformation.json
+  fi
 else
-  aws cloudformation update-stack \
-    --stack-name concourse \
-    --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
-    --parameters file://${deployment_dir}/cloud_formation/properties.json || true # update-stack is not idempotent :(
+  if [ -e ${deployment_dir}/cloud_formation/properties.json ]; then
+    aws cloudformation update-stack \
+      --stack-name concourse \
+      --template-body file://$script_dir/../templates/infrastructure/cloudformation.json \
+      --parameters file://${deployment_dir}/cloud_formation/properties.json || true # update-stack is not idempotent :(
+  else
+    aws cloudformation update-stack \
+          --stack-name concourse \
+          --template-body file://$script_dir/../templates/infrastructure/cloudformation.json || true # update-stack is not idempotent :(
+  fi
 fi
 
-start_time_in_s=$(date +%s)
-wait_time_in_s=$((30 * 60))
-deadline_in_s=$(($start_time_in_s + $wait_time_in_s))
 while aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep IN_PROGRESS ; do
   echo "CloudFormation stack 'concourse' still in progress..."
-  current_time_in_s=$(date +%s)
-  remaining_time_in_s=$(($deadline_in_s - $current_time_in_s))
-
-  if [ "$remaining_time_in_s" -gt 0 ]; then
-    echo "   Waiting ${remaining_time_in_s} more seconds."
-    sleep 15
-  else
-    echo "   Waited ${wait_time_in_s}, aborting."
-    exit 1
-  fi
+  sleep 15
 done
 
 if aws cloudformation describe-stacks --stack-name concourse | grep StackStatus | grep ROLLBACK ; then
@@ -168,7 +168,7 @@ BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 echo "BOSH director is at $BOSH_IP"
 
 # generate director uuid stub for cf
-BOSH_DIRECTOR_UUID=$(bosh status --uuid)
+BOSH_DIRECTOR_UUID=$(bosh -t ${BOSH_IP} status --uuid)
 cat > ${deployment_dir}/generated-stubs/cf/director-uuid.yml <<EOF
 ---
 director_uuid: $BOSH_DIRECTOR_UUID

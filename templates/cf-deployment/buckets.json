@@ -21,15 +21,40 @@
     },
     "AcceptanceTestLogsBucketName": {
       "Description": "Bucket name for storage of acceptance test logs",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "CloudFrontOriginAccessIdentityId": {
       "Description": "Cloud Front Origin Access Identifier",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "AwsAccountId": {
       "Description": "Account Id Authorized for Signing Urls",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
+    }
+  },
+
+  "Conditions": {
+    "ConfigureCloudFront": {
+      "Fn::And": [
+        {
+          "Fn::Not": [
+            { "Fn::Equals": [{ "Ref": "CloudFrontOriginAccessIdentityId" }, ""] }
+          ]
+        },
+        {
+          "Fn::Not": [
+            { "Fn::Equals": [{ "Ref": "AwsAccountId" }, ""] }
+          ]
+        }
+      ]
+    },
+    "ConfigureAcceptanceTestLogsBucket": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "AcceptanceTestLogsBucketName" }, ""] }
+      ]
     }
   },
 
@@ -39,7 +64,8 @@
     },
 
     "LogsUser": {
-      "Type" : "AWS::IAM::User"
+      "Type" : "AWS::IAM::User",
+      "Condition": "ConfigureAcceptanceTestLogsBucket"
     },
 
     "CFAccessKey": {
@@ -51,6 +77,7 @@
 
     "LogsAccessKey": {
       "Type" : "AWS::IAM::AccessKey",
+      "Condition": "ConfigureAcceptanceTestLogsBucket",
       "Properties": {
         "UserName": { "Ref": "LogsUser" }
       }
@@ -86,6 +113,7 @@
 
     "AcceptanceTestLogsBucket": {
       "Type" : "AWS::S3::Bucket",
+      "Condition": "ConfigureAcceptanceTestLogsBucket",
       "Properties" : {
         "BucketName" : { "Ref": "AcceptanceTestLogsBucketName" }
       }
@@ -93,6 +121,7 @@
 
     "AcceptanceTestLogsBucketPolicy": {
       "Type" : "AWS::S3::BucketPolicy",
+      "Condition": "ConfigureAcceptanceTestLogsBucket",
       "Properties" : {
         "PolicyDocument" : {
           "Statement" : [
@@ -193,20 +222,32 @@
             "Resource" : { "Fn::Join" : [
               "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } ]
             ] }
-          },
-          {
-            "Sid" : "CloudFrontGetBucket",
-            "Action" : [
-              "s3:GetObject"
-            ],
-            "Effect" : "Allow",
-            "Principal" : {
-              "AWS" : { "Fn::Join" : [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",  { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
-            },
-            "Resource" : { "Fn::Join" : [
-              "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } , "/*" ]
-            ] }
           }]
+        },
+        "Bucket" : { "Ref" : "CCDropletsBucket" }
+      }
+    },
+
+    "CCDropletsBucketPolicyCloudFront": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Condition": "ConfigureCloudFront",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Statement" : [
+            {
+              "Sid" : "CloudFrontGetBucket",
+              "Action" : [
+                "s3:GetObject"
+              ],
+              "Effect" : "Allow",
+              "Principal" : {
+                "AWS" : { "Fn::Join" : [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",  { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
+              },
+              "Resource" : { "Fn::Join" : [
+                "", [ "arn:aws:s3:::", { "Ref" : "CCDropletsBucket" } , "/*" ]
+              ] }
+            }
+          ]
         },
         "Bucket" : { "Ref" : "CCDropletsBucket" }
       }
@@ -278,20 +319,32 @@
             "Resource" : { "Fn::Join" : [
               "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } ]
             ] }
-          },
-          {
-            "Sid" : "CloudFrontGetBucket",
-            "Action" : [
-              "s3:GetObject"
-            ],
-            "Effect" : "Allow",
-            "Principal" : {
-              "AWS" : { "Fn::Join" : [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",  { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
-            },
-            "Resource" : { "Fn::Join" : [
-              "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } , "/*" ]
-            ] }
           }]
+        },
+        "Bucket" : { "Ref" : "CCResourcesBucket" }
+      }
+    },
+
+    "CCResourcesBucketPolicyCloudFront": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Condition": "ConfigureCloudFront",
+      "Properties" : {
+        "PolicyDocument" : {
+          "Statement" : [
+            {
+              "Sid" : "CloudFrontGetBucket",
+              "Action" : [
+                "s3:GetObject"
+              ],
+              "Effect" : "Allow",
+              "Principal" : {
+                "AWS" : { "Fn::Join" : [ "", [ "arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ",  { "Ref": "CloudFrontOriginAccessIdentityId" } ] ] }
+              },
+              "Resource" : { "Fn::Join" : [
+                "", [ "arn:aws:s3:::", { "Ref" : "CCResourcesBucket" } , "/*" ]
+              ] }
+            }
+          ]
         },
         "Bucket" : { "Ref" : "CCResourcesBucket" }
       }
@@ -299,6 +352,7 @@
 
     "CCResourcesCloudFront" : {
       "Type" : "AWS::CloudFront::Distribution",
+      "Condition": "ConfigureCloudFront",
       "Properties" : {
         "DistributionConfig" : {
           "Origins" : [ {
@@ -324,6 +378,7 @@
 
     "CCDropletsCloudFront" : {
       "Type" : "AWS::CloudFront::Distribution",
+      "Condition": "ConfigureCloudFront",
       "Properties" : {
         "DistributionConfig" : {
           "Origins" : [ {
@@ -359,18 +414,22 @@
     },
     "LogsUserAccessKeyID": {
       "Description": "Access Key ID",
+      "Condition": "ConfigureAcceptanceTestLogsBucket",
       "Value": { "Ref": "LogsAccessKey" }
     },
     "LogsUserSecretAccessKey" : {
       "Description" : "Secret Key",
+      "Condition": "ConfigureAcceptanceTestLogsBucket",
       "Value": { "Fn::GetAtt" : [ "LogsAccessKey", "SecretAccessKey"]}
     },
     "CloudFrontResourcesDomainName" : {
       "Description" : "Domain Name for Resources Cloud Front Distribution",
+      "Condition": "ConfigureCloudFront",
       "Value": { "Fn::GetAtt" : [ "CCResourcesCloudFront", "DomainName"]}
     },
     "CloudFrontDropletsDomainName" : {
       "Description" : "Domain Name for Droplets Cloud Front Distribution",
+      "Condition": "ConfigureCloudFront",
       "Value": { "Fn::GetAtt" : [ "CCDropletsCloudFront", "DomainName"]}
     }
   }

@@ -24,12 +24,12 @@ deploy_bosh_and_cf() {
     aws cloudformation create-stack \
       --stack-name cf-deployment \
       --template-body file://$script_dir/../templates/cf-deployment/cloudformation.json \
-      --parameters file://${deployment_dir}/cloud_formation/properties.json
+      --parameters file://${deployment_dir}/cloud_formation/cf-properties.json
   else
     aws cloudformation update-stack \
       --stack-name cf-deployment \
       --template-body file://$script_dir/../templates/cf-deployment/cloudformation.json \
-      --parameters file://${deployment_dir}/cloud_formation/properties.json || true # update-stack is not idempotent :(
+      --parameters file://${deployment_dir}/cloud_formation/cf-properties.json || true # update-stack is not idempotent :(
   fi
 
   wait_for_deployment cf-deployment
@@ -177,7 +177,7 @@ cf_resources:
     droplets: ${CF_CloudFrontDroplets}
 EOF
 
-cat ${deployment_dir}/cloud_formation/properties.json | \
+cat ${deployment_dir}/cloud_formation/cf-properties.json | \
   jq '.|map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | {cloud_formation_inputs: $body}' \
   > ${deployment_dir}/generated-stubs/cf/cf-cloud-formation-inputs.json
 
@@ -204,17 +204,17 @@ cf_databases:
 EOF
 
 # generate BOSH deployment manifest
-echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/bosh.yml
+echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/cf-bosh.yml
 spiff merge $script_dir/../templates/cf-deployment/bosh-init.yml \
   $script_dir/../templates/cf-deployment/bosh.yml \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/security-groups.yml \
   ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
-  >> ${deployment_dir}/artifacts/deployments/bosh.yml
+  >> ${deployment_dir}/artifacts/deployments/cf-bosh.yml
 
 # deploy BOSH
-bosh-init deploy ${deployment_dir}/artifacts/deployments/bosh.yml
+bosh-init deploy ${deployment_dir}/artifacts/deployments/cf-bosh.yml
 
 # display result
 BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)

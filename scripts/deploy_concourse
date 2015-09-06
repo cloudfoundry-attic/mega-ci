@@ -51,57 +51,8 @@ set +x
   fi
 set -x
 
-# deploy infrastructure
-if ! aws cloudformation describe-stacks --stack-name concourse-buckets ; then
-  aws cloudformation create-stack \
-    --stack-name concourse-buckets \
-    --template-body file://$script_dir/../templates/infrastructure/buckets.json \
-    --capabilities CAPABILITY_IAM
-else
-  aws cloudformation update-stack \
-    --stack-name concourse-buckets \
-    --template-body file://$script_dir/../templates/infrastructure/buckets.json \
-    --capabilities CAPABILITY_IAM || true
-fi
-
-mkdir -p ${deployment_dir}/artifacts/iam-users
 mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p generated-stubs
-
-start_time_in_s=$(date +%s)
-wait_time_in_s=$((30 * 60))
-deadline_in_s=$(($start_time_in_s + $wait_time_in_s))
-while aws cloudformation describe-stacks --stack-name concourse-buckets | grep StackStatus | grep IN_PROGRESS ; do
-  echo "CloudFormation stack 'concourse-buckets' still in progress..."
-  current_time_in_s=$(date +%s)
-  remaining_time_in_s=$(($deadline_in_s - $current_time_in_s))
-
-  if [ "$remaining_time_in_s" -gt 0 ]; then
-    echo "   Waiting ${remaining_time_in_s} more seconds."
-    sleep 15
-  else
-    echo "   Waited ${wait_time_in_s}, aborting."
-    exit 1
-  fi
-done
-
-if ! aws cloudformation describe-stacks --stack-name concourse-buckets | grep StackStatus | grep COMPLETE ; then
-  echo 'Cloud formation failure'
-  exit 1
-fi
-
-# generate AWS resources stub for shared purposes
-aws cloudformation describe-stacks --stack-name concourse-buckets \
-  > ${deployment_dir}/artifacts/iam-users/concourse-buckets.json
-
-CONCOURSE_BUCKET_ACCESS_KEY_ID=$(cat ${deployment_dir}/artifacts/iam-users/concourse-buckets.json | jq -e -r ".Stacks[0].Outputs[0].OutputValue" )
-CONCOURSE_BUCKET_SECRET_KEY=$(cat ${deployment_dir}/artifacts/iam-users/concourse-buckets.json | jq -e -r ".Stacks[0].Outputs[1].OutputValue" )
-
-cat > ${deployment_dir}/pipeline_vars/infrastructure-buckets.yml <<EOF
----
-concourse_bucket_access_key_id: $CONCOURSE_BUCKET_ACCESS_KEY_ID
-concourse_bucket_secret_key: $CONCOURSE_BUCKET_SECRET_KEY
-EOF
 
 # Target bosh
 bosh -n target $BOSH_DIRECTOR
@@ -145,7 +96,7 @@ echo "# GENERATED, NO TOUCHING" > ${deployment_dir}/artifacts/deployments/concou
 spiff merge $script_dir/../templates/infrastructure/concourse.yml \
   generated-stubs/director_uuid.yml \
   generated-stubs/cloud_properties.yml \
-  ${deployment_dir}/stubs/concourse/atc_credentials.yml \
+  ${deployment_dir}/stubs/concourse/*.yml \
   >> ${deployment_dir}/artifacts/deployments/concourse.yml
 
 # Upload binaries to BOSH director

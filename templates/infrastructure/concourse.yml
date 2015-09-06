@@ -91,7 +91,7 @@ jobs:
           servers: {lan: (( jobs.discovery.networks.concourse.static_ips ))}
 
   - name: worker
-    instances: 6
+    instances: 2
     resource_pool: workers
     templates:
       - {release: concourse, name: consul-agent}
