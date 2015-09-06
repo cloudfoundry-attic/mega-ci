@@ -23,7 +23,7 @@ resources:
 - name: cf-release
   type: git
   source:
-    branch: develop
+    branch: runtime-passed
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-deployment
