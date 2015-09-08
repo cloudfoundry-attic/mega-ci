@@ -175,5 +175,5 @@ update:
 
 cloud_properties: (( merge ))
 atc_credentials: (( merge ))
-datadog_properties: (( merge ))
-syslog_properties: (( merge ))
+datadog_properties: (( merge || nil ))
+syslog_properties: (( merge || nil ))

@@ -92,14 +92,24 @@ cloud_properties:
 EOF
 
 # Generate Concourse manifest
+optional_syslog=""
+if [ "$(ls -A ${deployment_dir}/stubs/syslog)" ]; then
+  optional_syslog=$(ls -d ${deployment_dir}/stubs/syslog/*)
+fi
+
+optional_datadog=""
+if [ "$(ls -A ${deployment_dir}/stubs/datadog)" ]; then
+  optional_datadog=$(ls -d ${deployment_dir}/stubs/datadog/*)
+fi
+
 echo "# GENERATED, NO TOUCHING" > ${deployment_dir}/artifacts/deployments/concourse.yml
 spiff merge $script_dir/../templates/infrastructure/mask.yml \
   $script_dir/../templates/infrastructure/concourse.yml \
   generated-stubs/director_uuid.yml \
   generated-stubs/cloud_properties.yml \
   ${deployment_dir}/stubs/concourse/*.yml \
-  ${deployment_dir}/stubs/datadog/*.yml \
-  ${deployment_dir}/stubs/syslog/*.yml \
+  ${optional_datadog} \
+  ${optional_syslog} \
   >> ${deployment_dir}/artifacts/deployments/concourse.yml
 
 # Upload binaries to BOSH director

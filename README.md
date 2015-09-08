@@ -146,8 +146,13 @@ my_deployment_dir/
    |- bosh/
    |  |- bosh_passwords.yml
    |- concourse/
-      |- atc_credentials.yml
-      |- binary_urls.json
+   |  |- atc_credentials.yml
+   |  |- binary_urls.json
+   |- datadog/
+   |  |- datadog_stub.yml
+   |- syslog/
+   |  |- syslog_stub.yml
+
 ```
 
 You need an SSL certificate for the domain where Concourse will be accessible. The
@@ -197,6 +202,26 @@ Finally, the `stubs/concourse/binary_urls.json` should look something like this:
   "concourse_release": "https://bosh.io/d/github.com/concourse/concourse?v=0.62.0",
   "garden_release": "https://bosh.io/d/github.com/cloudfoundry-incubator/garden-linux-release?v=0.303.0"
 }
+```
+
+#### Optional stubs
+
+Concourse can optionally be configured to send metrics to datadog by adding your
+datadog API key to datadog_stub with this format:
+
+```yaml
+---
+datadog_properties:
+  api_key: YOUR_DATADOG_API_KEY
+```
+
+Additionally, you can configure syslog on concourse to use an external endpoint
+with the syslog_stub (i.e. papertrail):
+
+```yaml
+---
+syslog_properties:
+  address: logs3.papertrailapp.com:YOUR_PAPERTRAIL_PORT
 ```
 
 Concourse (and associated garden releases) can be found [here][concourse-releases].
