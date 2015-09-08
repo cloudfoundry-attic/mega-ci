@@ -98,6 +98,8 @@ spiff merge $script_dir/../templates/infrastructure/mask.yml \
   generated-stubs/director_uuid.yml \
   generated-stubs/cloud_properties.yml \
   ${deployment_dir}/stubs/concourse/*.yml \
+  ${deployment_dir}/stubs/datadog/*.yml \
+  ${deployment_dir}/stubs/syslog/*.yml \
   >> ${deployment_dir}/artifacts/deployments/concourse.yml
 
 # Upload binaries to BOSH director

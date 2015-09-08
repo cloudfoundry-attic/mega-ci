@@ -23,6 +23,15 @@ networks:
             - (( .cloud_properties.security_group_name ))
           subnet: (( .cloud_properties.subnet_id ))
 
+blackbox_config: &blackbox_config
+  expvar:
+    datadog:
+      api_key: (( datadog_properties.api_key || nil ))
+  syslog:
+    destination:
+      address: (( syslog_properties.address || nil ))
+      transport: tls
+
 jobs:
   - name: discovery
     instances: 1
@@ -35,6 +44,7 @@ jobs:
       - name: concourse
         static_ips: (( .networks.concourse.subnets.[0].static ))
     properties:
+      blackbox: *blackbox_config
       consul:
         agent:
           mode: server
@@ -53,6 +63,7 @@ jobs:
       serial: true
       max_in_flight: 1
     properties:
+      blackbox: *blackbox_config
       atc:
         basic_auth_username: (( atc_credentials.basic_auth_username ))
         basic_auth_password: (( atc_credentials.basic_auth_password ))
@@ -80,6 +91,7 @@ jobs:
       - {release: concourse, name: postgresql}
     networks: [{name: concourse}]
     properties:
+      blackbox: *blackbox_config
       postgresql:
         databases:
         - name: (( atc_credentials.db_name ))
@@ -100,6 +112,7 @@ jobs:
       - {release: garden-linux, name: garden}
     networks: [{name: concourse}]
     properties:
+      blackbox: *blackbox_config
       garden:
         listen_network: tcp
         listen_address: 0.0.0.0:7777
@@ -162,3 +175,5 @@ update:
 
 cloud_properties: (( merge ))
 atc_credentials: (( merge ))
+datadog_properties: (( merge ))
+syslog_properties: (( merge ))
