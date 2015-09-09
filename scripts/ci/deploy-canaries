@@ -22,9 +22,9 @@ cf target -s canaries
 set -e
 
 
-canaries --number-of-zero-downtime-apps=20 \
-         --number-of-instances-canary-instances=20\
-         --number-of-instances-per-app=20 \
+canaries --number-of-zero-downtime-apps=1 \
+         --number-of-instances-canary-instances=5 \
+         --number-of-instances-per-app=5 \
          --target=$CF_API_ENDPOINT \
          --app-domain=$CF_APPS_DOMAIN \
          --username=$CF_API_USER \
