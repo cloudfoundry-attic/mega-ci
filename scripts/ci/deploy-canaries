@@ -11,7 +11,7 @@ gem build cf_canaries.gemspec
 gem install cf_canaries-0.1.0.gem
 
 
-cf api $CF_API_ENDPOINT
+cf api $CF_API_ENDPOINT --skip-ssl-validation
 cf auth $CF_API_USER $CF_API_PASSWORD
 
 set +e
