@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e -x
+
+source ~/.bashrc
+
+cd cf-canaries
+
+# install the canaries application name
+bundle
+gem build cf_canaries.gemspec
+gem install cf_canaries-0.1.0.gem
+
+
+set +x
+canaries --number-of-zero-downtime-apps=20 \
+         --number-of-instances-canary-instances=20\
+         --number-of-instances-per-app=20 \
+         --target=$CF_API_ENDPOINT \
+         --app-domain=$CF_DOMAIN \
+         --username=$CF_API_USER \
+         --password=$CF_API_PASSWORD \
+         --organization=canaries \
+         --space=canaries \
+         --skip-ssl-validation

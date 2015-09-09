@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: cf-canaries
+  - name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/deploy-network-canaries
+
+params:
+  CF_DOMAIN:
+  CF_API_ENDPOINT:
+  CF_API_USER:
+  CF_API_PASSWORD:
