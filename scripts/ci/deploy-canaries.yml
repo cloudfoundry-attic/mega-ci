@@ -8,7 +8,7 @@ inputs:
   - name: mega-ci
 
 run:
-  path: mega-ci/scripts/ci/deploy-network-canaries
+  path: mega-ci/scripts/ci/deploy-canaries
 
 params:
   CF_APPS_DOMAIN:
