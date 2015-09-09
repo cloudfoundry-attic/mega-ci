@@ -1,0 +1,31 @@
+groups:
+- name: canaries
+  jobs:
+    - deploy-canaries
+
+resources:
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/mega-ci.git
+- name: cf-canaries
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/pivotal-cf-experimental/cf_canaries.git
+jobs:
+- name: deploy-canaries
+  public: false
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: cf-canaries
+  - task: deploy-network-canaries
+    file: mega-ci/scripts/ci/deploy-network-canaries.yml
+    config:
+      params:
+        CF_APPS_DOMAIN: {{cf_apps_domain}}
+        CF_API_ENDPOINT: {{cf_api_endpoint}}
+        CF_API_USER: {{cf_api_user}}
+        CF_API_PASSWORD: {{cf_api_password}}
