@@ -1,7 +1,7 @@
-# Mega-Ci
+# MEGA CI
 
 This repo contains all public scripts and templates used to configure AWS and
-Deploy Concourse CI, Bosh, CloudFoundry, or any combination thereof. It should
+Deploy Concourse CI, BOSH, Cloud Foundry, or any combination thereof. It should
 be used in concert with a private repo that contains all necessary secret
 information for your planned deployment as described below.
 
@@ -12,11 +12,11 @@ information for your planned deployment as described below.
 
 #### Contents
 
-* [General Requirements](#general-requirements)
-* [Deployment Directory Details](#deployment-directory-details)
-* [Setting up Your AWS Environment and Deploying BOSH](#setting-up-your-aws-environment-and-deploying-bosh)
-* [Deploying Concourse](#deploying-concourse)
-* [Deploying Cloud Foundry](#deploying-cloud-foundry)
+1. [General Requirements](#general-requirements)
+2. [Deployment Directory Details](#deployment-directory-details)
+3. [Setting up Your AWS Environment and Deploying BOSH](#setting-up-your-aws-environment-and-deploying-bosh)
+4. [Deploying Concourse](#deploying-concourse)
+5. [Setting up an AWS VPC for Deploying Cloud Foundry](#setting-up-an-aws-vpc-for-deploying-cloud-foundry)
 
 ## General Requirements
 
@@ -39,8 +39,9 @@ information for your planned deployment as described below.
   [spiff-releases].
 
 
-### Deployment Directory Details
-Minimal folder structer requirments:
+## Deployment Directory Details
+
+Minimal folder structure requirments:
 
 ```
 my_deployment_dir/
@@ -71,9 +72,7 @@ bosh_credentials:
   registry_password: REPLACE_WITH_PASSWORD
 ```
 
-You can find the latest stemcells [here][bosh-stemcells].
-
-# Setting up Your AWS Environment and Deploying BOSH
+## Setting up Your AWS Environment and Deploying BOSH
 
 Run:
 
@@ -92,7 +91,7 @@ instance. The script generates several artifacts in your deployment directory:
   account that will be used for all deployments; you will need this if you ever
   want to ssh into the BOSH instance or any of the concourse instances.
 
-The script will also print the IP of the BOSH director. Target your bosh by running:
+The script will also print the IP of the BOSH director. Target your director by running:
 ```bash
 bosh target DIRECTOR_IP
 ```
@@ -113,7 +112,7 @@ export BOSH_PASSWORD=REPLACE_ME
 export BOSH_DIRECTOR=https://REPLACE_ME_WITH_BOSH_DIRECTOR_IP:25555
 ```
 
-# Deploying Concourse
+## Deploying Concourse
 
 Run:
 
@@ -130,9 +129,8 @@ The script will also print the Concourse load balancer hostname at the end. This
 used to create the `CNAME` for your DNS entry in Route53 so that you can have a nice
 URL where you access your Concourse.
 
-### Private Direcotry Requirements
-
-* A deployment directory with the following minimal skeleton structure:
+This script requires your deployment directory to have a few more things, in addition to the
+minimal structure mentioned above:
 ```
 my_deployment_dir/
 |- aws_environment
@@ -204,6 +202,8 @@ Finally, the `stubs/concourse/binary_urls.json` should look something like this:
 }
 ```
 
+You can find the latest stemcells [here][bosh-stemcells]. Concourse (and associated garden releases) can be found [here][concourse-releases].
+
 #### Optional stubs
 
 Concourse can optionally be configured to send metrics to datadog by adding your
@@ -224,13 +224,18 @@ syslog_properties:
   address: logs3.papertrailapp.com:YOUR_PAPERTRAIL_PORT
 ```
 
-Concourse (and associated garden releases) can be found [here][concourse-releases].
+## Setting up an AWS VPC for Deploying Cloud Foundry
 
-# Deploying Cloud Foundry
+Run:
 
-You can deploy Cloud Foundry using either [cf-deployment][cf-deployment] or [cf-release][cf-release]. In either case,
-when you reference stub files, or generate the deployment manifest, use
-`DEPLOYMENT_DIRECTORY/stubs/cf/cf-stub.yml DEPLOYMENT_DIRECTORY/generated-stubs/cf/*`.
+```bash
+./scripts/deploy_cf_bosh_instance PATH_TO_DEPLOYMENT_DIR
+```
+
+This will set up an AWS VPC for BOSH and Cloud Foundry, and will deploy BOSH for you as well. It will
+also generate stubs to be used later when generating a deployment manifest for Cloud Foundry, located in
+`DEPLOYMENT_DIRECTORY/genearted-stubs/cf/`. When using manifest generation tools from [cf-deployment][cf-deployment] or [cf-release][cf-release], include `DEPLOYMENT_DIRECTORY/generated-stubs/cf/*` in the list of stubs you
+pass to those tools.
 
 ### Requirements
 
