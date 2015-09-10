@@ -12,7 +12,11 @@ gem install cf_canaries-0.1.0.gem
 
 
 cf api $CF_API_ENDPOINT --skip-ssl-validation
+set +x
+echo "Authenticating"
 cf auth $CF_API_USER $CF_API_PASSWORD
+echo "Succeeded authenticating"
+set -x
 
 set +e
 cf create-org canaries
@@ -21,7 +25,18 @@ cf create-space canaries
 cf target -s canaries
 set -e
 
-
+set +x
+echo "Running command:
+canaries --number-of-zero-downtime-apps=1 \\
+         --number-of-instances-canary-instances=2 \\
+         --number-of-instances-per-app=2 \\
+         --target=$CF_API_ENDPOINT \\
+         --app-domain=$CF_APPS_DOMAIN \\
+         --username=$CF_API_USER \\
+         --password=\$CF_API_PASSWORD \\
+         --organization=canaries \\
+         --space=canaries \\
+         --skip-ssl-validation"
 canaries --number-of-zero-downtime-apps=1 \
          --number-of-instances-canary-instances=2 \
          --number-of-instances-per-app=2 \
@@ -32,3 +47,5 @@ canaries --number-of-zero-downtime-apps=1 \
          --organization=canaries \
          --space=canaries \
          --skip-ssl-validation
+echo "Succeeded running command"
+set -x
