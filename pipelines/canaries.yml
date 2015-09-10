@@ -1,7 +1,7 @@
 groups:
 - name: canaries
   jobs:
-    - deploy-canaries
+    - push-canaries
 
 resources:
 - name: mega-ci
@@ -15,13 +15,13 @@ resources:
     branch: master
     uri: https://github.com/pivotal-cf-experimental/cf_canaries.git
 jobs:
-- name: deploy-canaries
-  public: false
+- name: push-canaries
+  public: true
   plan:
   - aggregate:
     - get: mega-ci
     - get: cf-canaries
-  - task: deploy-network-canaries
+  - task: push-canaries
     file: mega-ci/scripts/ci/deploy-canaries.yml
     config:
       params:
