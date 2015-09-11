@@ -117,7 +117,7 @@ jobs:
     file: mega-ci/scripts/ci/clean-deployment.yml
 
 - name: deploy-and-test-with-cf
-  public: true
+  public: false
   serial: true
   plan:
   - aggregate:
