@@ -79,6 +79,12 @@ bosh_credentials:
   registry_password: REPLACE_WITH_PASSWORD
 ```
 
+In addition, the bosh credentials yml can be generated with:
+
+```bash
+./scripts/generate_bosh_passwords
+```
+
 ## Setting up Your AWS Environment and Deploying BOSH
 
 Run:
