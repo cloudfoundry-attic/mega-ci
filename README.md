@@ -43,6 +43,9 @@ information for your planned deployment as described below.
 * The `certstrap` command line tool. This is used to generate the ssl certificates needed
   for consul. This can be installed by running `go get -v github.com/square/certstrap`.
 
+Alternatively, you can use the Dockerfile included in this repository to create
+an environment with the necessary programs.
+
 ## Deployment Directory Details
 
 Minimal folder structure requirments:
