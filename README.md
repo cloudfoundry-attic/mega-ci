@@ -38,6 +38,7 @@ information for your planned deployment as described below.
 * The `spiff` command line tool. The latest release can be found [here]
   [spiff-releases].
 
+* The `openssl` command line tool. 
 
 ## Deployment Directory Details
 
