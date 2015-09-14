@@ -1,7 +1,3 @@
 #/bin/bash
 set -e
-
-function generate_random_string()
-{
-    dd if=/dev/urandom | env LC_CTYPE=C tr -cd 'a-zA-Z0-9' | head -c 32
-}
+dd if=/dev/urandom | env LC_CTYPE=C tr -cd 'a-zA-Z0-9' | head -c 32
