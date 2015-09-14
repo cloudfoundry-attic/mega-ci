@@ -183,6 +183,10 @@ properties:
     agent_key: |
       REPLACE_WITH_CONSUL_AGENT_KEY
 jobs:
+  - name: api_z2
+    instances: 0
+  - name: api_worker_z2
+    instances: 0
   - name: consul_z1
     instances: 1
   - name: consul_z2
@@ -193,11 +197,19 @@ jobs:
     instances: 1
   - name: etcd_z2
     instances: 0
+  - name: hm9000_z2
+    instances: 0
   - name: loggregator_trafficcontroller_z2
     instances: 0
   - name: nats_z2
     instances: 0
   - name: router_z2
     instances: 0
+  - name: runner_z2
+    instances: 0
   - name: smoke_tests
     instances: 1
+  - name: stats_z2
+    instances: 0
+  - name: uaa_z2
+    instances: 0
