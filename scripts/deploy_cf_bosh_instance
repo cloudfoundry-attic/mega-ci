@@ -97,14 +97,12 @@ mkdir -p ${deployment_dir}/generated-stubs/cf
 mkdir -p generated-stubs
 
 # create keypair
-if ! aws ec2 describe-key-pairs --key-names bosh; then
-  aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > ${deployment_dir}/artifacts/keypair/id_rsa_bosh
-fi
+aws ec2 delete-key-pair --key-name bosh
+aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > ${deployment_dir}/artifacts/keypair/id_rsa_bosh
 
 # install certs for CF ELB
-if ! aws iam get-server-certificate --server-certificate-name cf; then
-  aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
-fi
+aws iam delete-server-certificate --server-certificate-name cf; 
+aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
 
 # deploy cloud formation templates
 deploy_bosh_and_cf
