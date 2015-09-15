@@ -20,7 +20,7 @@ information for your planned deployment as described below.
 
 ## General Requirements
 
-* An AWS account for your Concourse deployment. It doesn't need to be empty as
+* An AWS account for your deployments. It doesn't need to be empty as
   we can contain everything inside a VPC.
 
 * The `aws` command line tool. This can be installed by running `brew install awscli`
