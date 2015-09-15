@@ -36,7 +36,7 @@ set -x
 
 mkdir -p ${deployment_dir}/artifacts/keypair
 mkdir -p ${deployment_dir}/artifacts/deployments
-mkdir -p ${deployment_dir}/generated-stubs/cf
+mkdir -p ${deployment_dir}/generated-stubs/pipeline
 mkdir -p generated-stubs
 
 # create keypair
@@ -141,7 +141,7 @@ CF_ELB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFLoadBalance
 CF_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSecurityGroup)
 CF_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${CF_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
 
-cat > ${deployment_dir}/generated-stubs/cf/cf-resources.yml<<EOF
+cat > ${deployment_dir}/generated-stubs/pipeline/cf-resources.yml<<EOF
 ---
 cf_resources:
   availability_zone: $CF_AWS_ZONE
@@ -169,7 +169,7 @@ echo "BOSH director is at $BOSH_IP"
 
 # generate director uuid stub for cf
 BOSH_DIRECTOR_UUID=$(bosh -t ${BOSH_IP} status --uuid)
-cat > ${deployment_dir}/generated-stubs/cf/director-uuid.yml <<EOF
+cat > ${deployment_dir}/generated-stubs/pipeline/bosh-director-uuid.yml <<EOF
 ---
 director_uuid: $BOSH_DIRECTOR_UUID
 EOF

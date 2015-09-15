@@ -135,8 +135,8 @@ jobs:
     file: mega-ci/scripts/ci/deploy-etcd-cf.yml
     config:
       params:
-        STUB_PATH: deployments-runtime/mega-ci/stubs/cf/cf-stub.yml
-        STUB_PARTS_PATH: deployments-runtime/mega-ci/generated-stubs/cf
+        STUB_PATH: {{cf_stub_path}}
+        STUB_PARTS_PATH: {{cf_stub_parts_path}}
   - task: run-cats
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
