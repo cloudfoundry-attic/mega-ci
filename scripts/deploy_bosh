@@ -5,7 +5,7 @@ set -e -x
 script_dir=$(dirname $0)
 
 if [ $# -ne 1 ]; then
-  echo 'Expected 1 argument (path to deployment directory), received $#'
+  echo "Expected 1 argument (path to deployment directory), received $#"
   exit 1
 fi
 deployment_dir=$1
