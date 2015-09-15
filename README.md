@@ -89,7 +89,7 @@ instance. The script generates several artifacts in your deployment directory:
   existing one
 * `artifacts/keypair/id_rsa_bosh`: the private key created in your AWS
   account that will be used for all deployments; you will need this if you ever
-  want to ssh into the BOSH instance or any of the concourse instances.
+  want to ssh into the BOSH instance or any of the VMs deployed by BOSH.
 
 The script will also print the IP of the BOSH director. Target your director by running:
 ```bash
