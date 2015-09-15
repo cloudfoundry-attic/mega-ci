@@ -1,9 +1,9 @@
 # MEGA CI
 
-This repo contains all public scripts and templates used to configure AWS and
-Deploy Concourse CI, BOSH, Cloud Foundry, or any combination thereof. It should
-be used in concert with a private repo that contains all necessary secret
-information for your planned deployment as described below.
+This repo contains all public scripts and templates used to provision AWS resources and
+Deploy BOSH, Concourse CI, Cloud Foundry, or any combination thereof. It should
+be used in concert with a private repository that contains all necessary configuration 
+and secret information for your planned deployments.
 
 #### Links
 
@@ -13,10 +13,10 @@ information for your planned deployment as described below.
 #### Contents
 
 1. [General Requirements](#general-requirements)
-2. [Deployment Directory Details](#deployment-directory-details)
-3. [Setting up Your AWS Environment and Deploying BOSH](#setting-up-your-aws-environment-and-deploying-bosh)
-4. [Deploying Concourse](#deploying-concourse)
-5. [Setting up an AWS VPC for Deploying Cloud Foundry](#setting-up-an-aws-vpc-for-deploying-cloud-foundry)
+2. [Provisioning AWS for BOSH and Concourse, and Deploying BOSH](#provisioning-aws-for-bosh-and-concourse-and-deploying-bosh)
+3. [Deploying Concourse](#deploying-concourse)
+4. [Provisioning AWS for BOSH and Cloud Foundry, and Deploying BOSH](#provisioning-aws-for-bosh-and-cloud-foundry-and-deploying-bosh)
+5. [Example Stub Templates for Deploying Cloud Foundry](#example-stub-templates-for-deploying-cloud-foundry)
 
 ## General Requirements
 
@@ -38,14 +38,46 @@ information for your planned deployment as described below.
 * The `spiff` command line tool. The latest release can be found [here]
   [spiff-releases].
 
+## Provisioning AWS for BOSH and Concourse, and Deploying BOSH
 
-## Deployment Directory Details
+#### Usage
 
-Minimal folder structure requirments:
+```bash
+./scripts/deploy_bosh PATH_TO_DEPLOYMENT_DIR
+```
+
+See Requirements below for an explanation of the DEPLOYMENT_DIR.
+
+This script will apply an AWS CloudFormation template, creating a stack in your AWS
+account.It will then create a BOSH instance. The default username/password is for 
+your BOSH director is admin/admin. You are **strongly advised** to change these by 
+targetting the director and running:
+
+```bash
+bosh create user USERNAME PASSWORD
+```
+
+When you're done, create a file called `bosh_environment` at the root of your
+deployment directory (see Requirements below) that looks like this:
+
+```bash
+export BOSH_USER=REPLACE_ME
+export BOSH_PASSWORD=REPLACE_ME
+export BOSH_DIRECTOR=https://REPLACE_ME_WITH_BOSH_DIRECTOR_IP:25555
+```
+
+This file will be sourced by the script which deploys Concourse.
+
+#### Requirements
+
+The argument passed to the script must be the path to a "deployment directory".
+For this script, it must have at least the following minimal structure.
 
 ```
 my_deployment_dir/
 |- aws_environment
+|- cloud_formation/
+|  |- (properties.json, optional)
 |- stubs/
    |- bosh/
       |- bosh_passwords.yml
@@ -72,96 +104,7 @@ bosh_credentials:
   registry_password: REPLACE_WITH_PASSWORD
 ```
 
-## Setting up Your AWS Environment and Deploying BOSH
-
-Run:
-
-```bash
-./scripts/deploy_bosh PATH_TO_DEPLOYMENT_DIR
-```
-
-This will execute the AWS cloud formation template and then create a BOSH
-instance. The script generates several artifacts in your deployment directory:
-
-* `artifacts/deployments/bosh.yml`: the deployment manifest for your BOSH instance
-* `artifacts/deployments/bosh-state.json`: an implementation detail of `bosh-init`;
-  used to determine things like whether it is deploying a new BOSH or updating an
-  existing one
-* `artifacts/keypair/id_rsa_bosh`: the private key created in your AWS
-  account that will be used for all deployments; you will need this if you ever
-  want to ssh into the BOSH instance or any of the VMs deployed by BOSH.
-
-The script will also print the IP of the BOSH director. Target your director by running:
-```bash
-bosh target DIRECTOR_IP
-```
-
-The default username/password is admin/admin. You are **strongly advised** to change
-these by running:
-
-```bash
-bosh create user USERNAME PASSWORD
-```
-
-When you're done, create a file called `bosh_environment` at the root of your
-deployment directory that looks like this:
-
-```bash
-export BOSH_USER=REPLACE_ME
-export BOSH_PASSWORD=REPLACE_ME
-export BOSH_DIRECTOR=https://REPLACE_ME_WITH_BOSH_DIRECTOR_IP:25555
-```
-
-## Deploying Concourse
-
-Run:
-
-```bash
-./scripts/deploy_concourse PATH_TO_DEPLOYMENT_DIR
-```
-
-The script will deploy Concourse. It generates one additional artifact in your
-deployment directory:
-
-* `artifacts/deployments/concourse.yml`: the deployment manifest of your Concourse
-
-The script will also print the Concourse load balancer hostname at the end. This can be
-used to create the `CNAME` for your DNS entry in Route53 so that you can have a nice
-URL where you access your Concourse.
-
-This script requires your deployment directory to have a few more things, in addition to the
-minimal structure mentioned above:
-```
-my_deployment_dir/
-|- aws_environment
-|- certs/
-|  |- concourse.pem
-|  |- concourse.key
-|  |- (concourse_chain.pem, optional)
-|- cloud_formation/
-|  |- (properties.json, optional)
-|- stubs/
-   |- bosh/
-   |  |- bosh_passwords.yml
-   |- concourse/
-   |  |- atc_credentials.yml
-   |  |- binary_urls.json
-   |- datadog/
-   |  |- datadog_stub.yml
-   |- syslog/
-      |- syslog_stub.yml
-
-```
-
-You need an SSL certificate for the domain where Concourse will be accessible. The
-key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. If
-there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
-You can generate a self signed cert if needed:
-                                                                             
-* `openssl genrsa -out concourse.key 1024`
-* `openssl req -new -key concourse.key -out concourse.csr` For the Common Name, you must enter your self signed domain.
-* `openssl x509 -req -in concourse.csr -signkey concourse.key -out concourse.pem`
-* Copy `concourse.pem` and `concourse.key` into the certs directory.
+#### Optional Configuration
 
 The optional `cloud_formation/properties.json` file should look like this:
 
@@ -181,6 +124,68 @@ The optional `cloud_formation/properties.json` file should look like this:
 If both `ConcourseHostedZoneName` and `ELBRecordSetName` are provided, a Route 53 hosted zone will be created with the given
 `ConcourseHostedZoneName` name, and a DNS entry pointing at the new ELB will be created with the given
 `ELBRecordSetName` name.
+
+#### Output
+
+The script generates several artifacts in your deployment directory:
+
+* `artifacts/deployments/bosh.yml`: the deployment manifest for your BOSH instance
+* `artifacts/deployments/bosh-state.json`: an implementation detail of `bosh-init`;
+  used to determine things like whether it is deploying a new BOSH or updating an
+  existing one
+* `artifacts/keypair/id_rsa_bosh`: the private key created in your AWS
+  account that will be used for all deployments; you will need this if you ever
+  want to ssh into the BOSH instance or any of the VMs deployed by BOSH.
+
+The script will also print the IP of the BOSH director. Target your director by running:
+```bash
+bosh target DIRECTOR_IP
+```
+
+## Deploying Concourse
+
+#### Usage
+
+Run:
+
+```bash
+./scripts/deploy_concourse PATH_TO_DEPLOYMENT_DIR
+```
+
+The script will deploy Concourse.
+
+#### Requirements
+
+The argument passed to the script must be the path to a "deployment directory".
+For this script, it must have at least the following minimal structure.
+
+```
+my_deployment_dir/
+|- aws_environment
+|- certs/
+|  |- concourse.pem
+|  |- concourse.key
+|  |- (concourse_chain.pem, optional)
+|- stubs/
+   |- concourse/
+   |  |- atc_credentials.yml
+   |  |- binary_urls.json
+   |- datadog/
+   |  |- (datadog_stub.yml, optional)
+   |- syslog/
+      |- (syslog_stub.yml, optional)
+
+```
+
+You need an SSL certificate for the domain where Concourse will be accessible. The
+key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. If
+there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
+You can generate a self signed cert if needed:
+                                                                             
+* `openssl genrsa -out concourse.key 1024`
+* `openssl req -new -key concourse.key -out concourse.csr` For the Common Name, you must enter your self signed domain.
+* `openssl x509 -req -in concourse.csr -signkey concourse.key -out concourse.pem`
+* Copy `concourse.pem` and `concourse.key` into the certs directory.
 
 The `stubs/concourse/atc_credentials.yml` file should look like this:
 ```yaml
@@ -204,7 +209,7 @@ Finally, the `stubs/concourse/binary_urls.json` should look something like this:
 
 You can find the latest stemcells [here][bosh-stemcells]. Concourse (and associated garden releases) can be found [here][concourse-releases].
 
-#### Optional stubs
+#### Optional Configuration
 
 Concourse can optionally be configured to send metrics to datadog by adding your
 datadog API key to datadog_stub with this format:
@@ -224,7 +229,19 @@ syslog_properties:
   address: logs3.papertrailapp.com:YOUR_PAPERTRAIL_PORT
 ```
 
-## Setting up an AWS VPC for Deploying Cloud Foundry
+#### Output
+
+This script generates one additional artifact in your deployment directory:
+
+* `artifacts/deployments/concourse.yml`: the deployment manifest of your Concourse
+
+The script will also print the Concourse load balancer hostname at the end. This can be
+used to create the `CNAME` for your DNS entry in Route53 so that you can have a nice
+URL where you access your Concourse.
+
+## Provisioning AWS for BOSH and Cloud Foundry, and Deploying BOSH
+
+#### Usage
 
 Run:
 
@@ -232,14 +249,24 @@ Run:
 ./scripts/deploy_cf_bosh_instance PATH_TO_DEPLOYMENT_DIR
 ```
 
-This will set up an AWS VPC for BOSH and Cloud Foundry, and will deploy BOSH for you as well. It will
-also generate stubs to be used later when generating a deployment manifest for Cloud Foundry, located in
-`DEPLOYMENT_DIRECTORY/genearted-stubs/cf/`. When using manifest generation tools from [cf-deployment][cf-deployment] or [cf-release][cf-release], include `DEPLOYMENT_DIRECTORY/generated-stubs/cf/*` in the list of stubs you
-pass to those tools.
+This script will apply an AWS CloudFormation template, creating a stack in your AWS
+account. It will then create a BOSH instance. The default username/password is for 
+your BOSH director is admin/admin. You are **strongly advised** to change these by 
+targetting the director and running:
 
-### Requirements
+```bash
+bosh create user USERNAME PASSWORD
+```
 
-* A deployment directory with the following minimal skeleton structure:
+This script will also generate stubs to be used later when generating a deployment manifest 
+for Cloud Foundry, located in `PATH_TO_DEPLOYMENT_DIRECTORY/generated-stubs/cf/`. When using 
+manifest generation tools from [cf-deployment][cf-deployment] or [cf-release][cf-release], include `PATH_TO_DEPLOYMENT_DIRECTORY/generated-stubs/cf/*` in the list of stubs you pass to those tools.
+
+#### Requirements
+
+The argument passed to the script must be the path to a "deployment directory".
+For this script, it must have at least the following minimal structure.
+
 ```
 my_deployment_dir/
 |- aws_environment
@@ -248,13 +275,10 @@ my_deployment_dir/
 |  |- cf.key
 |- cloud_formation/
 |  |- buckets-properties.json
-|  |- cf-properties.json
+|  |- (cf-properties.json, optional)
 |- stubs/
    |- bosh/
-   |  |- bosh_passwords.yml
-   |- cf/
-      |- cf-stub.yml
-
+      |- bosh_passwords.yml
 ```
 
 The `aws_environment` file should look like this:
@@ -263,6 +287,19 @@ The `aws_environment` file should look like this:
 export AWS_DEFAULT_REGION=REPLACE_ME # e.g. us-east-1
 export AWS_ACCESS_KEY_ID=REPLACE_ME
 export AWS_SECRET_ACCESS_KEY=REPLACE_ME
+```
+
+The `stubs/bosh/bosh_passwords.yml` file should look like this:
+
+```yaml
+bosh_credentials:
+  agent_password: REPLACE_WITH_PASSWORD
+  director_password: REPLACE_WITH_PASSWORD
+  mbus_password: REPLACE_WITH_PASSWORD
+  nats_password: REPLACE_WITH_PASSWORD
+  redis_password: REPLACE_WITH_PASSWORD
+  postgres_password: REPLACE_WITH_PASSWORD
+  registry_password: REPLACE_WITH_PASSWORD
 ```
 
 You need an SSL certificate for the domain where Cloud Foundry will be accessible. The key and pem file must 
@@ -306,10 +343,9 @@ The `cloud_formation/buckets-properties.json` file should look like this:
     "ParameterValue": "OPTIONAL-REPLACE_WITH_BUCKET_NAME_IF_YOU_WANT_A_BUCKET_FOR_STORING_CATS_LOGS"
   }
 ]
-
 ```
 
-#### Optional Instructions for using Cloud Front
+#### Optional Configuration
 
 To configure Cloud Front as a CDN for your Resource Matching and Droplet blobstores:
  
@@ -352,22 +388,29 @@ The `cloud_formation/cf-properties.json` file should look like this:
 ]
 ```
 
-The `stubs/bosh/bosh_passwords.yml` should look like this:
+#### Output
 
-```yaml
-bosh_credentials:
-  agent_password: REPLACE_WITH_PASSWORD
-  director_password: REPLACE_WITH_PASSWORD
-  mbus_password: REPLACE_WITH_PASSWORD
-  nats_password: REPLACE_WITH_PASSWORD
-  redis_password: REPLACE_WITH_PASSWORD
-  postgres_password: REPLACE_WITH_PASSWORD
-  registry_password: REPLACE_WITH_PASSWORD
-```
+The script generates several artifacts in your deployment directory:
 
-The `stubs/cf/cf-stub.yml` will be your primary manifest stub for your Cloud Foundry deployment. Any changes you
-want to make should be made here. Certain values will be merged into this stub by default. See the `example_stubs/cf`
-directory for example stubs. Also read `example_stubs/cf/README` for instructions on filling out the stubs.
+* `artifacts/deployments/bosh.yml`: the deployment manifest for your BOSH instance
+* `artifacts/deployments/bosh-state.json`: an implementation detail of `bosh-init`;
+  used to determine things like whether it is deploying a new BOSH or updating an
+  existing one
+* `artifacts/keypair/id_rsa_bosh`: the private key created in your AWS
+  account that will be used for all deployments; you will need this if you ever
+  want to ssh into the BOSH instance or any of the VMs deployed by BOSH.
+* `generated-stubs/cf/director-uuid.yml`: a stub to be used in generating deployment manifests for
+  use with BOSH
+* `generated-stubs/cf/cf-databases.yml`: a stub to be used in generating the Cloud Foundry deployment
+  manifest containing data about the provisioned RDS instances
+* `generated-stubs/cf/cf-cloud-formation-inputs.json`: a stub to be used in generating the Cloud Foundry
+  deployment manifest, only created if the Optional Configuration for CloudFront are provided
+* `generated-stubs/cf/cf-resources.yml`: a stub to be used in generating the Cloud Foundry deployment
+  manifest containing data about the provisioned AWS stack, such as subnet IDs, security groups, etc.
+
+## Example Stub Templates for Deploying Cloud Foundry
+
+See the `example_stubs/cf` directory for example stub templates. Also read `example_stubs/cf/README` for instructions on filling out the stubs.
 
 [concourse-releases]: https://github.com/concourse/concourse/releases
 [bosh-init-docs]: https://bosh.io/docs/install-bosh-init.html
