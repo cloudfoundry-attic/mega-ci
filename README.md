@@ -38,6 +38,13 @@ information for your planned deployment as described below.
 * The `spiff` command line tool. The latest release can be found [here]
   [spiff-releases].
 
+* The `openssl` command line tool. 
+
+* The `certstrap` command line tool. This is used to generate the ssl certificates needed
+  for consul. This can be installed by running `go get -v github.com/square/certstrap`.
+
+Alternatively, you can use the Dockerfile included in this repository to create
+an environment with the necessary programs.
 
 ## Deployment Directory Details
 
@@ -70,6 +77,12 @@ bosh_credentials:
   redis_password: REPLACE_WITH_PASSWORD
   postgres_password: REPLACE_WITH_PASSWORD
   registry_password: REPLACE_WITH_PASSWORD
+```
+
+In addition, the bosh credentials yml can be generated with:
+
+```bash
+./scripts/generate_bosh_passwords
 ```
 
 ## Setting up Your AWS Environment and Deploying BOSH
@@ -368,6 +381,12 @@ bosh_credentials:
 The `stubs/cf/cf-stub.yml` will be your primary manifest stub for your Cloud Foundry deployment. Any changes you
 want to make should be made here. Certain values will be merged into this stub by default. See the `example_stubs/cf`
 directory for example stubs. Also read `example_stubs/cf/README` for instructions on filling out the stubs.
+
+In addition, the shared secrets needed for CF can be generated with:
+
+```bash
+./scripts/generate_shared_secrets_stub
+```
 
 [concourse-releases]: https://github.com/concourse/concourse/releases
 [bosh-init-docs]: https://bosh.io/docs/install-bosh-init.html

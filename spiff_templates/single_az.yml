@@ -1,6 +1,6 @@
 ---
 meta:
-  environment: REPLACE_WITH_DEPLOYMENT_NAME
+  environment: (( merge ))
 
 cf_databases: (( merge ))
 cf_resources: (( merge ))
@@ -51,7 +51,7 @@ resource_pools:
 properties:
   domain: (( cloud_formation_inputs.CFHostedZoneName ))
   ssl:
-    skip_cert_verify: false # REPLACE_WITH true if your ELB is using a self signed cert
+    skip_cert_verify: (( merge || false )) # REPLACE_WITH true if your ELB is using a self signed cert
   system_domain_organization: system
   app_domains: [(( cloud_formation_inputs.CFAppsDomainHostedZoneName ))]
   template_only:
@@ -87,53 +87,52 @@ properties:
   uaa:
     jwt:
       signing_key: |
-        REPLACE_WITH_RSA_PRIVATE_KEY
+        (( merge ))
       verification_key: |
-        REPLACE_WITH_RSA_PUBLIC_KEY
+        (( merge ))
     cc:
-      client_secret: REPLACE_WITH_PASSWORD
+      client_secret: (( merge ))
     admin:
-      client_secret: REPLACE_WITH_PASSWORD
+      client_secret: (( merge ))
     batch:
-      username: REPLACE_WITH_USERNAME
-      password: REPLACE_WITH_PASSWORD
+      username: (( merge ))
+      password: (( merge ))
     clients:
       login:
-        secret: REPLACE_WITH_PASSWORD
+        secret: (( merge ))
       notifications:
-        secret: REPLACE_WITH_PASSWORD
+        secret: (( merge ))
       doppler:
-        secret: REPLACE_WITH_PASSWORD
+        secret: (( merge ))
       cloud_controller_username_lookup:
-        secret: REPLACE_WITH_PASSWORD
+        secret: (( merge ))
       gorouter:
-        secret: REPLACE_WITH_PASSWORD
+        secret: (( merge ))
 
     scim:
-      users:
-      - admin|REPLACE_WITH_ADMIN_USER_PASSWORD|scim.write,scim.read,openid,cloud_controller.admin,doppler.firehose
+      users: (( merge ))
 
   nats:
     user: nats
-    password: REPLACE_WITH_PASSWORD
+    password: (( merge ))
     monitor_port: 9222
 
   cc:
-    bulk_api_password: REPLACE_WITH_PASSWORD
-    staging_upload_user: REPLACE_WITH_USERNAME
-    staging_upload_password: REPLACE_WITH_PASSWORD
-    db_encryption_key: REPLACE_WITH_PASSWORD
+    bulk_api_password: (( merge ))
+    staging_upload_user: (( merge ))
+    staging_upload_password: (( merge ))
+    db_encryption_key: (( merge ))
     resource_pool: ~
     droplets: ~
 
   router:
     status:
       user: router
-      password: REPLACE_WITH_PASSWORD
-    route_service_secret: REPLACE_WITH_PASSWORD
+      password: (( merge ))
+    route_service_secret: (( merge ))
 
   loggregator_endpoint:
-    shared_secret: REPLACE_WITH_PASSWORD
+    shared_secret: (( merge ))
 
   dea_next:
     disk_mb: 199000
@@ -148,14 +147,14 @@ properties:
     system_domain: (( domain ))
     client_secret: (( uaa.clients.gorouter.secret ))
     admin_user: admin
-    admin_password: REPLACE_WITH_ADMIN_USER_PASSWORD
+    admin_password: (( merge ))
     nodes: 3
     include_sso: false
     include_services: false
     include_logging: false
     include_v3: false
     include_routing: false
-    skip_ssl_validation: false # REPLACE_WITH true if your ELB is using a self signed cert
+    skip_ssl_validation: (( merge || false )) # REPLACE_WITH true if your ELB is using a self signed cert
     use_diego: false
     use_http: true
 
@@ -163,25 +162,20 @@ properties:
     api:  (( "api." domain ))
     apps_domain: (( app_domains ))
     user: admin
-    password: REPLACE_WITH_ADMIN_USER_PASSWORD
+    password: (( merge ))
     org: 'smoke-tests'
     space: 'smoke-tests'
     use_existing_org: true
-    skip_ssl_validation: false # REPLACE_WITH true if your ELB is using a self signed cert
+    skip_ssl_validation: (( merge || false )) # REPLACE_WITH true if your ELB is using a self signed cert
 
   consul:
-    encrypt_keys: [REPLACE_WITH_CONSUL_ENCRYPTION_KEY]
+    encrypt_keys: (( merge ))
     require_ssl: true
-    ca_cert: |
-      REPLACE_WITH_CONSUL_CA_CERT
-    server_cert: |
-      REPLACE_WITH_CONSUL_SERVER_CERT
-    server_key: |
-      REPLACE_WITH_CONSUL_SERVER_KEY
-    agent_cert: |
-      REPLACE_WITH_CONSUL_AGENT_CERT
-    agent_key: |
-      REPLACE_WITH_CONSUL_AGENT_KEY
+    ca_cert: (( merge ))
+    server_cert: (( merge ))
+    server_key: (( merge ))
+    agent_cert: (( merge ))
+    agent_key: (( merge ))
 jobs:
   - name: api_z2
     instances: 0
@@ -197,7 +191,7 @@ jobs:
     instances: 1
   - name: etcd_z2
     instances: 0
-  - name: hm9000_z2
+  - name: hm9000_z2 
     instances: 0
   - name: loggregator_trafficcontroller_z2
     instances: 0

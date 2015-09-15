@@ -1,0 +1,128 @@
+#/bin/bash
+set -e
+
+command -v openssl >/dev/null || { echo "openssl is required"; exit 1; }
+command -v git >/dev/null || { echo "git is required"; exit 1; }
+
+dir=$(dirname $0)
+generate_bosh_passwords="$dir/generate_bosh_passwords"
+generate_shared_secrets_stub="$dir/generate_shared_secrets_stub"
+generate_random_string="$dir/generate_random_string"
+
+: ${AWS_ACCESS_KEY_ID:?"Must set AWS_ACCESS_KEY_ID (e.g. AKIAIOSFODNN7EXAMPLE)"}
+: ${AWS_DEFAULT_REGION:?"Must set AWS_DEFAULT_REGION (e.g. us-east-1)"}
+: ${AWS_SECRET_ACCESS_KEY:?"Must set AWS_SECRET_ACCESS_KEY (e.g. wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY)"}
+: ${DEPLOYMENT_DIR:?"Must set DEPLOYMENT_DIR (e.g. ferret, will abort if exists)"}
+: ${DOMAIN_NAME:?"Must set DOMAIN_NAME that will point to CF (e.g. hello.com)"}
+
+if [ -d $DEPLOYMENT_DIR ]; then
+  echo "$DEPLOYMENT_DIR already exists. Aborting..."
+  exit
+fi
+
+echo "Creating directory structure..."
+mkdir -p $DEPLOYMENT_DIR/certs
+mkdir -p $DEPLOYMENT_DIR/cloud_formation
+mkdir -p $DEPLOYMENT_DIR/stubs/bosh
+mkdir -p $DEPLOYMENT_DIR/stubs/cf
+
+absolute_deployment_path="$( cd "$( dirname $DEPLOYMENT_DIR )" && echo "$PWD/$DEPLOYMENT_DIR" )"
+deployment_name=$(basename $absolute_deployment_path)
+
+echo "Creating bosh_passwords.yml..."
+$generate_bosh_passwords > $absolute_deployment_path/stubs/bosh/bosh_passwords.yml
+
+echo "Creating aws_environment file..."
+cat > $absolute_deployment_path/aws_environment <<EOF
+export AWS_DEFAULT_REGION="$AWS_DEFAULT_REGION"
+export AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"
+export AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"
+EOF
+
+echo "Creating cf-properties.json..."
+cat > $absolute_deployment_path/cloud_formation/cf-properties.json <<EOF
+[
+  {
+    "ParameterKey": "CFHostedZoneName",
+    "ParameterValue": "$DOMAIN_NAME"
+  },
+  {
+    "ParameterKey": "CFAppsDomainHostedZoneName",
+    "ParameterValue": "$DOMAIN_NAME"
+  },
+  {
+    "ParameterKey": "CCDBUsername",
+    "ParameterValue": "admin"
+  },
+  {
+    "ParameterKey": "CCDBPassword",
+    "ParameterValue": "$($generate_random_string)"
+  },
+  {
+    "ParameterKey": "UAADBUsername",
+    "ParameterValue": "admin"
+  },
+  {
+    "ParameterKey": "UAADBPassword",
+    "ParameterValue": "$($generate_random_string)"
+  }
+]
+EOF
+
+echo "Creating buckets-properties.json..."
+domain_name_s3_safe=$(echo $DOMAIN_NAME | sed -e 's/\./\-/')
+cat > $absolute_deployment_path/cloud_formation/buckets-properties.json <<EOF
+[
+  {
+    "ParameterKey": "CCBuildpacksBucketName",
+    "ParameterValue": "${domain_name_s3_safe}-cc-buildpacks"
+  },
+  {
+    "ParameterKey": "CCDropletsBucketName",
+    "ParameterValue": "${domain_name_s3_safe}-cc-droplets"
+  },
+  {
+    "ParameterKey": "CCPackagesBucketName",
+    "ParameterValue": "${domain_name_s3_safe}-cc-packages"
+  },
+  {
+    "ParameterKey": "CCResourcesBucketName",
+    "ParameterValue": "${domain_name_s3_safe}-cc-resources"
+  },
+  {
+    "ParameterKey": "AcceptanceTestLogsBucketName",
+    "ParameterValue": "$domain_name_s3_safe-cat-logs"
+  }
+]
+EOF
+
+echo "WARNING: Skipped setting up Cloud Front CDN (optional)."
+
+echo "Creating environment.yml"
+cat > $absolute_deployment_path/stubs/cf/environment.yml <<EOF
+meta:
+  environment: $deployment_name
+EOF
+
+echo "Creating shared_secrets.yml [this may take a few minutes]..."
+$generate_shared_secrets_stub > $absolute_deployment_path/stubs/cf/shared_secrets.yml
+
+echo "Creating self-signed.yml"
+cat > $absolute_deployment_path/stubs/cf/self-signed.yml <<EOF
+properties:
+  ssl:
+    skip_cert_verify: true
+  acceptance_tests:
+    skip_ssl_validation: true
+  smoke_tests:
+    skip_ssl_validation: true
+EOF
+
+echo "Creating self signed certificate..."
+openssl genrsa -out "$absolute_deployment_path/certs/cf.key" 1024
+chmod 400 "$absolute_deployment_path/certs/cf.key"
+openssl req -new -subj "/CN=*.$DOMAIN_NAME" -key "$absolute_deployment_path/certs/cf.key" -out "$absolute_deployment_path/certs/cf.csr"
+openssl x509 -req -in "$absolute_deployment_path/certs/cf.csr" -signkey "$absolute_deployment_path/certs/cf.key" -out "$absolute_deployment_path/certs/cf.pem"
+
+echo "Committing to git..."
+cd $absolute_deployment_path && git init && git add -A && git commit -m "init commit"

@@ -1,0 +1,23 @@
+#/bin/bash
+set -e
+command -v openssl >/dev/null || { echo "openssl is required"; exit 1; }
+
+dir=$(dirname $0)
+generate_random_string="$dir/generate_random_string"
+
+signing_key_location=$(mktemp || mktemp -t private)
+verification_key_location=$(mktemp || mktemp -t public)
+
+openssl genrsa -out $signing_key_location 2048 
+openssl rsa -in $signing_key_location -pubout > $verification_key_location
+
+signing_key=$(cat $signing_key_location)
+rm $signing_key_location
+verification_key=$(cat $verification_key_location)
+rm $verification_key_location
+
+cat << EOF
+$signing_key
+
+$verification_key
+EOF
