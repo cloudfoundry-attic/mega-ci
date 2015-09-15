@@ -48,7 +48,7 @@ my_deployment_dir/
 |- aws_environment
 |- stubs/
    |- bosh/
-   |  |- bosh_passwords.yml
+      |- bosh_passwords.yml
 ```
 
 The `aws_environment` file should look like this:
@@ -149,7 +149,7 @@ my_deployment_dir/
    |- datadog/
    |  |- datadog_stub.yml
    |- syslog/
-   |  |- syslog_stub.yml
+      |- syslog_stub.yml
 
 ```
 
