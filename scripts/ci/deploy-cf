@@ -20,6 +20,6 @@ pushd ../cf-release
   done
 popd
 
-./scripts/deploy aws ../cf-release ../etcd-release/*.tgz ../stub.yml
+./scripts/deploy aws ../cf-release ../etcd-release/*.tgz ../consul-release ../stub.yml
 
 cat outputs/manifests/cf.yml
