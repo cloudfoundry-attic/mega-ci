@@ -27,6 +27,6 @@ pushd ../etcd-release
   done
 popd
 
-./scripts/deploy aws ../cf-release ../etcd-release ../stub.yml
+./scripts/deploy aws ../cf-release ../etcd-release ../consul-release ../stub.yml
 
 cat outputs/manifests/cf.yml
