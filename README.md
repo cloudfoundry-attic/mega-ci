@@ -16,7 +16,6 @@ and secret information for your planned deployments.
 2. [Provisioning AWS for BOSH and Concourse, and Deploying BOSH](#provisioning-aws-for-bosh-and-concourse-and-deploying-bosh)
 3. [Deploying Concourse](#deploying-concourse)
 4. [Provisioning AWS for BOSH and Cloud Foundry, and Deploying BOSH](#provisioning-aws-for-bosh-and-cloud-foundry-and-deploying-bosh)
-5. [Example Stub Templates for Deploying Cloud Foundry](#example-stub-templates-for-deploying-cloud-foundry)
 
 ## General Requirements
 
@@ -407,10 +406,6 @@ The script generates several artifacts in your deployment directory:
   deployment manifest, only created if the Optional Configuration for CloudFront are provided
 * `generated-stubs/cf/cf-resources.yml`: a stub to be used in generating the Cloud Foundry deployment
   manifest containing data about the provisioned AWS stack, such as subnet IDs, security groups, etc.
-
-## Example Stub Templates for Deploying Cloud Foundry
-
-See the `example_stubs/cf` directory for example stub templates. Also read `example_stubs/cf/README` for instructions on filling out the stubs.
 
 [concourse-releases]: https://github.com/concourse/concourse/releases
 [bosh-init-docs]: https://bosh.io/docs/install-bosh-init.html
