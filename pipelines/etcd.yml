@@ -46,6 +46,12 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
+- name: consul-release
+  type: git
+  source:
+    branch: master
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry-incubator/consul-release.git
 - name: cf-release
   type: git
   source:
@@ -131,6 +137,7 @@ jobs:
     - get: cf-deployment
     - get: stemcell
       resource: aws-stemcell
+    - get: consul-release
   - task: deploy-etcd-cf
     file: mega-ci/scripts/ci/deploy-etcd-cf.yml
     config:
