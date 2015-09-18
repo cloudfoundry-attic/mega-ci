@@ -205,7 +205,7 @@ EOF
 
 # generate BOSH deployment manifest
 echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/cf-bosh.yml
-spiff merge $script_dir/../templates/cf-deployment/bosh-init.yml \
+spiff merge $script_dir/../templates/bosh/bosh-init.yml \
   $script_dir/../templates/cf-deployment/bosh.yml \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
