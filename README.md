@@ -274,7 +274,7 @@ my_deployment_dir/
 |  |- cf.key
 |- cloud_formation/
 |  |- buckets-properties.json
-|  |- (cf-properties.json, optional)
+|  |- cf-properties.json
 |- stubs/
    |- bosh/
       |- bosh_passwords.yml
@@ -344,29 +344,17 @@ The `cloud_formation/buckets-properties.json` file should look like this:
 ]
 ```
 
-#### Optional Configuration
-
-To configure Cloud Front as a CDN for your Resource Matching and Droplet blobstores:
- 
-1. Navigate to the Cloud Front configuration page in the AWS Console.
-2. Click `Origin Access Identity` in the left column.
-3. Click `Create Origin Access Identity`
-4. Click `Create` in the modal window.
-5. Copy the `ID` for the new identity, and use it as the `CloudFrontOriginAccessIdentityId` in `buckets-properties.json`
-6. At the top of the AWS Console, click your account name, then select `My Account` from the drop down.
-7. Copy the `Account Id` and use it as the `AwsAccountId` in `buckets-properties.json`
-
 The `cloud_formation/cf-properties.json` file should look like this:
 
 ```json
 [
   {
     "ParameterKey": "CFHostedZoneName",
-    "ParameterValue": "REPLACE_WITH_SYSTEM_DOMAIN_NAME_OF_THE_CLOUD_FOUNDRY_INSTALLATION"
+    "ParameterValue": "OPTIONAL-REPLACE_WITH_SYSTEM_DOMAIN_NAME_OF_THE_CLOUD_FOUNDRY_INSTALLATION"
   },
   {
     "ParameterKey": "CFAppsDomainHostedZoneName",
-    "ParameterValue": "REPLACE_WITH_THE_APPS_DOMAIN_NAME__CAN_BE_IDENTICAL_TO_THE_SYSTEM_DOMAIN_NAME"
+    "ParameterValue": "OPTIONAL-REPLACE_WITH_THE_APPS_DOMAIN_NAME-CAN_BE_IDENTICAL_TO_THE_SYSTEM_DOMAIN_NAME"
   },
   {
     "ParameterKey": "CCDBUsername",
@@ -386,6 +374,20 @@ The `cloud_formation/cf-properties.json` file should look like this:
   }
 ]
 ```
+
+Route53 Hosted Zones and Records will only be created for the system domain and apps domain if the corresponding properties are provided in the above file.
+
+#### Optional Configuration
+
+To configure Cloud Front as a CDN for your Resource Matching and Droplet blobstores:
+ 
+1. Navigate to the Cloud Front configuration page in the AWS Console.
+2. Click `Origin Access Identity` in the left column.
+3. Click `Create Origin Access Identity`
+4. Click `Create` in the modal window.
+5. Copy the `ID` for the new identity, and use it as the `CloudFrontOriginAccessIdentityId` in `buckets-properties.json`
+6. At the top of the AWS Console, click your account name, then select `My Account` from the drop down.
+7. Copy the `Account Id` and use it as the `AwsAccountId` in `buckets-properties.json`
 
 #### Output
 
