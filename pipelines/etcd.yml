@@ -99,6 +99,11 @@ jobs:
           SUBNET: EtcdSubnet
           SECURITY_GROUP: EtcdSecurityGroup
           STACK_NAME: concourse
+    - task: generate-property-overrides-turbulence
+      file: mega-ci/scripts/ci/generate-property-overrides-turbulence.yml
+      config:
+        params:
+          DEPLOYMENT_DIR: mega-ci
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats.yml
     config:
@@ -107,6 +112,7 @@ jobs:
         CPI_RELEASE_URL: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=30
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
+        PROPERTY_OVERRIDES_TURBULENCE: generate-property-overrides-turbulence/property-overrides-turbulence.yml
         BOSH_OPERATION_TIMEOUT: 20m
 
 - name: clean-deployment

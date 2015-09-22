@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -e -x
+
+source ~/.bashrc
+
+echo "Sourcing aws_environment"
+set +x
+source deployments-runtime/$DEPLOYMENT_DIR/aws_environment
+set -x
+echo "Done sourcing aws_environment"
+
+echo "Sourcing bosh_environment"
+set +x
+source deployments-runtime/$DEPLOYMENT_DIR/bosh_environment
+set -x
+echo "Done sourcing bosh_environment"
+
+mkdir generated-stubs
+
+set +x
+cat > generated-stubs/aws-credentials.yml <<EOF
+{
+  "AWSCredentials": {
+    "AWS_ZONE": "$AWS_ZONE",
+    "AWS_DEFAULT_REGION": "$AWS_DEFAULT_REGION",
+    "AWS_ACCESS_KEY_ID": "$AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY": "$AWS_SECRET_ACCESS_KEY"
+  }
+}
+EOF
+set -x
+
+cat > generated-stubs/bosh-director.yml <<EOF
+{
+  "bosh_director": "$BOSH_DIRECTOR"
+}
+EOF
+
+spiff merge mega-ci/templates/turbulence/turbulence-property-overrides.yml \
+  generated-stubs/aws-credentials.yml \
+  generated-stubs/bosh-director.yml \
+  deployments-runtime/$DEPLOYMENT_DIR/stubs/bosh/bosh_passwords.yml \
+  deployments-runtime/$DEPLOYMENT_DIR/stubs/etcd/turbulence-certificates.yml \
+  deployments-runtime/$DEPLOYMENT_DIR/generated-stubs/pipeline/cf-resources.yml \
+  > generated-stubs/property-overrides-turbulence.yml

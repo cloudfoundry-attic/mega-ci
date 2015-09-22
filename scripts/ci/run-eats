@@ -15,6 +15,7 @@ cat > eats_config.json <<EOF
   "bosh_target": "$BOSH_DIRECTOR",
   "iaas_settings_etcd_stub_path": "$PWD/$IAAS_SETTINGS_ETCD",
   "iaas_settings_turbulence_stub_path": "$PWD/$IAAS_SETTINGS_TURBULENCE",
+  "turbulence_properties_stub_path": "$PWD/$PROPERTY_OVERRIDES_TURBULENCE",
   "cpi_release_url": "$CPI_RELEASE_URL",
   "cpi_release_name": "$CPI_RELEASE_NAME",
   "bosh_operation_timeout": "$BOSH_OPERATION_TIMEOUT"
