@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e -x
+
+source ~/.bashrc
+
+cd cf-deployment
+
+./scripts/generate_blessed_versions ../stemcell/*.tgz ../cf-release ../etcd-release/*.tgz
+

@@ -38,6 +38,12 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
+- name: cf-deployment-test-bless
+  type: git
+  source:
+    branch: test-bless
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: aws-stemcell
   type: bosh-io-stemcell
   source:
@@ -122,3 +128,29 @@ jobs:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests-3/acceptance_tests(.*).tgz
+- name: bless
+  public: false
+  serial: true
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: cf-release
+      trigger: true
+      passed: [deploy-and-test-alfredo]
+    - get: etcd-release
+      trigger: true
+      passed: [deploy-and-test-alfredo]
+    - get: cf-deployment
+      passed: [deploy-and-test-alfredo]
+    - get: stemcell
+      resource: aws-stemcell
+      passed: [deploy-and-test-alfredo]
+    - get: consul-release
+      passed: [deploy-and-test-alfredo]
+  - task: create-blessing
+    file: mega-ci/scripts/ci/commit-blessing.yml
+  - put: cf-deployment-test-bless
+    params:
+      repository: bless/cf-deployment
+

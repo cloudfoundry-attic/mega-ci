@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: deployments-runtime
+  - name: cf-deployment
+  - name: cf-release
+  - name: consul-release
+  - name: etcd-release
+  - name: mega-ci
+  - name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/commit-blessing
+
+params:
+  # ENVIRONMENT:
+  # STUB_PATH:
+  # STUB_PARTS_PATH:
