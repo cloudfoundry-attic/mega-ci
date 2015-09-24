@@ -107,6 +107,10 @@ jobs:
       db: *db
       cpi_job: cpi
       max_threads: 10
+      ssl:
+        key: (( bosh_certs.key ))
+        cert: (( bosh_certs.crt ))
+
 
     hm:
       director_account:
@@ -145,6 +149,7 @@ cloud_provider:
     ntp: *ntp
 
 bosh_credentials: (( merge ))
+bosh_certs: (( merge ))
 AWSCredentials: (( merge ))
 Resources: (( merge ))
 SecurityGroups: (( merge ))

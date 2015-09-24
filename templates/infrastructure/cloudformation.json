@@ -405,6 +405,14 @@
       }
     },
 
+    "EtcdSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "EtcdSubnet" }
+      }
+    },
+
     "CFSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {

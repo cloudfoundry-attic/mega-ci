@@ -3,9 +3,9 @@ AWSCredentials:
   AWS_SECRET_ACCESS_KEY: (( merge ))
   AWS_DEFAULT_REGION: (( merge ))
 
-bosh_credentials:
-  director_password: (( merge ))
-  registry_password: (( merge ))
+bosh_config:
+  director: (( merge ))
+  password: (( merge ))
 
 bosh_director: (( merge ))
 
@@ -18,14 +18,15 @@ turbulence_certificates:
   ca_cert: (( merge ))
 
 property_overrides:
+  nats_password: password
   turbulence_api:
     password: turbulence-password
     certificate: (( turbulence_certificates.certificate ))
     private_key: (( turbulence_certificates.private_key ))
     director:
-      host: (( bosh_director ))
+      host: (( bosh_config.director ))
       username: admin
-      password: (( bosh_credentials.director_password ))
+      password: (( bosh_config.password ))
       ca_cert: (( turbulence_certificates.ca_cert ))
   aws:
     access_key_id: (( AWSCredentials.AWS_ACCESS_KEY_ID ))
@@ -36,6 +37,6 @@ property_overrides:
     region: (( AWSCredentials.AWS_DEFAULT_REGION ))
   registry:
     username: admin
-    password: (( bosh_credentials.registry_password ))
-    host: 10.0.0.6
+    password: password
+    host: 127.0.0.1
     port: 25777

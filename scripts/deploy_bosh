@@ -14,6 +14,7 @@ command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
 command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 command -v spiff >/dev/null || { echo "spiff is required"; exit 1; }
+command -v openssl >/dev/null || { echo "openssl is required"; exit 1; }
 
 set +x
   source $deployment_dir/aws_environment
@@ -34,10 +35,21 @@ set +x
   fi
 set -x
 
+mkdir -p ${deployment_dir}/artifacts/certs
 mkdir -p ${deployment_dir}/artifacts/keypair
 mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p ${deployment_dir}/generated-stubs/pipeline
 mkdir -p generated-stubs
+
+# create bosh ssl certificate
+
+if [ ! -e ${deployment_dir}/certs/rootCA.key ]; then
+  openssl genrsa -out ${deployment_dir}/certs/rootCA.key 2048
+fi
+
+if [ ! -e ${deployment_dir}/certs/rootCA.pem ]; then
+  yes "" | openssl req -x509 -new -nodes -key ${deployment_dir}/certs/rootCA.key -out ${deployment_dir}/certs/rootCA.pem -days 99999
+fi
 
 # create keypair
 if ! aws ec2 describe-key-pairs --key-names bosh; then
@@ -107,6 +119,34 @@ aws cloudformation describe-stack-resources --stack-name concourse \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
 
+BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
+# generate certificate for bosh director
+if [ ! -e ${deployment_dir}/certs/bosh.crt ]; then
+  cat >generated-stubs/openssl-exts.conf <<-EOL
+extensions = san
+[san]
+subjectAltName = IP:${BOSH_IP}
+EOL
+
+  openssl req -new -nodes -newkey rsa:2048 \
+    -out generated-stubs/bosh.csr -keyout ${deployment_dir}/certs/bosh.key \
+    -subj "/C=US/O=BOSH/CN=${BOSH_IP}"
+
+  openssl x509 -req -in generated-stubs/bosh.csr \
+    -CA ${deployment_dir}/certs/rootCA.pem -CAkey ${deployment_dir}/certs/rootCA.key -CAcreateserial \
+    -out ${deployment_dir}/certs/bosh.crt -days 99999 \
+    -extfile generated-stubs/openssl-exts.conf
+fi
+
+cat > generated-stubs/bosh-certs.json <<EOF
+{
+  "bosh_certs": {
+    "key": `cat ${deployment_dir}/certs/bosh.key | jq -R -s .`,
+    "crt": `cat ${deployment_dir}/certs/bosh.crt | jq -R -s .`
+  }
+}
+EOF
+
 # generate stub for BOSH Security Group Name
 BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
 BOSH_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${BOSH_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
@@ -156,6 +196,7 @@ spiff merge $script_dir/../templates/bosh/bosh-init.yml \
   $script_dir/../templates/infrastructure/bosh.yml \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
+  generated-stubs/bosh-certs.json \
   generated-stubs/security-groups.yml \
   ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
   >> ${deployment_dir}/artifacts/deployments/bosh.yml
@@ -164,7 +205,6 @@ spiff merge $script_dir/../templates/bosh/bosh-init.yml \
 bosh-init deploy ${deployment_dir}/artifacts/deployments/bosh.yml
 
 # display result
-BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 echo "BOSH director is at $BOSH_IP"
 
 # generate director uuid stub for cf

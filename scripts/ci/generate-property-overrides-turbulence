@@ -31,15 +31,18 @@ cat > generated-stubs/aws-credentials.yml <<EOF
 EOF
 set -x
 
-cat > generated-stubs/bosh-director.yml <<EOF
+cat > generated-stubs/bosh-config.yml <<EOF
 {
-  "bosh_director": "$BOSH_DIRECTOR"
+  "bosh_config": {
+    "director": "$BOSH_DIRECTOR",
+    "password": "$BOSH_PASSWORD"
+  }
 }
 EOF
 
 spiff merge mega-ci/templates/turbulence/turbulence-property-overrides.yml \
   generated-stubs/aws-credentials.yml \
-  generated-stubs/bosh-director.yml \
+  generated-stubs/bosh-config.yml \
   deployments-runtime/$DEPLOYMENT_DIR/stubs/bosh/bosh_passwords.yml \
   deployments-runtime/$DEPLOYMENT_DIR/stubs/etcd/turbulence-certificates.yml \
   deployments-runtime/$DEPLOYMENT_DIR/generated-stubs/pipeline/cf-resources.yml \
