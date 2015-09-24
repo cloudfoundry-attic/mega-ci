@@ -7,8 +7,6 @@ bosh_config:
   director: (( merge ))
   password: (( merge ))
 
-bosh_director: (( merge ))
-
 cf_resources:
   security_group_name: (( merge ))
 
