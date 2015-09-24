@@ -58,11 +58,7 @@ fi
 
 # install certs for CF ELB
 if [ -e ${deployment_dir}/certs/cf.key ] && ! aws iam get-server-certificate --server-certificate-name cf; then
-  if [ -e ${deployment_dir}/certs/cf_chain.pem ]; then
-    aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem  --certificate-chain file://${deployment_dir}/certs/cf_chain.pem
-  else
-    aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
-  fi
+  aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
 fi
 
 # install certs for Concourse ELB
