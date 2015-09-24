@@ -9,6 +9,7 @@ inputs:
   - name: etcd-release
   - name: generate-iaas-settings-etcd
   - name: generate-iaas-settings-turbulence
+  - name: generate-property-overrides-turbulence
 
 run:
   path: mega-ci/scripts/ci/run-eats

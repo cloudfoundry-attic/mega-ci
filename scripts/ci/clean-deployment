@@ -13,13 +13,13 @@ set -x
 bosh target $BOSH_DIRECTOR
 
 echo "Cleaning etcd deployments"
-etcd_deployments=$(bosh deployments | grep -o 'etcd-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | uniq
+etcd_deployments=$(bosh deployments | grep -o 'etcd-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | uniq)
 for i in $etcd_deployments; do
   bosh -n delete deployment $i
 done
 
 echo "Cleaning turbulence deployments"
-turbulence_deployments=$(bosh deployments | grep -o 'turb-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | uniq
+turbulence_deployments=$(bosh deployments | grep -o 'turb-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | uniq)
 for i in $turbulence_deployments; do
   bosh -n delete deployment $i
 done
