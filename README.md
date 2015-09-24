@@ -75,6 +75,12 @@ For this script, it must have at least the following minimal structure.
 ```
 my_deployment_dir/
 |- aws_environment
+|- certs/
+|  |- (cf.pem, optional)
+|  |- (cf.key, optional)
+|  |- concourse.pem
+|  |- concourse.key
+|  |- (concourse_chain.pem, optional)
 |- cloud_formation/
 |  |- (properties.json, optional)
 |- stubs/
@@ -90,6 +96,16 @@ export AWS_ACCESS_KEY_ID=REPLACE_ME
 export AWS_SECRET_ACCESS_KEY=REPLACE_ME
 ```
 
+You need an SSL certificate for the domain where Concourse will be accessible. The
+key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. If
+there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
+You can generate a self signed cert if needed:
+
+* `openssl genrsa -out concourse.key 1024`
+* `openssl req -new -key concourse.key -out concourse.csr` For the Common Name, you must enter your self signed domain.
+* `openssl x509 -req -in concourse.csr -signkey concourse.key -out concourse.pem`
+* Copy `concourse.pem` and `concourse.key` into the `certs` directory.
+
 The `stubs/bosh/bosh_passwords.yml` should look like this:
 
 ```yaml
@@ -104,6 +120,13 @@ bosh_credentials:
 ```
 
 #### Optional Configuration
+
+If you want to deploy full Cloud Foundry into the same AWS stack where you will deploy Concourse, you shold provide an SSL certificate for the domain where Cloud Foundry will be accessible.  If you provide these, the cert and pem will be uploaded to your AWS account. The script will look for the files at `certs/cf.key` and `certs/cf.pem`. You can generate a self signed cert if needed:
+
+* `openssl genrsa -out cf.key 1024`
+* `openssl req -new -key cf.key -out cf.csr` For the Common Name, you must enter "\*." followed by your self signed domain.
+* `openssl x509 -req -in cf.csr -signkey cf.key -out cf.pem`
+* Copy `cf.pem` and `cf.key` into the certs directory.
 
 The optional `cloud_formation/properties.json` file should look like this:
 
@@ -161,10 +184,7 @@ For this script, it must have at least the following minimal structure.
 ```
 my_deployment_dir/
 |- aws_environment
-|- certs/
-|  |- concourse.pem
-|  |- concourse.key
-|  |- (concourse_chain.pem, optional)
+|- bosh_environment
 |- stubs/
    |- concourse/
    |  |- atc_credentials.yml
@@ -176,15 +196,21 @@ my_deployment_dir/
 
 ```
 
-You need an SSL certificate for the domain where Concourse will be accessible. The
-key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. If
-there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
-You can generate a self signed cert if needed:
-                                                                             
-* `openssl genrsa -out concourse.key 1024`
-* `openssl req -new -key concourse.key -out concourse.csr` For the Common Name, you must enter your self signed domain.
-* `openssl x509 -req -in concourse.csr -signkey concourse.key -out concourse.pem`
-* Copy `concourse.pem` and `concourse.key` into the certs directory.
+The `aws_environment` file should look like this:
+
+```bash
+export AWS_DEFAULT_REGION=REPLACE_ME # e.g. us-east-1
+export AWS_ACCESS_KEY_ID=REPLACE_ME
+export AWS_SECRET_ACCESS_KEY=REPLACE_ME
+```
+
+The `bosh_environment` file should provide address and credentials of the BOSH director you wish to use to deploy Concourse:
+
+```bash
+export BOSH_USER=REPLACE_ME
+export BOSH_PASSWORD=REPLACE_ME
+export BOSH_DIRECTOR=https://REPLACE_ME_WITH_BOSH_DIRECTOR_IP:25555
+```
 
 The `stubs/concourse/atc_credentials.yml` file should look like this:
 ```yaml
