@@ -37,6 +37,8 @@ and secret information for your planned deployments.
 * The `spiff` command line tool. The latest release can be found [here]
   [spiff-releases].
 
+* The `openssl` command line tool.
+
 ## Provisioning AWS for BOSH and Concourse, and Deploying BOSH
 
 #### Usage
@@ -155,6 +157,10 @@ The script generates several artifacts in your deployment directory:
 * `artifacts/deployments/bosh-state.json`: an implementation detail of `bosh-init`;
   used to determine things like whether it is deploying a new BOSH or updating an
   existing one
+* `artifacts/certs/rootCA.[key,pem,srl]`: The root signing key used for 
+  creating the BOSH SSL certificate.
+* `artifacts/certs/bosh.[crt,key]`: The SSL certificate and key used for BOSH.
+  The certificate Common Name is the IP address of the BOSH director.
 * `artifacts/keypair/id_rsa_bosh`: the private key created in your AWS
   account that will be used for all deployments; you will need this if you ever
   want to ssh into the BOSH instance or any of the VMs deployed by BOSH.

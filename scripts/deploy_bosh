@@ -43,12 +43,12 @@ mkdir -p generated-stubs
 
 # create bosh ssl certificate
 
-if [ ! -e ${deployment_dir}/certs/rootCA.key ]; then
-  openssl genrsa -out ${deployment_dir}/certs/rootCA.key 2048
+if [ ! -e ${deployment_dir}/artifacts/certs/rootCA.key ]; then
+  openssl genrsa -out ${deployment_dir}/artifacts/certs/rootCA.key 2048
 fi
 
-if [ ! -e ${deployment_dir}/certs/rootCA.pem ]; then
-  yes "" | openssl req -x509 -new -nodes -key ${deployment_dir}/certs/rootCA.key -out ${deployment_dir}/certs/rootCA.pem -days 99999
+if [ ! -e ${deployment_dir}/artifacts/certs/rootCA.pem ]; then
+  yes "" | openssl req -x509 -new -nodes -key ${deployment_dir}/artifacts/certs/rootCA.key -out ${deployment_dir}/artifacts/certs/rootCA.pem -days 99999
 fi
 
 # create keypair
@@ -117,7 +117,7 @@ aws cloudformation describe-stack-resources --stack-name concourse \
 
 BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
 # generate certificate for bosh director
-if [ ! -e ${deployment_dir}/certs/bosh.crt ]; then
+if [ ! -e ${deployment_dir}/artifacts/certs/bosh.crt ]; then
   cat >generated-stubs/openssl-exts.conf <<-EOL
 extensions = san
 [san]
@@ -125,20 +125,20 @@ subjectAltName = IP:${BOSH_IP}
 EOL
 
   openssl req -new -nodes -newkey rsa:2048 \
-    -out generated-stubs/bosh.csr -keyout ${deployment_dir}/certs/bosh.key \
+    -out generated-stubs/bosh.csr -keyout ${deployment_dir}/artifacts/certs/bosh.key \
     -subj "/C=US/O=BOSH/CN=${BOSH_IP}"
 
   openssl x509 -req -in generated-stubs/bosh.csr \
-    -CA ${deployment_dir}/certs/rootCA.pem -CAkey ${deployment_dir}/certs/rootCA.key -CAcreateserial \
-    -out ${deployment_dir}/certs/bosh.crt -days 99999 \
+    -CA ${deployment_dir}/artifacts/certs/rootCA.pem -CAkey ${deployment_dir}/artifacts/certs/rootCA.key -CAcreateserial \
+    -out ${deployment_dir}/artifacts/certs/bosh.crt -days 99999 \
     -extfile generated-stubs/openssl-exts.conf
 fi
 
 cat > generated-stubs/bosh-certs.json <<EOF
 {
   "bosh_certs": {
-    "key": `cat ${deployment_dir}/certs/bosh.key | jq -R -s .`,
-    "crt": `cat ${deployment_dir}/certs/bosh.crt | jq -R -s .`
+    "key": `cat ${deployment_dir}/artifacts/certs/bosh.key | jq -R -s .`,
+    "crt": `cat ${deployment_dir}/artifacts/certs/bosh.crt | jq -R -s .`
   }
 }
 EOF
