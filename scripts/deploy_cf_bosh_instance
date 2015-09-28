@@ -38,11 +38,8 @@ deploy_bosh_and_cf() {
 wait_for_deployment() {
   DEPLOYMENT_NAME=$1
 
-  start_time_in_s=$(date +%s)
-  wait_time_in_s=$((30 * 60))
-  deadline_in_s=$(($start_time_in_s + $wait_time_in_s))
   while aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep IN_PROGRESS ; do
-    echo "CloudFormation stack 'cf-deployment' still in progress..."
+    echo "CloudFormation stack '${DEPLOYMENT_NAME}' still in progress..."
     sleep 15
   done
 
@@ -65,7 +62,9 @@ if [ $# -ne 1 ]; then
   echo 'Expected 1 argument (path to deployment directory), received $#'
   exit 1
 fi
-deployment_dir=$1
+
+#remove trailing slash
+deployment_dir=${1%/}
 
 command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
@@ -96,14 +95,26 @@ mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p ${deployment_dir}/generated-stubs/cf
 mkdir -p generated-stubs
 
+source ${script_dir}/common/*
+
 # create keypair
 if ! aws ec2 describe-key-pairs --key-names bosh; then
   aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > ${deployment_dir}/artifacts/keypair/id_rsa_bosh
 fi
 
 # install certs for CF ELB
+set +e
+CF_HOSTNAME=$(cat ${deployment_dir}/cloud_formation/cf-properties.json | \
+  jq -r '.|map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | $body | .CFHostedZoneName' | grep -v "^null$" | grep -o ".*[^.]")
+set -e
+
 if ! aws iam get-server-certificate --server-certificate-name cf; then
-  aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
+  if [ ! -e ${deployment_dir}/certs/cf.pem -a -n ${CF_HOSTNAME} ]; then
+    generate_certificate "${deployment_dir}/certs" "cf" ${CF_HOSTNAME}
+  fi
+  if [ -e ${deployment_dir}/certs/cf.pem ]; then
+    aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
+  fi
 fi
 
 # deploy cloud formation templates

@@ -8,7 +8,9 @@ if [ $# -ne 1 ]; then
   echo 'Expected 1 argument (path to deployment directory), received $#'
   exit 1
 fi
-deployment_dir=$1
+
+#remove trailing slash
+deployment_dir=${1%/}
 
 command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh >/dev/null || { echo "bosh is required"; exit 1; }

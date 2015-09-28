@@ -306,8 +306,8 @@ For this script, it must have at least the following minimal structure.
 my_deployment_dir/
 |- aws_environment
 |- certs/
-|  |- cf.pem
-|  |- cf.key
+|  |- (cf.pem, optional)
+|  |- (cf.key, optional)
 |- cloud_formation/
 |  |- buckets-properties.json
 |  |- cf-properties.json
@@ -336,14 +336,6 @@ bosh_credentials:
   postgres_password: REPLACE_WITH_PASSWORD
   registry_password: REPLACE_WITH_PASSWORD
 ```
-
-You need an SSL certificate for the domain where Cloud Foundry will be accessible. The key and pem file must 
-exist at `certs/cf.key` and `certs/cf.pem`. You can generate a self signed cert if needed:
-
-* `openssl genrsa -out cf.key 1024`
-* `openssl req -new -key cf.key -out cf.csr` For the Common Name, you must enter "\*." followed by your self signed domain.
-* `openssl x509 -req -in cf.csr -signkey cf.key -out cf.pem`
-* Copy `cf.pem` and `cf.key` into the certs directory.
 
 The `cloud_formation/buckets-properties.json` file should look like this:
 
@@ -414,6 +406,10 @@ The `cloud_formation/cf-properties.json` file should look like this:
 Route53 Hosted Zones and Records will only be created for the system domain and apps domain if the corresponding properties are provided in the above file.
 
 #### Optional Configuration
+
+If you want to support SSL, an SSL certificate for the domain where Cloud Foundry will be accessible is required.
+If you do not provide a certificate, but provide the `CFHostedZoneName` in `cf-properites.json`, one will be created
+for you. If you are providing your own certificate, the key and pem file must exist at `certs/cf.key` and `certs/cf.pem`.
 
 To configure Cloud Front as a CDN for your Resource Matching and Droplet blobstores:
  

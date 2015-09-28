@@ -8,7 +8,9 @@ if [ $# -ne 1 ]; then
   echo "Expected 1 argument (path to deployment directory), received $#"
   exit 1
 fi
-deployment_dir=$1
+
+#remove trailing slash
+deployment_dir=${1%/}
 
 command -v aws >/dev/null || { echo "aws is required"; exit 1; }
 command -v bosh-init >/dev/null || { echo "bosh-init is required"; exit 1; }
@@ -41,19 +43,7 @@ mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p ${deployment_dir}/generated-stubs/pipeline
 mkdir -p generated-stubs
 
-function generate_certificate() {
-  cert_folder=$1
-  cert_name=$2
-  cert_common_name=$3
-
-  openssl req -new -nodes -newkey rsa:2048 \
-    -out generated-stubs/#{cert_name}.csr -keyout ${cert_folder}/${cert_name}.key \
-    -subj "/CN=${cert_common_name}"
-
-  openssl x509 -req -in generated-stubs/#{cert_name}.csr \
-    -signkey ${cert_folder}/${cert_name}.key \
-    -days 99999 -out ${cert_folder}/${cert_name}.pem
-}
+source ${script_dir}/common/*
 
 # create bosh ssl certificate
 
@@ -76,15 +66,18 @@ if [ -e ${deployment_dir}/certs/cf.key ] && ! aws iam get-server-certificate --s
 fi
 
 # install certs for Concourse ELB
-CONCOURSE_HOSTNAME=$(cat /Users/pivotal/workspace/deployments-runtime/mega-ci/cloud_formation/properties.json | \
-  jq -r '.|map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | $body | .ELBRecordSetName' | grep -o ".*[^.]")
+set +e
+CONCOURSE_HOSTNAME=$(cat ${deployment_dir}/cloud_formation/properties.json | \
+  jq -r '.|map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | $body | .ELBRecordSetName' | grep -v "^null$" | grep -o ".*[^.]")
+set -e
+
 if ! aws iam get-server-certificate --server-certificate-name concourse; then
   if [ -e ${deployment_dir}/certs/concourse_chain.pem ]; then
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/certs/concourse.key --certificate-body file://${deployment_dir}/certs/concourse.pem  --certificate-chain file://${deployment_dir}/certs/concourse_chain.pem
   elif [ -e ${deployment_dir}/certs/concourse.pem ]; then
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/certs/concourse.key --certificate-body file://${deployment_dir}/certs/concourse.pem
   elif [ -n ${CONCOURSE_HOSTNAME} ]; then
-    generate_certificate "${deployment_dir}/cert" "concourse" ${CONCOURSE_HOSTNAME}
+    generate_certificate "${deployment_dir}/certs" "concourse" ${CONCOURSE_HOSTNAME}
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/certs/concourse.key --certificate-body file://${deployment_dir}/certs/concourse.pem
   fi
 fi
