@@ -39,6 +39,12 @@ resources:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
+- name: cf-deployment-develop
+  type: git
+  source:
+    branch: develop
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: aws-stemcell
   type: bosh-io-stemcell
   source:
@@ -137,6 +143,8 @@ jobs:
       trigger: true
       passed: [deploy-and-test-alfredo]
     - get: cf-deployment
+    - get: release-repo
+      resource: cf-deployment-develop
     - get: stemcell
       resource: aws-stemcell
       passed: [deploy-and-test-alfredo]
@@ -147,4 +155,9 @@ jobs:
   - put: cf-deployment
     params:
       repository: create-blessing/cf-deployment
+  - task: merge-master-into-develop
+    file: mega-ci/scripts/ci/merge-master-into-develop.yml
+  - put: cf-deployment-develop
+    params:
+      repository: merge-master-into-develop/release-repo
 
