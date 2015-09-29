@@ -5,7 +5,9 @@ source ~/.bashrc
 
 cd release-repo
 
-cp ../runtime-credentials/$PRIVATE_YML_PATH ./config
+set +x
+./scripts/configure-aws ../deployments-runtime/oss-aws ./config
+set -x
 
 for i in {1..5}; do
   bosh -n create release --with-tarball --final

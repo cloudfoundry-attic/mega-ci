@@ -172,7 +172,7 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: runtime-credentials
+    - get: deployments-runtime
     - get: release-repo
       resource: etcd-release-develop
       passed: [deploy-and-test-with-cf]
@@ -182,7 +182,6 @@ jobs:
     config:
       params:
         RELEASE_NAME: etcd
-        PRIVATE_YML_PATH: etcd-release/private.yml
   - put: etcd-release-master
     params:
       repository: create-final-release/release-repo
