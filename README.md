@@ -64,7 +64,7 @@ deployment directory (see Requirements below) that looks like this:
 ```bash
 export BOSH_USER=REPLACE_ME
 export BOSH_PASSWORD=REPLACE_ME
-export BOSH_DIRECTOR=https://REPLACE_ME_WITH_BOSH_DIRECTOR_IP:25555
+export BOSH_DIRECTOR=REPLACE_ME_WITH_BOSH_DIRECTOR_IP
 ```
 
 This file will be sourced by the script which deploys Concourse.
@@ -87,7 +87,7 @@ my_deployment_dir/
 |  |- (properties.json, optional)
 |- stubs/
    |- bosh/
-      |- bosh_passwords.yml
+      |- (bosh_passwords.yml, optional)
 ```
 
 The `aws_environment` file should look like this:
@@ -98,7 +98,10 @@ export AWS_ACCESS_KEY_ID=REPLACE_ME
 export AWS_SECRET_ACCESS_KEY=REPLACE_ME
 ```
 
-The `stubs/bosh/bosh_passwords.yml` should look like this:
+#### Optional Configuration
+
+The `stubs/bosh/bosh_passwords.yml` contains internal BOSH passwords. If you do not provide one, one will be
+generated with random passwords. The file should look like this:
 
 ```yaml
 bosh_credentials:
@@ -110,8 +113,6 @@ bosh_credentials:
   postgres_password: REPLACE_WITH_PASSWORD
   registry_password: REPLACE_WITH_PASSWORD
 ```
-
-#### Optional Configuration
 
 An SSL certificate for the domain where Concourse will be accessible is required. 
 If you do not provide a certificate, one will be created for you. The
@@ -197,7 +198,7 @@ my_deployment_dir/
 |- bosh_environment
 |- stubs/
    |- concourse/
-   |  |- atc_credentials.yml
+   |  |- (atc_credentials.yml, optional)
    |  |- binary_urls.json
    |- datadog/
    |  |- (datadog_stub.yml, optional)
@@ -219,10 +220,25 @@ The `bosh_environment` file should provide address and credentials of the BOSH d
 ```bash
 export BOSH_USER=REPLACE_ME
 export BOSH_PASSWORD=REPLACE_ME
-export BOSH_DIRECTOR=https://REPLACE_ME_WITH_BOSH_DIRECTOR_IP:25555
+export BOSH_DIRECTOR=REPLACE_ME_WITH_BOSH_DIRECTOR_IP
 ```
 
-The `stubs/concourse/atc_credentials.yml` file should look like this:
+Finally, the `stubs/concourse/binary_urls.json` should look something like this:
+
+```json
+{
+  "stemcell": "https://d26ekeud912fhb.cloudfront.net/bosh-stemcell/aws/light-bosh-stemcell-3087-aws-xen-hvm-ubuntu-trusty-go_agent.tgz",
+  "concourse_release": "https://bosh.io/d/github.com/concourse/concourse?v=0.63.0",
+  "garden_release": "https://bosh.io/d/github.com/cloudfoundry-incubator/garden-linux-release?v=0.305.0"
+}
+```
+
+You can find the latest stemcells [here][bosh-stemcells]. Concourse (and associated garden releases) can be found [here][concourse-releases].
+
+#### Optional Configuration
+
+The `stubs/concourse/atc_credentials.yml` contains the basic auth credentials you will need to access the Concourse
+web interface. If you do not provide a file, one will be generated with random passwords. The file should look like this:
 ```yaml
 atc_credentials:
   basic_auth_username: REPLACE_ME
@@ -231,20 +247,6 @@ atc_credentials:
   db_user: REPLACE_ME
   db_password: REPLACE_ME
 ```
-
-Finally, the `stubs/concourse/binary_urls.json` should look something like this:
-
-```json
-{
-  "stemcell": "https://d26ekeud912fhb.cloudfront.net/bosh-stemcell/aws/light-bosh-stemcell-3068-aws-xen-hvm-ubuntu-trusty-go_agent.tgz",
-  "concourse_release": "https://bosh.io/d/github.com/concourse/concourse?v=0.62.0",
-  "garden_release": "https://bosh.io/d/github.com/cloudfoundry-incubator/garden-linux-release?v=0.303.0"
-}
-```
-
-You can find the latest stemcells [here][bosh-stemcells]. Concourse (and associated garden releases) can be found [here][concourse-releases].
-
-#### Optional Configuration
 
 Concourse can optionally be configured to send metrics to datadog by adding your
 datadog API key to datadog_stub with this format:
@@ -310,10 +312,11 @@ my_deployment_dir/
 |  |- (cf.key, optional)
 |- cloud_formation/
 |  |- buckets-properties.json
-|  |- cf-properties.json
+|  |- (cf-database_credentials.json, optional)
+|  |- (cf-properties.json, optional)
 |- stubs/
    |- bosh/
-      |- bosh_passwords.yml
+      |- (bosh_passwords.yml, optional)
 ```
 
 The `aws_environment` file should look like this:
@@ -322,19 +325,6 @@ The `aws_environment` file should look like this:
 export AWS_DEFAULT_REGION=REPLACE_ME # e.g. us-east-1
 export AWS_ACCESS_KEY_ID=REPLACE_ME
 export AWS_SECRET_ACCESS_KEY=REPLACE_ME
-```
-
-The `stubs/bosh/bosh_passwords.yml` file should look like this:
-
-```yaml
-bosh_credentials:
-  agent_password: REPLACE_WITH_PASSWORD
-  director_password: REPLACE_WITH_PASSWORD
-  mbus_password: REPLACE_WITH_PASSWORD
-  nats_password: REPLACE_WITH_PASSWORD
-  redis_password: REPLACE_WITH_PASSWORD
-  postgres_password: REPLACE_WITH_PASSWORD
-  registry_password: REPLACE_WITH_PASSWORD
 ```
 
 The `cloud_formation/buckets-properties.json` file should look like this:
@@ -372,18 +362,13 @@ The `cloud_formation/buckets-properties.json` file should look like this:
 ]
 ```
 
-The `cloud_formation/cf-properties.json` file should look like this:
+#### Optional Configuration
+
+The `cloud_formation/cf-database-credentials.json` contains database credentials used for creating RDS instances. If you
+do not provide one, one will be generated with random credentials. The file should look like this:
 
 ```json
 [
-  {
-    "ParameterKey": "CFHostedZoneName",
-    "ParameterValue": "OPTIONAL-REPLACE_WITH_SYSTEM_DOMAIN_NAME_OF_THE_CLOUD_FOUNDRY_INSTALLATION"
-  },
-  {
-    "ParameterKey": "CFAppsDomainHostedZoneName",
-    "ParameterValue": "OPTIONAL-REPLACE_WITH_THE_APPS_DOMAIN_NAME-CAN_BE_IDENTICAL_TO_THE_SYSTEM_DOMAIN_NAME"
-  },
   {
     "ParameterKey": "CCDBUsername",
     "ParameterValue": "CHOOSE_A_USERNAME_FOR_THE_CCDB_RDS_DATABASE"
@@ -403,9 +388,35 @@ The `cloud_formation/cf-properties.json` file should look like this:
 ]
 ```
 
-Route53 Hosted Zones and Records will only be created for the system domain and apps domain if the corresponding properties are provided in the above file.
+The `cloud_formation/cf-properties.json` contains the System and Apps domain for the CF installation. If you do not
+provide one, Route53 Hosted Zones and Records will only not be created for you. The file should look like this:
 
-#### Optional Configuration
+```json
+[
+  {
+    "ParameterKey": "CFHostedZoneName",
+    "ParameterValue": "OPTIONAL-REPLACE_WITH_SYSTEM_DOMAIN_NAME_OF_THE_CLOUD_FOUNDRY_INSTALLATION"
+  },
+  {
+    "ParameterKey": "CFAppsDomainHostedZoneName",
+    "ParameterValue": "OPTIONAL-REPLACE_WITH_THE_APPS_DOMAIN_NAME-CAN_BE_IDENTICAL_TO_THE_SYSTEM_DOMAIN_NAME"
+  }
+]
+```
+
+The `stubs/bosh/bosh_passwords.yml` contains internal BOSH passwords. If you do not provide one, one will be
+generated with random passwords. The file should look like this:
+
+```yaml
+bosh_credentials:
+  agent_password: REPLACE_WITH_PASSWORD
+  director_password: REPLACE_WITH_PASSWORD
+  mbus_password: REPLACE_WITH_PASSWORD
+  nats_password: REPLACE_WITH_PASSWORD
+  redis_password: REPLACE_WITH_PASSWORD
+  postgres_password: REPLACE_WITH_PASSWORD
+  registry_password: REPLACE_WITH_PASSWORD
+```
 
 If you want to support SSL, an SSL certificate for the domain where Cloud Foundry will be accessible is required.
 If you do not provide a certificate, but provide the `CFHostedZoneName` in `cf-properites.json`, one will be created

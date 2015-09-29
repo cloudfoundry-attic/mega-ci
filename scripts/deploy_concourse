@@ -56,6 +56,8 @@ set -x
 mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p generated-stubs
 
+for script_source in ${script_dir}/common/*; do source ${script_source}; done
+
 # Target bosh
 bosh -n target $BOSH_DIRECTOR
 set +x
@@ -102,6 +104,11 @@ fi
 optional_datadog=""
 if [ "$(ls -A ${deployment_dir}/stubs/datadog)" ]; then
   optional_datadog=$(ls -d ${deployment_dir}/stubs/datadog/*)
+fi
+
+# generate atc_credentials if they do not exist
+if [ ! -e ${deployment_dir}/stubs/concourse/atc_credentials.yml  ]; then
+  atc_credentials ${deployment_dir}/stubs/concourse/atc_credentials.yml
 fi
 
 echo "# GENERATED, NO TOUCHING" > ${deployment_dir}/artifacts/deployments/concourse.yml

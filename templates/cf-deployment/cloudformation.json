@@ -91,6 +91,19 @@
     }
   },
 
+  "Conditions": {
+    "ConfigureSystemHostedZone": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "CFHostedZoneName" }, ""] }
+      ]
+    },
+    "ConfigureAppsHostedZone": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "CFAppsDomainHostedZoneName" }, ""] }
+      ]
+    }
+  },
+
   "Mappings": {
     "AWSNATAMI" : {
       "us-east-1":      { "AMI": "ami-ad227cc4" },
@@ -455,6 +468,7 @@
 
     "CFHostedZone": {
       "Type": "AWS::Route53::HostedZone",
+      "Condition": "ConfigureSystemHostedZone",
       "Properties": {
         "Name": { "Ref": "CFHostedZoneName" }
       }
@@ -462,6 +476,7 @@
 
     "CFRecordSet": {
       "Type": "AWS::Route53::RecordSet",
+      "Condition": "ConfigureSystemHostedZone",
       "Properties": {
         "HostedZoneId": { "Ref": "CFHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFHostedZoneName"} ,"."]] },
@@ -475,6 +490,7 @@
 
     "BoshRecordSet": {
       "Type": "AWS::Route53::RecordSet",
+      "Condition": "ConfigureSystemHostedZone",
       "Properties": {
         "HostedZoneId": { "Ref": "CFHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "bosh.", {"Ref" : "CFHostedZoneName"} ,"."]] },
@@ -488,6 +504,7 @@
 
     "CFAppsDomainHostedZone": {
       "Type": "AWS::Route53::HostedZone",
+      "Condition": "ConfigureAppsHostedZone",
       "Properties": {
         "Name": { "Ref": "CFAppsDomainHostedZoneName" }
       }
@@ -495,6 +512,7 @@
 
     "CFAppsRecordSet": {
       "Type": "AWS::Route53::RecordSet",
+      "Condition": "ConfigureAppsHostedZone",
       "Properties": {
         "HostedZoneId": { "Ref": "CFAppsDomainHostedZone" },
         "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "CFAppsDomainHostedZoneName"} ,"."]] },

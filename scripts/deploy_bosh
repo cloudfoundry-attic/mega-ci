@@ -41,12 +41,12 @@ mkdir -p ${deployment_dir}/artifacts/certs
 mkdir -p ${deployment_dir}/artifacts/keypair
 mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p ${deployment_dir}/generated-stubs/pipeline
+mkdir -p ${deployment_dir}/stubs/bosh
 mkdir -p generated-stubs
 
-source ${script_dir}/common/*
+for script_source in ${script_dir}/common/*; do source ${script_source}; done
 
 # create bosh ssl certificate
-
 if [ ! -e ${deployment_dir}/artifacts/certs/rootCA.key ]; then
   openssl genrsa -out ${deployment_dir}/artifacts/certs/rootCA.key 2048
 fi
@@ -197,6 +197,11 @@ cf_resources:
   security_group_name: $CF_SECURITY_GROUP_NAME
   subnet_id: $CF_Subnet
 EOF
+
+# generate BOSH passwords if they do not exist
+if [ ! -e ${deployment_dir}/stubs/bosh/bosh_passwords.yml ]; then
+  generate_bosh_passwords ${deployment_dir}/stubs/bosh/bosh_passwords.yml
+fi
 
 # generate BOSH deployment manifest
 echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/bosh.yml
