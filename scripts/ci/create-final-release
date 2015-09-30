@@ -9,6 +9,10 @@ set +x
 ./scripts/configure-aws ../deployments-runtime/oss-aws ./config
 set -x
 
+git config user.name "CF MEGA BOT"
+git config user.email "cf-mega@pivotal.io"
+git merge origin/master -m 'Merge with master'
+
 for i in {1..5}; do
   bosh -n create release --with-tarball --final
   EXIT_STATUS=${PIPESTATUS[0]}
@@ -25,7 +29,5 @@ fi
 new_release_version=$(find releases -regex ".*${RELEASE_NAME}-[0-9]*.yml" | sort | tail -n 1 | egrep -o "${RELEASE_NAME}-[0-9]+" | egrep -o "[0-9]+")
 
 git add .final_builds releases
-git config user.name "CF MEGA BOT"
-git config user.email "cf-mega@pivotal.io"
 git commit -m "Final release ${new_release_version}"
 echo ${new_release_version} > version_number

@@ -13,4 +13,3 @@ run:
 
 params:
   RELEASE_NAME:
-  PRIVATE_YML_PATH:
