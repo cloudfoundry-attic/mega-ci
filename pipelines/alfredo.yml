@@ -3,6 +3,7 @@ groups:
   jobs:
   - deploy-and-test-alfredo
   - bless
+  - merge-master-into-develop
 
 resources:
 - name: deployments-runtime
@@ -33,13 +34,20 @@ resources:
     branch: runtime-passed
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-release.git
-- name: cf-deployment
+- name: cf-deployment-master
   type: git
   source:
     branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: cf-deployment-develop
+  type: git
+  source:
+    branch: develop
+    ignore_paths: [blessed_versions.yml]
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/cf-deployment.git
+- name: cf-deployment-develop-merge-target
   type: git
   source:
     branch: develop
@@ -69,6 +77,7 @@ jobs:
     - get: etcd-release
       trigger: true
     - get: cf-deployment
+      resource: cf-deployment-develop
     - get: stemcell
       resource: aws-stemcell
     - get: consul-release
@@ -142,22 +151,32 @@ jobs:
     - get: etcd-release
       trigger: true
       passed: [deploy-and-test-alfredo]
-    - get: cf-deployment
     - get: release-repo
       resource: cf-deployment-develop
+      params: {fetch: [master]}
+      passed: [deploy-and-test-alfredo]
     - get: stemcell
       resource: aws-stemcell
       passed: [deploy-and-test-alfredo]
     - get: consul-release
       passed: [deploy-and-test-alfredo]
-  - task: create-blessing
+  - task: commit-blessing
     file: mega-ci/scripts/ci/commit-blessing.yml
-  - put: cf-deployment
+  - put: cf-deployment-master
     params:
-      repository: create-blessing/cf-deployment
+      repository: commit-blessing/release-repo
+- name: merge-master-into-develop
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: cf-deployment-master
+      trigger: true
+    - get: release-repo
+      resource: cf-deployment-develop-merge-target
   - task: merge-master-into-develop
     file: mega-ci/scripts/ci/merge-master-into-develop.yml
-  - put: cf-deployment-develop
+  - put: cf-deployment-develop-merge-target
     params:
       repository: merge-master-into-develop/release-repo
-

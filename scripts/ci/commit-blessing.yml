@@ -5,7 +5,7 @@ image: docker:///cloudfoundry/runtime-ci
 
 inputs:
   - name: deployments-runtime
-  - name: cf-deployment
+  - name: release-repo
   - name: cf-release
   - name: consul-release
   - name: etcd-release
