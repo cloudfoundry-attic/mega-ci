@@ -44,7 +44,7 @@ resources:
   type: git
   source:
     branch: develop
-    ignore_paths: [blessed_versions.yml]
+    ignore_paths: [blessed_versions.json]
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: cf-deployment-develop-merge-target
