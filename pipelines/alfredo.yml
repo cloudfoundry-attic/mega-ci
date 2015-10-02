@@ -78,6 +78,7 @@ jobs:
       trigger: true
     - get: cf-deployment
       resource: cf-deployment-develop
+      trigger: true
     - get: stemcell
       resource: aws-stemcell
       trigger: true
