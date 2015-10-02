@@ -80,7 +80,9 @@ jobs:
       resource: cf-deployment-develop
     - get: stemcell
       resource: aws-stemcell
+      trigger: true
     - get: consul-release
+      trigger: true
   - task: deploy-cf
     file: mega-ci/scripts/ci/deploy-cf.yml
     config:
@@ -146,11 +148,11 @@ jobs:
     - get: deployments-runtime
     - get: mega-ci
     - get: cf-release
-      trigger: true
       passed: [deploy-and-test-alfredo]
+      trigger: true
     - get: etcd-release
-      trigger: true
       passed: [deploy-and-test-alfredo]
+      trigger: true
     - get: release-repo
       resource: cf-deployment-develop
       params: {fetch: [master]}
@@ -160,6 +162,7 @@ jobs:
       passed: [deploy-and-test-alfredo]
     - get: consul-release
       passed: [deploy-and-test-alfredo]
+      trigger: true
   - task: commit-blessing
     file: mega-ci/scripts/ci/commit-blessing.yml
   - put: cf-deployment-master
