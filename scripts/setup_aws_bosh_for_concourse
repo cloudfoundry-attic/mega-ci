@@ -76,7 +76,14 @@ if ! aws iam get-server-certificate --server-certificate-name concourse; then
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/artifacts/certs/concourse.key --certificate-body file://${deployment_dir}/artifacts/certs/concourse.pem  --certificate-chain file://${deployment_dir}/artifacts/certs/concourse_chain.pem
   elif [ -e ${deployment_dir}/artifacts/certs/concourse.pem ]; then
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/artifacts/certs/concourse.key --certificate-body file://${deployment_dir}/artifacts/certs/concourse.pem
-  elif [ -n ${CONCOURSE_HOSTNAME} ]; then
+  else
+    if [ -n ${CONCOURSE_HOSTNAME} ]; then
+      if [ -z ${DEFAULT_CONCOURSE_HOSTNAME} ]; then
+        echo 'No concourse key present, so we need to generate one, but DEFAULT_CONCOURSE_HOSTNAME is not set'
+        exit 1
+      fi
+      CONCOURSE_HOSTNAME=${DEFAULT_CONCOURSE_HOSTNAME}
+    fi
     generate_certificate "${deployment_dir}/artifacts/certs" "concourse" ${CONCOURSE_HOSTNAME}
     aws iam upload-server-certificate --server-certificate-name concourse --private-key file://${deployment_dir}/artifacts/certs/concourse.key --certificate-body file://${deployment_dir}/artifacts/certs/concourse.pem
   fi
