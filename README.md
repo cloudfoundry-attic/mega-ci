@@ -44,7 +44,7 @@ and secret information for your planned deployments.
 #### Usage
 
 ```bash
-./scripts/deploy_bosh PATH_TO_DEPLOYMENT_DIR
+./scripts/setup_aws_bosh_for_concourse PATH_TO_DEPLOYMENT_DIR
 ```
 
 See Requirements below for an explanation of the DEPLOYMENT_DIR.
@@ -283,7 +283,7 @@ URL where you access your Concourse.
 Run:
 
 ```bash
-./scripts/deploy_cf_bosh_instance PATH_TO_DEPLOYMENT_DIR
+./scripts/setup_aws_bosh_for_cf PATH_TO_DEPLOYMENT_DIR
 ```
 
 This script will apply an AWS CloudFormation template, creating a stack in your AWS
