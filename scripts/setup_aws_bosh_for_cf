@@ -4,13 +4,13 @@ deploy_buckets() {
   if ! aws cloudformation describe-stacks --stack-name cf-deployment-buckets; then
     aws cloudformation create-stack \
       --stack-name cf-deployment-buckets \
-      --template-body file://$script_dir/../templates/cf-deployment/buckets.json \
+      --template-body file://$script_dir/../templates/infrastructure/s3-for-cloudfoundry.json \
       --parameters file://${deployment_dir}/cloud_formation/buckets-properties.json \
       --capabilities CAPABILITY_IAM
   else
     aws cloudformation update-stack \
       --stack-name cf-deployment-buckets \
-      --template-body file://$script_dir/../templates/cf-deployment/buckets.json \
+      --template-body file://$script_dir/../templates/infrastructure/s3-for-cloudfoundry.json \
       --parameters file://${deployment_dir}/cloud_formation/buckets-properties.json \
       --capabilities CAPABILITY_IAM || true
   fi
@@ -28,13 +28,13 @@ deploy_bosh_and_cf() {
   if ! aws cloudformation describe-stacks --stack-name cf-deployment ; then
     aws cloudformation create-stack \
       --stack-name cf-deployment \
-      --template-body file://$script_dir/../templates/cf-deployment/cloudformation.json \
+      --template-body file://$script_dir/../templates/infrastructure/aws-for-cloudfoundry.json \
       --parameters file://${deployment_dir}/cloud_formation/cf-properties.json \
       --parameters file://${deployment_dir}/cloud_formation/cf-database-passwords.json
   else
     aws cloudformation update-stack \
       --stack-name cf-deployment \
-      --template-body file://$script_dir/../templates/cf-deployment/cloudformation.json \
+      --template-body file://$script_dir/../templates/infrastructure/aws-for-cloudfoundry.json \
       --parameters file://${deployment_dir}/cloud_formation/cf-properties.json \
       --parameters file://${deployment_dir}/cloud_formation/cf-database-passwords.json || true # update-stack is not idempotent :(
   fi
@@ -87,19 +87,22 @@ set +x
   fi
 
   if [ -z ${AWS_ACCESS_KEY_ID} ]; then
-    echo 'AWS_DEFAULT_REGION is not set'
+    echo 'AWS_ACCESS_KEY_ID is not set'
     exit 1
   fi
 
   if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
-    echo 'AWS_DEFAULT_REGION is not set'
+    echo 'AWS_SECRET_ACCESS_KEY is not set'
     exit 1
   fi
 set -x
 
+mkdir -p ${deployment_dir}/artifacts/certs
 mkdir -p ${deployment_dir}/artifacts/keypair
 mkdir -p ${deployment_dir}/artifacts/deployments
 mkdir -p ${deployment_dir}/generated-stubs/cf
+mkdir -p ${deployment_dir}/cloud_formation
+mkdir -p ${deployment_dir}/stubs/bosh
 mkdir -p generated-stubs
 
 for script_source in ${script_dir}/common/*; do source ${script_source}; done
@@ -132,6 +135,34 @@ deploy_buckets
 aws cloudformation describe-stack-resources --stack-name cf-deployment \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
+
+BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
+# generate certificate for bosh director
+if [ ! -e ${deployment_dir}/artifacts/certs/bosh.crt ]; then
+  cat >generated-stubs/openssl-exts.conf <<-EOL
+extensions = san
+[san]
+subjectAltName = IP:${BOSH_IP}
+EOL
+
+  openssl req -new -nodes -newkey rsa:2048 \
+    -out generated-stubs/bosh.csr -keyout ${deployment_dir}/artifacts/certs/bosh.key \
+    -subj "/C=US/O=BOSH/CN=${BOSH_IP}"
+
+  openssl x509 -req -in generated-stubs/bosh.csr \
+    -CA ${deployment_dir}/artifacts/certs/rootCA.pem -CAkey ${deployment_dir}/artifacts/certs/rootCA.key -CAcreateserial \
+    -out ${deployment_dir}/artifacts/certs/bosh.crt -days 99999 \
+    -extfile generated-stubs/openssl-exts.conf
+fi
+
+cat > generated-stubs/bosh-certs.json <<EOF
+{
+  "bosh_certs": {
+    "key": `cat ${deployment_dir}/artifacts/certs/bosh.key | jq -R -s .`,
+    "crt": `cat ${deployment_dir}/artifacts/certs/bosh.crt | jq -R -s .`
+  }
+}
+EOF
 
 # generate stub for BOSH Security Group Name
 BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
@@ -230,9 +261,10 @@ EOF
 # generate BOSH deployment manifest
 echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/cf-bosh.yml
 spiff merge $script_dir/../templates/bosh/bosh-init.yml \
-  $script_dir/../templates/cf-deployment/bosh.yml \
+  $script_dir/../templates/bosh/bosh-init.yml \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
+  generated-stubs/bosh-certs.json \
   generated-stubs/security-groups.yml \
   ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
   >> ${deployment_dir}/artifacts/deployments/cf-bosh.yml
