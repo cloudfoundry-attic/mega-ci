@@ -108,6 +108,7 @@ jobs:
     templates:
       - {release: concourse, name: consul-agent}
       - {release: concourse, name: blackbox}
+      - {release: concourse, name: baggageclaim}
       - {release: concourse, name: groundcrew}
       - {release: garden-linux, name: garden}
     networks: [{name: concourse}]
@@ -116,7 +117,6 @@ jobs:
       garden:
         listen_network: tcp
         listen_address: 0.0.0.0:7777
-        default_container_grace_time: 15m
         btrfs_store_size_mb: 100000
       consul:
         agent:
