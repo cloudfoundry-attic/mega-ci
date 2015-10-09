@@ -4,5 +4,5 @@ set -e -x
 
 source ~/.bashrc
 
-./mega-ci/scripts/deploy_bosh $DEPLOYMENT_DIR
+./mega-ci/scripts/setup_aws_bosh_for_concourse $DEPLOYMENT_DIR
 
