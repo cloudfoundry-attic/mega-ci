@@ -158,9 +158,11 @@ jobs:
       resource: cf-deployment-develop
       params: {fetch: [master]}
       passed: [deploy-and-test-alfredo]
+      trigger: true
     - get: stemcell
       resource: aws-stemcell
       passed: [deploy-and-test-alfredo]
+      trigger: true
     - get: consul-release
       passed: [deploy-and-test-alfredo]
       trigger: true
