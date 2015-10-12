@@ -1,12 +1,25 @@
 #!/bin/bash
-set -e -x
+set -ex
 
+# Cannot set -u before sourcing .bashrc because of all
+# the unbound variables in things beyond our control.
 source ~/.bashrc
 
-cd release-repo
+set -u
 
-git config user.name "CF MEGA BOT"
-git config user.email "cf-mega@pivotal.io"
-git merge origin/master -m 'Merge with master'
+pushd release-repo
+  git config user.name "CF MEGA BOT"
+  git config user.email "cf-mega@pivotal.io"
+  git merge origin/master -m 'Merge with master'
 
-./scripts/generate_blessed_versions ../stemcell/*.tgz ../cf-release ../etcd-release/*.tgz
+  git status
+  git show
+
+  ./scripts/generate_blessed_versions \
+      ../stemcell/*.tgz \
+      ../cf-release \
+      ../etcd-release/*.tgz
+
+  git status
+  git show
+popd

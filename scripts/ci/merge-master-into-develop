@@ -11,4 +11,7 @@ pushd release-repo
   git config user.name "CF MEGA BOT"
   git config user.email "cf-mega@pivotal.io"
   git merge --no-edit origin/master
+
+  git status
+  git show
 popd
