@@ -181,6 +181,7 @@ jobs:
       trigger: true
     - get: release-repo
       resource: cf-deployment-develop-merge-target
+      params: {fetch: [master]}
   - task: merge-master-into-develop
     file: mega-ci/scripts/ci/merge-master-into-develop.yml
   - put: cf-deployment-develop-merge-target
