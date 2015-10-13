@@ -4,10 +4,13 @@ set -e -x
 source ~/.bashrc
 
 cd release-repo
-
-set +x
-./scripts/configure-aws ../deployments-runtime/oss-aws ./config
-set -x
+if [ -n ${PRIVATE_YML_PATH} ]; then
+  cp ../${PRIVATE_YML_PATH} config/
+else
+  set +x
+  ./scripts/configure-aws ../private-credentials/oss-aws ./config
+  set -x
+fi
 
 git config user.name "CF MEGA BOT"
 git config user.email "cf-mega@pivotal.io"

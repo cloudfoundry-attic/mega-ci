@@ -172,7 +172,8 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: deployments-runtime
+    - get: private-credentials
+      resource: deployments-runtime
     - get: release-repo
       resource: etcd-release-develop
       passed: [deploy-and-test-with-cf]

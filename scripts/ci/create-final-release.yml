@@ -5,7 +5,7 @@ image: docker:///cloudfoundry/runtime-ci
 
 inputs:
   - name: mega-ci
-  - name: deployments-runtime
+  - name: private-credentials
   - name: release-repo
 
 run:
@@ -13,3 +13,4 @@ run:
 
 params:
   RELEASE_NAME:
+  PRIVATE_YML_PATH:
