@@ -1,6 +1,8 @@
 #!/bin/bash
 set -ex
 
+MASTER_BRANCH="${MASTER_BRANCH:-origin/master}"
+
 # Cannot set -u before sourcing .bashrc because of all
 # the unbound variables in things beyond our control.
 source ~/.bashrc
@@ -10,7 +12,7 @@ set -u
 pushd release-repo
   git config user.name "CF MEGA BOT"
   git config user.email "cf-mega@pivotal.io"
-  git merge --no-edit origin/master
+  git merge --no-edit "${MASTER_BRANCH}"
 
   git status
   git show --color | cat

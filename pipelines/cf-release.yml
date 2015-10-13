@@ -60,7 +60,6 @@ jobs:
       tag: create-final-release/release-repo/version_number
       tag_prefix: v
 
-
 - name: merge-master-into-develop
   public: true
   serial: true

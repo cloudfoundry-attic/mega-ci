@@ -1,7 +1,13 @@
 #!/bin/bash
-set -e -x
+set -ex
 
+MASTER_BRANCH="${MASTER_BRANCH:-origin/master}"
+
+# Cannot set -u before sourcing .bashrc because of all
+# the unbound variables in things beyond our control.
 source ~/.bashrc
+
+set -u
 
 cd release-repo
 if [ -n ${PRIVATE_YML_PATH} ]; then
@@ -14,7 +20,7 @@ fi
 
 git config user.name "CF MEGA BOT"
 git config user.email "cf-mega@pivotal.io"
-git merge origin/master -m 'Merge with master'
+git merge "${MASTER_BRANCH}" -m 'Merge with master'
 
 for i in {1..5}; do
   bosh -n create release --with-tarball --final

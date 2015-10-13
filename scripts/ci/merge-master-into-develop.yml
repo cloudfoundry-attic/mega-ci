@@ -9,3 +9,6 @@ inputs:
 
 run:
   path: mega-ci/scripts/ci/merge-master-into-develop
+
+params:
+  MASTER_BRANCH:
