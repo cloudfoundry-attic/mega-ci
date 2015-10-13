@@ -13,5 +13,5 @@ pushd release-repo
   git merge --no-edit origin/master
 
   git status
-  git show
+  git show --color | cat
 popd
