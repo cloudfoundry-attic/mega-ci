@@ -50,7 +50,7 @@ and secret information for your planned deployments.
 See Requirements below for an explanation of the DEPLOYMENT_DIR.
 
 This script will apply an AWS CloudFormation template, creating a stack in your AWS
-account.It will then create a BOSH instance. The default username/password is for 
+account. It will then create a BOSH instance. The default username/password is for 
 your BOSH director is admin/admin. You are **strongly advised** to change these by 
 targetting the director and running:
 
