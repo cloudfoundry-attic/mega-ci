@@ -13,7 +13,7 @@ pushd release-repo
   git merge origin/master -m 'Merge with master'
 
   git status
-  git show
+  git show --color | cat
 
   ./scripts/generate_blessed_versions \
       ../stemcell/*.tgz \
@@ -21,5 +21,5 @@ pushd release-repo
       ../etcd-release/*.tgz
 
   git status
-  git show
+  git show --color | cat
 popd
