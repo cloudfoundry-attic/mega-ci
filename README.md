@@ -1,7 +1,7 @@
 # MEGA CI
 
 This repo contains all public scripts and templates used to provision AWS resources and
-Deploy [BOSH](http://bosh.io/), [Concourse CI](http://concourse.ci/), [Cloud Foundry](http://docs.cloudfoundry.org/), or any combination thereof. It should
+deploy [BOSH](http://bosh.io/), [Concourse CI](http://concourse.ci/), [Cloud Foundry](http://docs.cloudfoundry.org/), or any combination thereof. It should
 be used in concert with a private repository that contains all necessary configuration 
 and secret information for your planned deployments.
 
