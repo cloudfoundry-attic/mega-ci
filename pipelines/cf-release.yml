@@ -20,13 +20,13 @@ resources:
 - name: cf-release-develop
   type: git
   source:
-    branch: final_release_test_develop
+    branch: develop
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-release-master
   type: git
   source:
-    branch: final_release_test_master
+    branch: master
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-release-credentials
@@ -70,6 +70,9 @@ jobs:
       trigger: true
     - get: release-repo
       resource: cf-release-develop
+      params:
+        fetch:
+          - master
   - task: merge-master-into-develop
     file: mega-ci/scripts/ci/merge-master-into-develop.yml
   - put: cf-release-develop
