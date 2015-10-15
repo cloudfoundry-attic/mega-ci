@@ -10,7 +10,9 @@ set -u
 pushd release-repo
   git config user.name "CF MEGA BOT"
   git config user.email "cf-mega@pivotal.io"
-  git merge origin/master -m 'Merge with master'
+
+  git remote add -f master-repo ../release-repo-master
+  git merge "master-repo/master" -m 'Merge with master'
 
   git status
   git show --color | cat

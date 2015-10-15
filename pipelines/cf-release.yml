@@ -46,6 +46,8 @@ jobs:
     - get: release-repo
       resource: cf-release-release-elect
       trigger: true
+    - get: release-repo-master
+      resource: cf-release-master
     - get: private-credentials
       resource: cf-release-credentials
   - task: create-final-release
@@ -66,13 +68,11 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: cf-release-master
+    - get: release-repo-master
+      resource: cf-release-master
       trigger: true
     - get: release-repo
       resource: cf-release-develop
-      params:
-        fetch:
-          - master
   - task: merge-master-into-develop
     file: mega-ci/scripts/ci/merge-master-into-develop.yml
   - put: cf-release-develop

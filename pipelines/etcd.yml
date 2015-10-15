@@ -31,7 +31,6 @@ resources:
   source:
     branch: develop
     ignore_paths: [.final_builds, releases]
-    fetch: [master]
     private_key: {{private_key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 - name: etcd-release-merge-target
@@ -179,6 +178,8 @@ jobs:
       resource: etcd-release-develop
       passed: [deploy-and-test-with-cf]
       trigger: true
+    - get: release-repo-master
+      resource: etcd-release-master
   - task: create-final-release
     file: mega-ci/scripts/ci/create-final-release.yml
     config:
@@ -196,13 +197,11 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: etcd-release-master
+    - get: release-repo-master
+      resource: etcd-release-master
       trigger: true
     - get: release-repo
       resource: etcd-release-merge-target
-      params:
-        fetch:
-          - master
   - task: merge-master-into-develop
     file: mega-ci/scripts/ci/merge-master-into-develop.yml
   - put: etcd-release-merge-target

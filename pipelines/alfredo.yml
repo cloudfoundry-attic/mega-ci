@@ -156,9 +156,10 @@ jobs:
       trigger: true
     - get: release-repo
       resource: cf-deployment-develop
-      params: {fetch: [master]}
       passed: [deploy-and-test-alfredo]
       trigger: true
+    - get: release-repo-master
+      resource: cf-deployment-master
     - get: stemcell
       resource: aws-stemcell
       passed: [deploy-and-test-alfredo]
