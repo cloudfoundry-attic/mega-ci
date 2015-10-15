@@ -18,7 +18,8 @@ cat > eats_config.json <<EOF
   "turbulence_properties_stub_path": "$PWD/$PROPERTY_OVERRIDES_TURBULENCE",
   "cpi_release_url": "$CPI_RELEASE_URL",
   "cpi_release_name": "$CPI_RELEASE_NAME",
-  "bosh_operation_timeout": "$BOSH_OPERATION_TIMEOUT"
+  "bosh_operation_timeout": "$BOSH_OPERATION_TIMEOUT",
+  "turbulence_release_url": "$TURBULENCE_RELEASE_URL"
 }
 EOF
 

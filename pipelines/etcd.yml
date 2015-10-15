@@ -113,6 +113,7 @@ jobs:
         IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
         IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
         PROPERTY_OVERRIDES_TURBULENCE: generate-property-overrides-turbulence/generated-stubs/property-overrides-turbulence.yml
+        TURBULENCE_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4
         BOSH_OPERATION_TIMEOUT: 20m
 
 - name: clean-deployment
