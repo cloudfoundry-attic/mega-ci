@@ -10,7 +10,7 @@ source ~/.bashrc
 set -u
 
 cd release-repo
-if [ -n ${PRIVATE_YML_PATH} ]; then
+if [ -n "${PRIVATE_YML_PATH}" ]; then
   cp ../${PRIVATE_YML_PATH} config/
 else
   set +x
