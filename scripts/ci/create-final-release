@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ex
 
-MASTER_BRANCH="${MASTER_BRANCH:-origin/master}"
+MASTER_BRANCH="${MASTER_BRANCH:-master}"
 
 # Cannot set -u before sourcing .bashrc because of all
 # the unbound variables in things beyond our control.
@@ -20,7 +20,9 @@ fi
 
 git config user.name "CF MEGA BOT"
 git config user.email "cf-mega@pivotal.io"
-git merge "${MASTER_BRANCH}" -m 'Merge with master'
+
+git remote add -f master-repo ../release-repo-master
+git merge "master-repo/${MASTER_BRANCH}" -m 'Merge with master'
 
 for i in {1..5}; do
   bosh -n create release --with-tarball --final

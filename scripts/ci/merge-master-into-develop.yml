@@ -6,6 +6,7 @@ image: docker:///cloudfoundry/runtime-ci
 inputs:
   - name: mega-ci
   - name: release-repo
+  - name: release-repo-master
 
 run:
   path: mega-ci/scripts/ci/merge-master-into-develop

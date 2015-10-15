@@ -7,6 +7,7 @@ inputs:
   - name: mega-ci
   - name: private-credentials
   - name: release-repo
+  - name: release-repo-master
 
 run:
   path: mega-ci/scripts/ci/create-final-release
