@@ -115,9 +115,10 @@ bosh_credentials:
 ```
 
 An SSL certificate for the domain where Concourse will be accessible is required. 
-If you do not provide a certificate, one will be created for you. The
-key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. If
-there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
+If you do not provide a certificate, one will be created for you, with the Common Name
+coming from the `ELBRecordSetName` parameter in the `cloud_formation/properties.json` 
+file (see below). The key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. 
+If there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
 You can generate a self signed cert if needed:
 
 * `openssl genrsa -out concourse.key 2048`
@@ -152,7 +153,7 @@ The optional `cloud_formation/properties.json` file should look like this:
 ```
 If both `ConcourseHostedZoneName` and `ELBRecordSetName` are provided, a Route 53 hosted zone will be created with the given
 `ConcourseHostedZoneName` name, and a DNS entry pointing at the new ELB will be created with the given
-`ELBRecordSetName` name.
+`ELBRecordSetName` name.  Note that if you do not provide `certs/concourse.key` and `certs/concourse.pem`, then you must provide this file as the `ELBRecordSetName` is used as the Common Name for generating certs.
 
 #### Output
 
@@ -169,6 +170,11 @@ The script generates several artifacts in your deployment directory:
 * `artifacts/keypair/id_rsa_bosh`: the private key created in your AWS
   account that will be used for all deployments; you will need this if you ever
   want to ssh into the BOSH instance or any of the VMs deployed by BOSH.
+* `generated-stubs/pipeline/bosh-director-uuid.yml`: If you plan to use the BOSH director deployed here for Concourse to also deploy other things, you will need the Director UUID in this stub.
+* `generated-stubs/pipeline/cf-resources.yml`: If you plan to use the BOSH director deployed here for Concourse to also deploy other things, you may need the data about AWS resources contained in this stub.
+* (`stubs/bosh/bosh_passwords.yml`): If you do not provide this file, it will be generated for you.
+* (`certs/concourse.key`): If you do not provide this file, it will be generated for you.
+* (`certs/concourse.pem`): If you do not provide this file, it will be generated for you.
 
 The script will also print the IP of the BOSH director. Target your director by running:
 ```bash
