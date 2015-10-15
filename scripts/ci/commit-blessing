@@ -20,7 +20,8 @@ pushd release-repo
   ./scripts/generate_blessed_versions \
       ../stemcell/*.tgz \
       ../cf-release \
-      ../etcd-release/*.tgz
+      ../etcd-release/*.tgz \
+      ../consul-release/*.tgz
 
   git status
   git show --color | cat

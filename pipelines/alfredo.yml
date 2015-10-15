@@ -17,11 +17,9 @@ resources:
   source:
     repository: cloudfoundry-incubator/etcd-release
 - name: consul-release
-  type: git
+  type: bosh-io-release
   source:
-    branch: master
-    private_key: {{private_key}}
-    uri: git@github.com:cloudfoundry-incubator/consul-release.git
+    repository: cloudfoundry-incubator/consul-release
 - name: mega-ci
   type: git
   source:
