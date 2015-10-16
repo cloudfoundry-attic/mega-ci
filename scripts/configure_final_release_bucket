@@ -1,0 +1,110 @@
+#!/bin/bash
+
+set -eux
+
+script_dir=$(dirname $0)
+
+if [ $# -ne 3 ]; then
+  echo 'Expected 3 argument (release_name path_to_aws_credentials_dir path_to_config_dir) received $#'
+  exit 1
+fi
+release_name=$1
+credentials_dir=$2
+release_config_dir=$3
+
+command -v aws >/dev/null || { echo "aws is required"; exit 1; }
+command -v jq >/dev/null || { echo "jq is required"; exit 1; }
+
+set +x
+  source ${credentials_dir}/aws_environment
+
+  if [ -z ${AWS_DEFAULT_REGION} ]; then
+    echo 'AWS_DEFAULT_REGION is not set'
+    exit 1
+  fi
+
+  if [ -z ${AWS_ACCESS_KEY_ID} ]; then
+    echo 'AWS_DEFAULT_REGION is not set'
+    exit 1
+  fi
+
+  if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
+    echo 'AWS_DEFAULT_REGION is not set'
+    exit 1
+  fi
+
+set -x
+
+# deploy infrastructure
+if ! aws cloudformation describe-stacks --stack-name "${release_name}-buckets" > /dev/null; then
+  aws cloudformation create-stack \
+    --stack-name "${release_name}-buckets" \
+    --parameters ParameterKey=BucketName,ParameterValue=${release_name}-release-blobs \
+    --template-body file://$script_dir/../templates/final-release/bucket.json \
+    --capabilities CAPABILITY_IAM > /dev/null
+else
+  aws cloudformation update-stack \
+    --stack-name "${release_name}-buckets" \
+    --parameters ParameterKey=BucketName,ParameterValue=${release_name}-release-blobs \
+    --template-body file://$script_dir/../templates/final-release/bucket.json \
+    --capabilities CAPABILITY_IAM > /dev/null || true
+fi
+
+mkdir -p ${credentials_dir}/artifacts/iam-users
+mkdir -p ${credentials_dir}/artifacts/deployments
+
+start_time_in_s=$(date +%s)
+wait_time_in_s=$((30 * 60))
+deadline_in_s=$(($start_time_in_s + $wait_time_in_s))
+while aws cloudformation describe-stacks --stack-name "${release_name}-buckets" | grep StackStatus | grep IN_PROGRESS ; do
+  echo "CloudFormation stack '${release_name}-buckets' still in progress..."
+  current_time_in_s=$(date +%s)
+  remaining_time_in_s=$(($deadline_in_s - $current_time_in_s))
+
+  if [ "$remaining_time_in_s" -gt 0 ]; then
+    echo "   Waiting ${remaining_time_in_s} more seconds."
+    sleep 15
+  else
+    echo "   Waited ${wait_time_in_s}, aborting."
+    exit 1
+  fi
+done
+
+if aws cloudformation describe-stacks --stack-name "${release_name}-buckets" | grep StackStatus | grep ROLLBACK ; then
+  echo 'Cloud formation failure'
+  exit 1
+fi
+
+if ! aws cloudformation describe-stacks --stack-name "${release_name}-buckets" | grep StackStatus | grep COMPLETE ; then
+  echo 'Cloud formation failure'
+  exit 1
+fi
+
+aws cloudformation describe-stacks --stack-name "${release_name}-buckets" \
+  > "${credentials_dir}/artifacts/iam-users/${release_name}-buckets.json"
+
+set +x
+
+BLOBS_BUCKET_ACCESS_KEY_ID=$(cat ${credentials_dir}/artifacts/iam-users/${release_name}-buckets.json | jq -e -r ".Stacks[0].Outputs[0].OutputValue" )
+BLOBS_BUCKET_SECRET_KEY=$(cat ${credentials_dir}/artifacts/iam-users/${release_name}-buckets.json | jq -e -r ".Stacks[0].Outputs[1].OutputValue" )
+BLOBS_DOMAIN_NAME=$(cat ${credentials_dir}/artifacts/iam-users/${release_name}-buckets.json | jq -e -r ".Stacks[0].Outputs[2].OutputValue" )
+
+set -x
+
+cat > ${release_config_dir}/private.yml <<EOF
+---
+blobstore:
+  s3:
+    secret_access_key: ${BLOBS_BUCKET_SECRET_KEY}
+    access_key_id: ${BLOBS_BUCKET_ACCESS_KEY_ID}
+EOF
+
+cat > ${release_config_dir}/final.yml <<EOF
+---
+final_name: ${release_name}
+min_cli_version: 1.5.0.pre.1001
+blobstore:
+  provider: s3
+  options:
+    bucket_name: ${BLOBS_DOMAIN_NAME}
+EOF
