@@ -176,7 +176,8 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: cf-deployment-master
+    - get: release-repo-master
+      resource: cf-deployment-master
       trigger: true
     - get: release-repo
       resource: cf-deployment-develop-merge-target
