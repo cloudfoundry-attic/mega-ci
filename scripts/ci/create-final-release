@@ -9,14 +9,15 @@ source ~/.bashrc
 
 set -u
 
-cd release-repo
 if [ -n "${PRIVATE_YML_PATH}" ]; then
-  cp ../${PRIVATE_YML_PATH} config/
+  cp "${PRIVATE_YML_PATH}" release-repo/config/
 else
   set +x
-  ./scripts/configure-aws ../private-credentials/oss-aws ./config
+  ./mega-ci/scripts/configure_final_release_bucket "${RELEASE_NAME}" ./private-credentials/oss-aws ./release-repo/config
   set -x
 fi
+
+cd release-repo
 
 git config user.name "CF MEGA BOT"
 git config user.email "cf-mega@pivotal.io"
@@ -34,11 +35,11 @@ done
 
 if [ ! "$EXIT_STATUS" = "0" ]; then
   echo "Failed to Create $RELEASE_NAME Release"
-  exit $EXIT_STATUS
+  exit "$EXIT_STATUS"
 fi
 
 new_release_version=$(find releases -regex ".*${RELEASE_NAME}-[0-9]*.yml" | egrep -o "${RELEASE_NAME}-[0-9]+" | egrep -o "[0-9]+" | sort -n | tail -n 1)
 
 git add .final_builds releases
 git commit -m "Final release ${new_release_version}"
-echo ${new_release_version} > version_number
+echo "${new_release_version}" > version_number
