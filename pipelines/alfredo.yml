@@ -1,6 +1,7 @@
 groups:
 - name: alfredo
   jobs:
+  - cf-deployment-unit-tests
   - deploy-and-test-alfredo
   - bless
   - merge-master-into-develop
@@ -63,6 +64,18 @@ resources:
     access_key_id: {{access_key}}
     secret_access_key: {{secret_key}}
 jobs:
+- name: cf-deployment-unit-tests
+  public: false
+  serial: true
+  plan:
+  - aggregate:
+    - get: cf-deployment
+      resource: cf-deployment-develop
+      trigger: true
+    - get: mega-ci
+  - task: unit-tests
+    file: mega-ci/scripts/ci/unit-tests-cf-deployment.yml
+
 - name: deploy-and-test-alfredo
   public: false
   serial: true
@@ -77,6 +90,7 @@ jobs:
     - get: cf-deployment
       resource: cf-deployment-develop
       trigger: true
+      passed: [cf-deployment-unit-tests]
     - get: stemcell
       resource: aws-stemcell
       trigger: true
