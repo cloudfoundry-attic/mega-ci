@@ -7,6 +7,9 @@ source ~/.bashrc
 
 set -u
 
+# Debugging #106061826:w
+env
+
 pushd cf-deployment
   bundle install
   bundle exec rspec
