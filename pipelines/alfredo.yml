@@ -75,6 +75,9 @@ jobs:
     - get: mega-ci
   - task: unit-tests
     file: mega-ci/scripts/ci/unit-tests-cf-deployment.yml
+    config:
+      params:
+        CF_DEPLOYMENT_TRACE: true
 
 - name: deploy-and-test-alfredo
   public: false
