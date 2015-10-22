@@ -14,7 +14,7 @@ set -x
 bosh target "${BOSH_DIRECTOR}"
 bosh upload stemcell stemcell/*.tgz --skip-if-exists
 
-stubs_parts="$(ls "${STUBS_PARTS_PATH}")"
+stubs_parts="$(ls "${STUB_PARTS_PATH}")"
 
 spiff merge \
   ./mega-ci/templates/cf/cf-stub-mask.yml \
