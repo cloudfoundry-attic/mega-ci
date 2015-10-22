@@ -29,6 +29,5 @@ popd
 
 pushd cf-deployment
   ./scripts/deploy aws ../cf-release ../etcd-release/*.tgz ../consul-release/*.tgz ../stub.yml
+  cat outputs/manifests/cf.yml
 popd
-
-cat outputs/manifests/cf.yml
