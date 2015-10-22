@@ -14,10 +14,12 @@ set -x
 bosh target "${BOSH_DIRECTOR}"
 bosh upload stemcell stemcell/*.tgz --skip-if-exists
 
+stubs_parts="$(ls "${STUBS_PARTS_PATH}")"
+
 spiff merge \
   ./mega-ci/templates/cf/cf-stub-mask.yml \
   "${STUB_PATH}" \
-  "${STUB_PARTS_PATH}/*" > stub.yml
+  "${stubs_parts}" > stub.yml
 
 pushd cf-release
   for _ in $(seq 1 5); do
