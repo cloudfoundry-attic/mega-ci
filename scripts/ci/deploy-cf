@@ -1,25 +1,32 @@
 #!/bin/bash
-set -e -x
+set -ex
 
+# Cannot set -u before sourcing .bashrc because of all
+# the unbound variables in things beyond our control.
 source ~/.bashrc
+set -u
+
+# Do not leak credentials
 set +x
 source ./deployments-runtime/${ENVIRONMENT}/bosh_environment
 set -x
 
-bosh target $BOSH_DIRECTOR
+bosh target "${BOSH_DIRECTOR}"
 bosh upload stemcell stemcell/*.tgz --skip-if-exists
 
-spiff merge ./mega-ci/templates/bosh/bosh-deployment.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
+spiff merge \
+  ./mega-ci/templates/cf/cf-stub-mask.yml \
+  "${STUB_PATH}" \
+  "${STUB_PARTS_PATH}/*" > stub.yml
 
-cd cf-deployment
-
-pushd ../cf-release
-  for i in `seq 1 5`;
-  do
+pushd cf-release
+  for _ in $(seq 1 5); do
     bosh -n --parallel 10 sync blobs && break
   done
 popd
 
-./scripts/deploy aws ../cf-release ../etcd-release/*.tgz ../consul-release/*.tgz ../stub.yml
+pushd cf-deployment
+  ./scripts/deploy aws ../cf-release ../etcd-release/*.tgz ../consul-release/*.tgz ../stub.yml
+popd
 
 cat outputs/manifests/cf.yml
