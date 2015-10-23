@@ -9,7 +9,7 @@ set -x
 bosh target $BOSH_DIRECTOR
 bosh upload stemcell stemcell/*.tgz --skip-if-exists
 
-spiff merge ./mega-ci/templates/bosh/bosh-deployment.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
+spiff merge ./mega-ci/templates/cf/cf-stub-mask.yml $STUB_PATH $STUB_PARTS_PATH/* > stub.yml
 
 cd cf-deployment
 
