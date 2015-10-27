@@ -4,14 +4,14 @@ deploy_buckets() {
   if ! aws cloudformation describe-stacks --stack-name cf-deployment-buckets; then
     aws cloudformation create-stack \
       --stack-name cf-deployment-buckets \
-      --template-body file://$script_dir/../templates/infrastructure/s3-for-cloudfoundry.json \
-      --parameters file://${deployment_dir}/cloud_formation/buckets-properties.json \
+      --template-body "file://${script_dir}/../templates/infrastructure/s3-for-cloudfoundry.json" \
+      --parameters "file://${deployment_dir}/cloud_formation/buckets-properties.json" \
       --capabilities CAPABILITY_IAM
   else
     aws cloudformation update-stack \
       --stack-name cf-deployment-buckets \
-      --template-body file://$script_dir/../templates/infrastructure/s3-for-cloudfoundry.json \
-      --parameters file://${deployment_dir}/cloud_formation/buckets-properties.json \
+      --template-body "file://${script_dir}/../templates/infrastructure/s3-for-cloudfoundry.json" \
+      --parameters "file://${deployment_dir}/cloud_formation/buckets-properties.json" \
       --capabilities CAPABILITY_IAM || true
   fi
 
@@ -20,23 +20,23 @@ deploy_buckets() {
 
 deploy_bosh_and_cf() {
   # generate database passwords if they do not exist
-  if [ ! -e ${deployment_dir}/cloud_formation/cf-database-passwords.json ]; then
-    generate_cf_database_passwords ${deployment_dir}/cloud_formation/cf-database-passwords.json
+  if [ ! -e "${deployment_dir}/cloud_formation/cf-database-passwords.json" ]; then
+    generate_cf_database_passwords "${deployment_dir}/cloud_formation/cf-database-passwords.json"
   fi
 
   # deploy infrastructure
   if ! aws cloudformation describe-stacks --stack-name cf-deployment ; then
     aws cloudformation create-stack \
       --stack-name cf-deployment \
-      --template-body file://$script_dir/../templates/infrastructure/aws-for-cloudfoundry.json \
-      --parameters file://${deployment_dir}/cloud_formation/cf-properties.json \
-      --parameters file://${deployment_dir}/cloud_formation/cf-database-passwords.json
+      --template-body "file://${script_dir}/../templates/infrastructure/aws-for-cloudfoundry.json" \
+      --parameters "file://${deployment_dir}/cloud_formation/cf-properties.json" \
+      --parameters "file://${deployment_dir}/cloud_formation/cf-database-passwords.json"
   else
     aws cloudformation update-stack \
       --stack-name cf-deployment \
-      --template-body file://$script_dir/../templates/infrastructure/aws-for-cloudfoundry.json \
-      --parameters file://${deployment_dir}/cloud_formation/cf-properties.json \
-      --parameters file://${deployment_dir}/cloud_formation/cf-database-passwords.json || true # update-stack is not idempotent :(
+      --template-body "file://${script_dir}/../templates/infrastructure/aws-for-cloudfoundry.json" \
+      --parameters "file://${deployment_dir}/cloud_formation/cf-properties.json" \
+      --parameters "file://${deployment_dir}/cloud_formation/cf-database-passwords.json" || true # update-stack is not idempotent :(
   fi
 
   wait_for_deployment cf-deployment
@@ -45,17 +45,17 @@ deploy_bosh_and_cf() {
 wait_for_deployment() {
   DEPLOYMENT_NAME=$1
 
-  while aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep IN_PROGRESS ; do
+  while aws cloudformation describe-stacks --stack-name "${DEPLOYMENT_NAME}" | grep StackStatus | grep IN_PROGRESS ; do
     echo "CloudFormation stack '${DEPLOYMENT_NAME}' still in progress..."
     sleep 15
   done
 
-  if aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep ROLLBACK ; then
+  if aws cloudformation describe-stacks --stack-name "${DEPLOYMENT_NAME}" | grep StackStatus | grep ROLLBACK ; then
     echo 'Cloud formation failure'
     exit 1
   fi
 
-  if ! aws cloudformation describe-stacks --stack-name $DEPLOYMENT_NAME | grep StackStatus | grep COMPLETE ; then
+  if ! aws cloudformation describe-stacks --stack-name "${DEPLOYMENT_NAME}" | grep StackStatus | grep COMPLETE ; then
     echo 'Cloud formation failure'
     exit 1
   fi
@@ -63,9 +63,9 @@ wait_for_deployment() {
 
 set -e -x
 
-script_dir=$(dirname $0)
+script_dir="$(dirname "${0}")"
 
-if [ $# -ne 1 ]; then
+if [ ${#} -ne 1 ]; then
   echo 'Expected 1 argument (path to deployment directory), received $#'
   exit 1
 fi
@@ -79,51 +79,58 @@ command -v jq >/dev/null || { echo "jq is required"; exit 1; }
 command -v spiff >/dev/null || { echo "spiff is required"; exit 1; }
 
 set +x
-  source $deployment_dir/aws_environment
+  source "${deployment_dir}/aws_environment"
 
-  if [ -z ${AWS_DEFAULT_REGION} ]; then
+  if [ -z "${AWS_DEFAULT_REGION}" ]; then
     echo 'AWS_DEFAULT_REGION is not set'
     exit 1
   fi
 
-  if [ -z ${AWS_ACCESS_KEY_ID} ]; then
+  if [ -z "${AWS_ACCESS_KEY_ID}" ]; then
     echo 'AWS_ACCESS_KEY_ID is not set'
     exit 1
   fi
 
-  if [ -z ${AWS_SECRET_ACCESS_KEY} ]; then
+  if [ -z "${AWS_SECRET_ACCESS_KEY}" ]; then
     echo 'AWS_SECRET_ACCESS_KEY is not set'
     exit 1
   fi
 set -x
 
-mkdir -p ${deployment_dir}/artifacts/certs
-mkdir -p ${deployment_dir}/artifacts/keypair
-mkdir -p ${deployment_dir}/artifacts/deployments
-mkdir -p ${deployment_dir}/generated-stubs/cf
-mkdir -p ${deployment_dir}/cloud_formation
-mkdir -p ${deployment_dir}/stubs/bosh
+mkdir -p "${deployment_dir}/artifacts/certs"
+mkdir -p "${deployment_dir}/artifacts/deployments"
+mkdir -p "${deployment_dir}/artifacts/keypair"
+mkdir -p "${deployment_dir}/certs"
+mkdir -p "${deployment_dir}/cloud_formation"
+mkdir -p "${deployment_dir}/generated-stubs/cf"
+mkdir -p "${deployment_dir}/stubs/bosh"
 mkdir -p generated-stubs
 
-for script_source in ${script_dir}/common/*; do source ${script_source}; done
+for script_source in "${script_dir}"/common/*; do source "${script_source}"; done
 
 # create keypair
 if ! aws ec2 describe-key-pairs --key-names bosh; then
-  aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial > ${deployment_dir}/artifacts/keypair/id_rsa_bosh
+  aws ec2 create-key-pair --key-name bosh | jq -r .KeyMaterial \
+    > "${deployment_dir}/artifacts/keypair/id_rsa_bosh"
 fi
 
 # install certs for CF ELB
 set +e
-CF_HOSTNAME=$(cat ${deployment_dir}/cloud_formation/cf-properties.json | \
-  jq -r '.|map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | $body | .CFHostedZoneName' | grep -v "^null$" | grep -o ".*[^.]")
+CF_HOSTNAME=$(jq -r \
+  '.|map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | $body | .CFHostedZoneName' \
+  "${deployment_dir}/cloud_formation/cf-properties.json" \
+  | grep -v "^null$" | grep -o ".*[^.]")
 set -e
 
 if ! aws iam get-server-certificate --server-certificate-name cf; then
-  if [ ! -e ${deployment_dir}/certs/cf.pem -a -n ${CF_HOSTNAME} ]; then
-    generate_certificate "${deployment_dir}/certs" "cf" ${CF_HOSTNAME}
+  if [ ! -e "${deployment_dir}/certs/cf.pem" ] && [ -n "${CF_HOSTNAME}" ]; then
+    generate_certificate "${deployment_dir}/certs" "cf" "${CF_HOSTNAME}"
   fi
-  if [ -e ${deployment_dir}/certs/cf.pem ]; then
-    aws iam upload-server-certificate --server-certificate-name cf --private-key file://${deployment_dir}/certs/cf.key --certificate-body file://${deployment_dir}/certs/cf.pem
+  if [ -e "${deployment_dir}/certs/cf.pem" ]; then
+    aws iam upload-server-certificate \
+      --server-certificate-name cf \
+      --private-key "file://${deployment_dir}/certs/cf.key" \
+      --certificate-body "file://${deployment_dir}/certs/cf.pem"
   fi
 fi
 
@@ -136,9 +143,9 @@ aws cloudformation describe-stack-resources --stack-name cf-deployment \
   | jq '.StackResources|map({key: .LogicalResourceId, value: .PhysicalResourceId}) | from_entries as $body | {Resources: $body}' \
   > generated-stubs/aws-resources.json
 
-BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
+BOSH_IP=$(jq -r .Resources.MicroEIP generated-stubs/aws-resources.json)
 # generate certificate for bosh director
-if [ ! -e ${deployment_dir}/artifacts/certs/bosh.crt ]; then
+if [ ! -f "${deployment_dir}/artifacts/certs/bosh.crt" ]; then
   cat >generated-stubs/openssl-exts.conf <<-EOL
 extensions = san
 [san]
@@ -146,47 +153,55 @@ subjectAltName = IP:${BOSH_IP}
 EOL
 
   openssl req -new -nodes -newkey rsa:2048 \
-    -out generated-stubs/bosh.csr -keyout ${deployment_dir}/artifacts/certs/bosh.key \
+    -out generated-stubs/bosh.csr \
+    -keyout "${deployment_dir}/artifacts/certs/bosh.key" \
     -subj "/C=US/O=BOSH/CN=${BOSH_IP}"
 
   openssl x509 -req -in generated-stubs/bosh.csr \
-    -CA ${deployment_dir}/artifacts/certs/rootCA.pem -CAkey ${deployment_dir}/artifacts/certs/rootCA.key -CAcreateserial \
-    -out ${deployment_dir}/artifacts/certs/bosh.crt -days 99999 \
+    -CA "${deployment_dir}/artifacts/certs/rootCA.pem" \
+    -CAkey "${deployment_dir}/artifacts/certs/rootCA.key" \
+    -CAcreateserial \
+    -out "${deployment_dir}/artifacts/certs/bosh.crt" \
+    -days 99999 \
     -extfile generated-stubs/openssl-exts.conf
 fi
 
 cat > generated-stubs/bosh-certs.json <<EOF
 {
   "bosh_certs": {
-    "key": `cat ${deployment_dir}/artifacts/certs/bosh.key | jq -R -s .`,
-    "crt": `cat ${deployment_dir}/artifacts/certs/bosh.crt | jq -R -s .`
+    "key": "$(jq -R -s . "${deployment_dir}/artifacts/certs/bosh.key")",
+    "crt": "$(jq -R -s . "${deployment_dir}/artifacts/certs/bosh.crt)"
   }
 }
 EOF
 
 # generate stub for BOSH Security Group Name
-BOSH_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSecurityGroup)
-BOSH_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${BOSH_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
+BOSH_SECURITY_GROUP_ID="$(jq -r .Resources.BOSHSecurityGroup generated-stubs/aws-resources.json)"
+BOSH_SECURITY_GROUP_NAME="$(aws ec2 describe-security-groups \
+  --group-ids "${BOSH_SECURITY_GROUP_ID}" | \
+  jq -r .SecurityGroups[0].GroupName)"
 
 cat > generated-stubs/security-groups.yml <<EOF
 {
   "SecurityGroups": {
-    "BOSH_SECURITY_GROUP_NAME": "$BOSH_SECURITY_GROUP_NAME"
+    "BOSH_SECURITY_GROUP_NAME": "${BOSH_SECURITY_GROUP_NAME}"
   }
 }
 EOF
 
 # generate stub for AWS Credentials
-BOSH_SUBNET_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.BOSHSubnet)
-AWS_ZONE=$(aws ec2 describe-subnets --subnet-ids $BOSH_SUBNET_ID | jq -r .Subnets[0].AvailabilityZone)
+BOSH_SUBNET_ID=$(jq -r .Resources.BOSHSubnet generated-stubs/aws-resources.json)
+AWS_ZONE=$(aws ec2 describe-subnets \
+  --subnet-ids "${BOSH_SUBNET_ID}" | \
+  jq -r .Subnets[0].AvailabilityZone)
 
 cat > generated-stubs/aws-credentials.yml <<EOF
 {
   "AWSCredentials": {
-    "AWS_ZONE": "$AWS_ZONE",
-    "AWS_DEFAULT_REGION": "$AWS_DEFAULT_REGION",
-    "AWS_ACCESS_KEY_ID": "$AWS_ACCESS_KEY_ID",
-    "AWS_SECRET_ACCESS_KEY": "$AWS_SECRET_ACCESS_KEY"
+    "AWS_ZONE": "${AWS_ZONE}",
+    "AWS_DEFAULT_REGION": "${AWS_DEFAULT_REGION}",
+    "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
+    "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}"
   }
 }
 EOF
@@ -195,20 +210,29 @@ EOF
 aws cloudformation describe-stacks --stack-name cf-deployment-buckets \
   | jq '.Stacks[0].Outputs|map({key: .OutputKey, value: .OutputValue}) | from_entries as $body | {Outputs: $body}' \
   > generated-stubs/outputs.json
-CF_CloudFrontResources=$(cat generated-stubs/outputs.json | jq -r .Outputs.CloudFrontResourcesDomainName)
-CF_CloudFrontDroplets=$(cat generated-stubs/outputs.json | jq -r .Outputs.CloudFrontDropletsDomainName)
-CF_BlobstoreAccessKey=$(cat generated-stubs/outputs.json | jq -r .Outputs.CFDeploymentAccessKeyID)
-CF_BlobstoreSecretKey=$(cat generated-stubs/outputs.json | jq -r .Outputs.CFDeploymentSecretAccessKey)
 
-CF_Subnet_1=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnetAZ1)
-CF_AWS_ZONE_1=$(aws ec2 describe-subnets --subnet-ids $CF_Subnet_1 | jq -r .Subnets[0].AvailabilityZone)
-CF_Subnet_2=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSubnetAZ2)
-CF_AWS_ZONE_2=$(aws ec2 describe-subnets --subnet-ids $CF_Subnet_2 | jq -r .Subnets[0].AvailabilityZone)
-CF_ELB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFLoadBalancer)
-CF_SECURITY_GROUP_ID=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CFSecurityGroup)
-CF_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups --group-ids ${CF_SECURITY_GROUP_ID} | jq -r .SecurityGroups[0].GroupName)
+CF_CloudFrontResources=$(jq -r .Outputs.CloudFrontResourcesDomainName generated-stubs/outputs.json)
+CF_CloudFrontDroplets=$(jq -r .Outputs.CloudFrontDropletsDomainName generated-stubs/outputs.json)
+CF_BlobstoreAccessKey=$(jq -r .Outputs.CFDeploymentAccessKeyID generated-stubs/outputs.json)
+CF_BlobstoreSecretKey=$(jq -r .Outputs.CFDeploymentSecretAccessKey generated-stubs/outputs.json)
 
-cat > ${deployment_dir}/generated-stubs/cf/cf-resources.yml<<EOF
+CF_Subnet_1=$(jq -r .Resources.CFSubnetAZ1 generated-stubs/aws-resources.json)
+CF_AWS_ZONE_1=$(aws ec2 describe-subnets \
+  --subnet-ids "${CF_Subnet_1}" | \
+  jq -r .Subnets[0].AvailabilityZone)
+
+CF_Subnet_2=$(jq -r .Resources.CFSubnetAZ2 generated-stubs/aws-resources.json)
+CF_AWS_ZONE_2=$(aws ec2 describe-subnets \
+  --subnet-ids "${CF_Subnet_2}" | \
+  jq -r .Subnets[0].AvailabilityZone)
+
+CF_ELB=$(jq -r .Resources.CFLoadBalancer generated-stubs/aws-resources.json)
+CF_SECURITY_GROUP_ID=$(jq -r .Resources.CFSecurityGroup generated-stubs/aws-resources.json)
+CF_SECURITY_GROUP_NAME=$(aws ec2 describe-security-groups \
+  --group-ids "${CF_SECURITY_GROUP_ID}" | \
+  jq -r .SecurityGroups[0].GroupName)
+
+cat > "${deployment_dir}/generated-stubs/cf/cf-resources.yml" <<EOF
 ---
 cf_resources:
   subnets:
@@ -227,27 +251,29 @@ cf_resources:
 EOF
 
 # generate BOSH passwords if they do not exist
-if [ ! -e ${deployment_dir}/stubs/bosh/bosh_passwords.yml  ]; then
-  generate_bosh_passwords ${deployment_dir}/stubs/bosh/bosh_passwords.yml
+if [ ! -f "${deployment_dir}/stubs/bosh/bosh_passwords.yml" ]; then
+  generate_bosh_passwords "${deployment_dir}/stubs/bosh/bosh_passwords.yml"
 fi
 
 # output the cloud formation inputs for later use
-cat ${deployment_dir}/cloud_formation/cf-properties.json ${deployment_dir}/cloud_formation/cf-database-passwords.json | \
+cat \
+  "${deployment_dir}/cloud_formation/cf-properties.json" \
+  "${deployment_dir}/cloud_formation/cf-database-passwords.json" | \
   jq -s '.[0] + .[1] | map({key: .ParameterKey, value: .ParameterValue}) | from_entries as $body | {cloud_formation_inputs: $body}' \
-  > ${deployment_dir}/generated-stubs/cf/cf-cloud-formation-inputs.json
+  > "${deployment_dir}/generated-stubs/cf/cf-cloud-formation-inputs.json"
 
 # generate CF database stub
-CCDB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.CCDB)
-UAADB=$(cat generated-stubs/aws-resources.json | jq -r .Resources.UAADB)
+CCDB=$(jq -r .Resources.CCDB generated-stubs/aws-resources.json)
+UAADB=$(jq -r .Resources.UAADB generated-stubs/aws-resources.json)
 CCDB_INFO=$(aws rds describe-db-instances --db-instance-identifier ccdb)
-CCDB_HOST=$(echo ${CCDB_INFO} | jq -r '.DBInstances[0].Endpoint.Address')
-CCDB_PORT=$(echo ${CCDB_INFO} | jq -r '.DBInstances[0].Endpoint.Port')
+CCDB_HOST=$(echo "${CCDB_INFO}" | jq -r '.DBInstances[0].Endpoint.Address')
+CCDB_PORT=$(echo "${CCDB_INFO}" | jq -r '.DBInstances[0].Endpoint.Port')
 
 UAADB_INFO=$(aws rds describe-db-instances --db-instance-identifier uaadb)
-UAADB_HOST=$(echo ${UAADB_INFO} | jq -r '.DBInstances[0].Endpoint.Address')
-UAADB_PORT=$(echo ${UAADB_INFO} | jq -r '.DBInstances[0].Endpoint.Port')
+UAADB_HOST=$(echo "${UAADB_INFO}" | jq -r '.DBInstances[0].Endpoint.Address')
+UAADB_PORT=$(echo "${UAADB_INFO}" | jq -r '.DBInstances[0].Endpoint.Port')
 
-cat > ${deployment_dir}/generated-stubs/cf/cf-databases.yml<<EOF
+cat > "${deployment_dir}/generated-stubs/cf/cf-databases.yml" <<EOF
 ---
 cf_databases:
   ccdb_database: ${CCDB}
@@ -259,26 +285,27 @@ cf_databases:
 EOF
 
 # generate BOSH deployment manifest
-echo "# GENERATED: NO TOUCHING" > ${deployment_dir}/artifacts/deployments/cf-bosh.yml
-spiff merge $script_dir/../templates/bosh/bosh-init.yml \
-  $script_dir/../templates/bosh/bosh-init.yml \
+echo "# GENERATED: NO TOUCHING" > "${deployment_dir}/artifacts/deployments/cf-bosh.yml"
+spiff merge "${script_dir}/../templates/bosh/bosh-init.yml" \
+  "${script_dir}/../templates/bosh/bosh-init.yml" \
   generated-stubs/aws-credentials.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/bosh-certs.json \
   generated-stubs/security-groups.yml \
-  ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
-  >> ${deployment_dir}/artifacts/deployments/cf-bosh.yml
+  "${deployment_dir}/stubs/bosh/bosh_passwords.yml" \
+  >> "${deployment_dir}/artifacts/deployments/cf-bosh.yml"
 
 # deploy BOSH
-bosh-init deploy ${deployment_dir}/artifacts/deployments/cf-bosh.yml
+bosh-init deploy "${deployment_dir}/artifacts/deployments/cf-bosh.yml"
 
 # display result
-BOSH_IP=$(cat generated-stubs/aws-resources.json | jq -r .Resources.MicroEIP)
+BOSH_IP=$(jq -r .Resources.MicroEIP generated-stubs/aws-resources.json)
 echo "BOSH director is at $BOSH_IP"
 
 # generate director uuid stub for cf
-BOSH_DIRECTOR_UUID=$(bosh -t ${BOSH_IP} status --uuid)
-cat > ${deployment_dir}/generated-stubs/cf/director-uuid.yml <<EOF
+BOSH_DIRECTOR_UUID=$(bosh -t "${BOSH_IP}" status --uuid)
+
+cat > "${deployment_dir}/generated-stubs/cf/director-uuid.yml" <<EOF
 ---
 director_uuid: $BOSH_DIRECTOR_UUID
 EOF
