@@ -2,7 +2,7 @@
 
 This repo contains all public scripts and templates used to provision AWS resources and
 deploy [BOSH](http://bosh.io/), [Concourse CI](http://concourse.ci/), [Cloud Foundry](http://docs.cloudfoundry.org/), or any combination thereof. It should
-be used in concert with a private repository that contains all necessary configuration 
+be used in concert with a private repository that contains all necessary configuration
 and secret information for your planned deployments.
 
 #### Links
@@ -17,6 +17,7 @@ and secret information for your planned deployments.
 3. [Deploying Concourse](#deploying-concourse)
 4. [Provisioning AWS for BOSH and Cloud Foundry, and Deploying BOSH](#provisioning-aws-for-bosh-and-cloud-foundry-and-deploying-bosh)
 
+<a name="general-requirements"></a>
 ## General Requirements
 
 * An AWS account for your deployments. It doesn't need to be empty as
@@ -39,6 +40,7 @@ and secret information for your planned deployments.
 
 * The `openssl` command line tool.
 
+<a name="provisioning-aws-for-bosh-and-concourse-and-deploying-bosh"></a>
 ## Provisioning AWS for BOSH and Concourse, and Deploying BOSH
 
 #### Usage
@@ -50,8 +52,8 @@ and secret information for your planned deployments.
 See Requirements below for an explanation of the DEPLOYMENT_DIR.
 
 This script will apply an AWS CloudFormation template, creating a stack in your AWS
-account. It will then create a BOSH instance. The default username/password is for 
-your BOSH director is admin/admin. You are **strongly advised** to change these by 
+account. It will then create a BOSH instance. The default username/password is for
+your BOSH director is admin/admin. You are **strongly advised** to change these by
 targetting the director and running:
 
 ```bash
@@ -114,10 +116,10 @@ bosh_credentials:
   registry_password: REPLACE_WITH_PASSWORD
 ```
 
-An SSL certificate for the domain where Concourse will be accessible is required. 
+An SSL certificate for the domain where Concourse will be accessible is required.
 If you do not provide a certificate, one will be created for you, with the Common Name
-coming from the `ELBRecordSetName` parameter in the `cloud_formation/properties.json` 
-file (see below). The key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`. 
+coming from the `ELBRecordSetName` parameter in the `cloud_formation/properties.json`
+file (see below). The key and pem file must exist at `certs/concourse.key` and `certs/concourse.pem`.
 If there is a certificate chain, it should exist at `certs/concourse_chain.pem`.
 You can generate a self signed cert if needed:
 
@@ -127,8 +129,8 @@ You can generate a self signed cert if needed:
 * Copy `concourse.pem` and `concourse.key` into the `certs` directory.
 
 
-If you want to deploy full Cloud Foundry into the same AWS stack where you will deploy Concourse, you shold provide an SSL certificate 
-for the domain where Cloud Foundry will be accessible.  If you provide these, the cert and pem will be uploaded to your AWS account. 
+If you want to deploy full Cloud Foundry into the same AWS stack where you will deploy Concourse, you shold provide an SSL certificate
+for the domain where Cloud Foundry will be accessible.  If you provide these, the cert and pem will be uploaded to your AWS account.
 The script will look for the files at `certs/cf.key` and `certs/cf.pem`. You can generate a self signed cert if needed:
 
 * `openssl genrsa -out cf.key 1024`
@@ -163,7 +165,7 @@ The script generates several artifacts in your deployment directory:
 * `artifacts/deployments/bosh-state.json`: an implementation detail of `bosh-init`;
   used to determine things like whether it is deploying a new BOSH or updating an
   existing one
-* `artifacts/certs/rootCA.[key,pem,srl]`: The root signing key used for 
+* `artifacts/certs/rootCA.[key,pem,srl]`: The root signing key used for
   creating the BOSH SSL certificate.
 * `artifacts/certs/bosh.[crt,key]`: The SSL certificate and key used for BOSH.
   The certificate Common Name is the IP address of the BOSH director.
@@ -181,6 +183,7 @@ The script will also print the IP of the BOSH director. Target your director by 
 bosh target DIRECTOR_IP
 ```
 
+<a name="deploying-concourse"></a>
 ## Deploying Concourse
 
 #### Usage
@@ -282,6 +285,7 @@ The script will also print the Concourse load balancer hostname at the end. This
 used to create the `CNAME` for your DNS entry in Route53 so that you can have a nice
 URL where you access your Concourse.
 
+<a name="provisioning-aws-for-bosh-and-cloud-foundry-and-deploying-bosh"></a>
 ## Provisioning AWS for BOSH and Cloud Foundry, and Deploying BOSH
 
 #### Usage
@@ -293,16 +297,16 @@ Run:
 ```
 
 This script will apply an AWS CloudFormation template, creating a stack in your AWS
-account. It will then create a BOSH instance. The default username/password is for 
-your BOSH director is admin/admin. You are **strongly advised** to change these by 
+account. It will then create a BOSH instance. The default username/password is for
+your BOSH director is admin/admin. You are **strongly advised** to change these by
 targetting the director and running:
 
 ```bash
 bosh create user USERNAME PASSWORD
 ```
 
-This script will also generate stubs to be used later when generating a deployment manifest 
-for Cloud Foundry, located in `PATH_TO_DEPLOYMENT_DIRECTORY/generated-stubs/cf/`. When using 
+This script will also generate stubs to be used later when generating a deployment manifest
+for Cloud Foundry, located in `PATH_TO_DEPLOYMENT_DIRECTORY/generated-stubs/cf/`. When using
 manifest generation tools from [cf-deployment][cf-deployment] or [cf-release][cf-release], include `PATH_TO_DEPLOYMENT_DIRECTORY/generated-stubs/cf/*` in the list of stubs you pass to those tools.
 
 #### Requirements
@@ -429,7 +433,7 @@ If you do not provide a certificate, but provide the `CFHostedZoneName` in `cf-p
 for you. If you are providing your own certificate, the key and pem file must exist at `certs/cf.key` and `certs/cf.pem`.
 
 To configure Cloud Front as a CDN for your Resource Matching and Droplet blobstores:
- 
+
 1. Navigate to the Cloud Front configuration page in the AWS Console.
 2. Click `Origin Access Identity` in the left column.
 3. Click `Create Origin Access Identity`

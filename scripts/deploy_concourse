@@ -112,8 +112,8 @@ if [ ! -e ${deployment_dir}/stubs/concourse/atc_credentials.yml  ]; then
 fi
 
 echo "# GENERATED, NO TOUCHING" > ${deployment_dir}/artifacts/deployments/concourse.yml
-spiff merge $script_dir/../templates/infrastructure/mask.yml \
-  $script_dir/../templates/infrastructure/concourse.yml \
+spiff merge $script_dir/../templates/bosh/bosh-deployment-mask.yml \
+  $script_dir/../templates/concourse/concourse.yml \
   generated-stubs/director_uuid.yml \
   generated-stubs/cloud_properties.yml \
   ${deployment_dir}/stubs/concourse/*.yml \
