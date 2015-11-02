@@ -65,6 +65,8 @@ jobs:
     properties:
       blackbox: *blackbox_config
       atc:
+        external_url: (( atc_credentials.external_url || nil ))
+        github_auth: (( atc_credentials.github_auth || nil ))
         basic_auth_username: (( atc_credentials.basic_auth_username ))
         basic_auth_password: (( atc_credentials.basic_auth_password ))
         publicly_viewable: true
