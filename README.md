@@ -1,3 +1,7 @@
+![Under Construction](http://i.stack.imgur.com/tM18j.gif)
+
+### **The tools in this repo are under heavy (re-)construction, please check back later, or look for announcements on the [cf-dev](https://lists.cloudfoundry.org/archives/list/cf-dev@lists.cloudfoundry.org/) and [cf-bosh](https://lists.cloudfoundry.org/archives/list/cf-bosh@lists.cloudfoundry.org/) mailing lists for when they will be ready.**
+
 # MEGA CI
 
 This repo contains all public scripts and templates used to provision AWS resources and
