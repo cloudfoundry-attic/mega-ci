@@ -28,9 +28,9 @@ stubs_parts="$(find "${STUB_PARTS_PATH}" | tail -n +2)"
 
 spiff merge \
   ./mega-ci/templates/cf/cf-stub-mask.yml \
+  ${stemcell_stub} \
   "${STUB_PATH}" \
   ${stubs_parts} \
-  ${stemcell_stub} \
   > stub.yml
 
 pushd cf-release
@@ -46,6 +46,6 @@ pushd cf-deployment
   ../etcd-release/*.tgz \
   ../consul-release/*.tgz \
   ../stub.yml
-  
+
   cat outputs/manifests/cf.yml
 popd
