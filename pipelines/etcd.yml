@@ -5,7 +5,8 @@ groups:
   - clean-deployment
   - create-final-release
   - merge-master-into-develop
-  - deploy-and-test-with-cf
+  - deploy-with-cf
+  - test-with-cf
 
 resources:
 - name: deployments-runtime
@@ -128,9 +129,9 @@ jobs:
   - task: clean
     file: mega-ci/scripts/ci/clean-deployment.yml
 
-- name: deploy-and-test-with-cf
+- name: deploy-with-cf
   public: false
-  serial: true
+  serial_group: [deploy_etcd]
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -150,6 +151,18 @@ jobs:
       params:
         STUB_PATH: {{cf_stub_path}}
         STUB_PARTS_PATH: {{cf_stub_parts_path}}
+
+- name: test-with-cf
+  public: false
+  serial_group: [deploy_etcd]
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [deploy-with-cf]
+      trigger: true
   - task: run-cats
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
@@ -176,7 +189,7 @@ jobs:
       resource: deployments-runtime
     - get: release-repo
       resource: etcd-release-develop
-      passed: [deploy-and-test-with-cf]
+      passed: [test-with-cf]
       trigger: true
     - get: release-repo-master
       resource: etcd-release-master
