@@ -14,7 +14,7 @@ gem install cf_canaries-0.1.0.gem
 cf api $CF_API_ENDPOINT --skip-ssl-validation
 set +x
 echo "Authenticating as $CF_API_USER"
-cf auth $CF_API_USER $CF_API_PASSWORD
+cf auth "$CF_API_USER" "$CF_API_PASSWORD"
 echo "Succeeded authenticating"
 set -x
 
