@@ -13,7 +13,7 @@ inputs:
   - name: stemcell
 
 run:
-  path: mega-ci/scripts/ci/deploy-etcd-cf
+  path: mega-ci/scripts/ci/deploy-etcd-cf/task
 
 params:
   STUB_PATH:

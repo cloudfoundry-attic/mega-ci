@@ -146,7 +146,7 @@ jobs:
       resource: aws-stemcell
     - get: consul-release
   - task: deploy-etcd-cf
-    file: mega-ci/scripts/ci/deploy-etcd-cf.yml
+    file: mega-ci/scripts/ci/deploy-etcd-cf/task.yml
     config:
       params:
         STUB_PATH: {{cf_stub_path}}
