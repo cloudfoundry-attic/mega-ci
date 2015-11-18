@@ -73,18 +73,14 @@ var _ = Describe("Task", func() {
 	})
 
 	It("deploys the manifest with BOSH", func() {
-		boshFile, err := os.Create(fmt.Sprintf("%s/bosh", tempDir))
-		Expect(err).NotTo(HaveOccurred())
-
-		err = boshFile.Chmod(os.ModePerm)
-		Expect(err).NotTo(HaveOccurred())
+		boshFilePath := fmt.Sprintf("%s/bosh", tempDir)
 
 		pathEnv := os.Getenv("PATH")
 		os.Setenv("PATH", tempDir+":"+pathEnv)
 
 		outputFile := tempDir + "/bosh-output"
 
-		_, err = boshFile.WriteString(fmt.Sprintf("printf '%%s ' \"${@}\" >> %s", outputFile))
+		err := ioutil.WriteFile(boshFilePath, []byte(fmt.Sprintf("printf '%%s ' \"${@}\" >> %s", outputFile)), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
 		command := sourceCommand("deploy",
