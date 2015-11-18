@@ -30,3 +30,19 @@ RUN chmod -R 777 /opt/rubies/
 # Install gems
 RUN /opt/rubies/ruby-2.2.2/bin/gem install bosh_cli --no-rdoc --no-ri
 
+# Install go
+RUN wget https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz && \
+  tar -C /usr/local -xzf go1.5.1.linux-amd64.tar.gz && \
+  rm -rf go1.5.1.linux-amd64.tar.gz
+
+# Add go to PATH
+ENV PATH $PATH:/usr/local/go/bin
+
+# Create directory for GOPATH
+RUN mkdir -p /go/bin
+
+# set GOPATH
+ENV GOPATH /go
+
+# add GOPATH/bin to PATH
+ENV PATH $PATH:$GOPATH/bin
