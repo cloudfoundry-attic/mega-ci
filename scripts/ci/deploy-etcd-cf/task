@@ -1,14 +1,5 @@
 #!/bin/bash -exu
 
-install_spiff() {
-  go get -u github.com/tools/godep
-  go get -u -d github.com/cloudfoundry-incubator/spiff
-  pushd "${GOPATH}/src/github.com/cloudfoundry-incubator/spiff"
-    godep restore
-  popd
-  go install github.com/cloudfoundry-incubator/spiff
-}
-
 generate_deployment_config() {
   local dir="${1}"
   local deployments_dir="${2}"
@@ -54,8 +45,6 @@ main() {
 	  "${PWD}" \
 	  ${stubs[@]} \
 	  > "${PWD}/config.json"
-
-  install_spiff()
 
   "${PWD}/cf-deployment/tools/prepare-deployments" \
 	  "aws" \
