@@ -100,6 +100,6 @@ var _ = Describe("Task", func() {
 		outputFileContents, err := ioutil.ReadFile(outputFile)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(bytes.TrimSpace(outputFileContents)).To(Equal([]byte("-t bosh.example.com -u username -p password -d manifest.yml deploy")))
+		Expect(bytes.TrimSpace(outputFileContents)).To(Equal([]byte("-n -t bosh.example.com -u username -p password -d manifest.yml deploy")))
 	})
 })

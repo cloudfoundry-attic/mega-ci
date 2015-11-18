@@ -27,6 +27,7 @@ CONFIG
 
 deploy() {
   bosh \
+    -n \
     -t "${1}" \
     -u "${2}" \
     -p "${3}" \

@@ -9,5 +9,5 @@ import (
 
 func TestDeployEtcdCf(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "DeployEtcdCf Suite")
+	RunSpecs(t, "deploy-etcd-cf")
 }
