@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	. "github.com/onsi/ginkgo"
@@ -41,12 +42,12 @@ var _ = Describe("Task", func() {
 	})
 
 	It("generates a config for the prepare-deployments tool", func() {
-		deploymentsDir := tempDir + "/deployments-dir"
+		deploymentsDir := filepath.Join(tempDir, "/deployments-dir")
 
-		err := os.Mkdir(tempDir+"/stemcell", os.ModePerm)
+		err := os.Mkdir(filepath.Join(tempDir, "/stemcell"), os.ModePerm)
 		Expect(err).ShouldNot(HaveOccurred())
 
-		_, err = os.Create(tempDir + "/stemcell/a-stemcell.tgz")
+		_, err = os.Create(filepath.Join(tempDir, "/stemcell/a-stemcell.tgz"))
 		Expect(err).ShouldNot(HaveOccurred())
 
 		command := sourceCommand("generate_deployment_config",
@@ -64,23 +65,27 @@ var _ = Describe("Task", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(config).To(Equal(deploymentConfig{
-			CF:             tempDir + "/cf-release",
-			ETCD:           tempDir + "/etcd-release",
-			Stemcell:       tempDir + "/stemcell/a-stemcell.tgz",
+			CF:             filepath.Join(tempDir, "/cf-release"),
+			ETCD:           filepath.Join(tempDir, "/etcd-release"),
+			Stemcell:       filepath.Join(tempDir, "/stemcell/a-stemcell.tgz"),
 			DeploymentsDir: deploymentsDir,
 			Stubs:          []string{"/stub-1.yml", "/stub-2.yml"},
 		}))
 	})
 
 	It("deploys the manifest with BOSH", func() {
-		boshFilePath := fmt.Sprintf("%s/bosh", tempDir)
+		boshFilePath := filepath.Join(tempDir, "bosh")
 
 		pathEnv := os.Getenv("PATH")
 		os.Setenv("PATH", tempDir+":"+pathEnv)
 
-		outputFile := tempDir + "/bosh-output"
+		outputFile := filepath.Join(tempDir, "/bosh-output")
 
-		err := ioutil.WriteFile(boshFilePath, []byte(fmt.Sprintf("printf '%%s ' \"${@}\" >> %s", outputFile)), os.ModePerm)
+		err := ioutil.WriteFile(
+			boshFilePath,
+			[]byte(fmt.Sprintf("printf '%%s ' \"${@}\" >> %s", outputFile)),
+			os.ModePerm,
+		)
 		Expect(err).NotTo(HaveOccurred())
 
 		command := sourceCommand("deploy",
@@ -96,6 +101,7 @@ var _ = Describe("Task", func() {
 		outputFileContents, err := ioutil.ReadFile(outputFile)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(bytes.TrimSpace(outputFileContents)).To(Equal([]byte("-n -t bosh.example.com -u username -p password -d manifest.yml deploy")))
+		Expect(bytes.TrimSpace(outputFileContents)).
+			To(Equal([]byte("-n -t bosh.example.com -u username -p password -d manifest.yml deploy")))
 	})
 })
