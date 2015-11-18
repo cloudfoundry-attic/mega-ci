@@ -35,8 +35,10 @@ RUN wget https://storage.googleapis.com/golang/go1.5.1.linux-amd64.tar.gz && \
   tar -C /usr/local -xzf go1.5.1.linux-amd64.tar.gz && \
   rm -rf go1.5.1.linux-amd64.tar.gz
 
-# Add go to PATH
-ENV PATH $PATH:/usr/local/go/bin
+# Install jq (apt-get has an old version)
+RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
+  mv jq-linux64 /usr/bin/jq && \
+  chmod +x /usr/bin/jq
 
 # Create directory for GOPATH
 RUN mkdir -p /go/bin
@@ -44,5 +46,6 @@ RUN mkdir -p /go/bin
 # set GOPATH
 ENV GOPATH /go
 
-# add GOPATH/bin to PATH
-ENV PATH $PATH:$GOPATH/bin
+# add go and GOPATH/bin to PATH
+ENV PATH $PATH:$GOPATH/bin:/usr/local/go/bin
+
