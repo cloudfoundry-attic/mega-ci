@@ -1,8 +1,10 @@
 #!/bin/bash -exu
 
 setup_ruby() {
+  set +e
   source /usr/local/share/chruby/chruby.sh
   chruby 2.2.3
+  set -e
 }
 
 generate_deployment_config() {
