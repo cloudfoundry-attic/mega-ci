@@ -151,6 +151,9 @@ jobs:
       params:
         STUB_PATH: {{cf_stub_path}}
         STUB_PARTS_PATH: {{cf_stub_parts_path}}
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
 
 - name: test-with-cf
   public: false
