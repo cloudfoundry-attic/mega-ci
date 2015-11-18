@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eux
+
+root_dir=$(cd "$(dirname $0)/../.." && pwd)
+
+scripts_dir="${root_dir}/scripts"
+
+# install ginkgo
+go get -v github.com/onsi/ginkgo/ginkgo
+go get -v github.com/onsi/gomega
+
+"${scripts_dir}/test"

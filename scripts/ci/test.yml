@@ -1,0 +1,10 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/mega-ci
+
+inputs:
+- name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/test
