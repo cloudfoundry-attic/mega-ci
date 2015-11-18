@@ -18,6 +18,15 @@ generate_deployment_config() {
 CONFIG
 }
 
+deploy() {
+  bosh \
+    -t "${1}" \
+    -u "${2}" \
+    -p "${3}" \
+    -d "${4}" \
+    deploy
+}
+
 main() {
   local stubs
   stubs=("${STUB_PATH} $(ls "${STUB_PARTS_PATH}/"*)")
@@ -31,6 +40,12 @@ main() {
   "${PWD}/cf-deployment/tools/prepare-deployments" \
 	  "aws" \
 	  "${PWD}/config.json"
+
+  deploy \
+    "${BOSH_DIRECTOR}" \
+    "${BOSH_USER}" \
+    "${BOSH_PASSWORD}" \
+    "${PWD}/cf.yml"
 }
 
 if [ "$(basename "${0}")" = "task" ]; then

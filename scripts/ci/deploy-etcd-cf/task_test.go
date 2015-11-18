@@ -1,6 +1,7 @@
 package deploy_etcd_cf
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -69,6 +70,36 @@ var _ = Describe("Task", func() {
 			DeploymentsDir: deploymentsDir,
 			Stubs:          []string{"/stub-1.yml", "/stub-2.yml"},
 		}))
+	})
 
+	It("deploys the manifest with BOSH", func() {
+		boshFile, err := os.Create(fmt.Sprintf("%s/bosh", tempDir))
+		Expect(err).NotTo(HaveOccurred())
+
+		err = boshFile.Chmod(os.ModePerm)
+		Expect(err).NotTo(HaveOccurred())
+
+		pathEnv := os.Getenv("PATH")
+		os.Setenv("PATH", tempDir+":"+pathEnv)
+
+		outputFile := tempDir + "/bosh-output"
+
+		_, err = boshFile.WriteString(fmt.Sprintf("printf '%%s ' \"${@}\" >> %s", outputFile))
+		Expect(err).NotTo(HaveOccurred())
+
+		command := sourceCommand("deploy",
+			"bosh.example.com",
+			"username",
+			"password",
+			"manifest.yml")
+
+		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+		Expect(err).ShouldNot(HaveOccurred())
+		Eventually(session).Should(gexec.Exit(0))
+
+		outputFileContents, err := ioutil.ReadFile(outputFile)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(bytes.TrimSpace(outputFileContents)).To(Equal([]byte("-t bosh.example.com -u username -p password -d manifest.yml deploy")))
 	})
 })
