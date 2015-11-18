@@ -1,0 +1,48 @@
+---
+resources:
+- name: mega-ci-master
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/mega-ci
+    branch: master
+    private_key: {{private_key}}
+
+- name: mega-ci-dockerfile
+  type: git
+  source:
+    uri: git@github.com:cloudfoundry/mega-ci
+    branch: master
+    private_key: {{private_key}}
+    paths:
+    - Dockerfile
+
+- name: mega-ci-docker-image
+  type: docker-image
+  source:
+    repository: cloudfoundry/mega-ci
+    username: {{docker-username}}
+    password: {{docker-password}}
+    email: {{docker-email}}
+
+jobs:
+- name: mega-ci-docker-image
+  plan:
+  - do:
+    - get: mega-ci
+      resource: mega-ci-dockerfile
+      trigger: true
+    - put: mega-ci-docker-image
+      params:
+        build: mega-ci
+        cache: true
+
+- name: mega-ci-unit-tests
+  plan:
+  - do:
+    - get: mega-ci
+      resource: mega-ci-master
+      trigger: true
+    - task: mega-ci-tests
+      file: mega-ci/scripts/ci/test.yml
+
+
