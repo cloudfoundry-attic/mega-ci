@@ -1,18 +1,13 @@
 #!/bin/bash -exu
 
-setup_ruby() {
-  set +eu
-  source /usr/local/share/chruby/chruby.sh
-  chruby 2.2.3
-  set -eu
-}
-
 generate_deployment_config() {
   local dir="${1}"
   local deployments_dir="${2}"
   local stubs="${@:3}"
-  local stubs_array="$(jq -n --arg v "${stubs}" '{ v: $v | split(" ") }' | jq -c .v)"
-  local stemcell_location="$(ls "${dir}/stemcell/"*.tgz | head -n 1)"
+  local stubs_array
+  stubs_array="$(jq -n --arg v "${stubs}" '{ v: $v | split(" ") }' | jq -c .v)"
+  local stemcell_location
+  stemcell_location="$(ls "${dir}/stemcell/"*.tgz | head -n 1)"
 
   cat <<CONFIG
 {
@@ -36,8 +31,6 @@ deploy() {
 }
 
 main() {
-  setup_ruby
-
   local stub_path
   stub_path="${PWD}/${STUB_PATH}"
 
