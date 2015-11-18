@@ -1,10 +1,10 @@
 #!/bin/bash -exu
 
 setup_ruby() {
-  set +e
+  set +eu
   source /usr/local/share/chruby/chruby.sh
   chruby 2.2.3
-  set -e
+  set -eu
 }
 
 generate_deployment_config() {
