@@ -28,8 +28,14 @@ deploy() {
 }
 
 main() {
+  local stub_path
+  stub_path="${PWD}/${STUB_PATH}"
+
+  local stub_parts_path
+  stub_parts_path="${PWD}/${STUB_PARTS_PATH}"
+
   local stubs
-  stubs=("${STUB_PATH} $(ls "${STUB_PARTS_PATH}/"*)")
+  stubs=("${stub_path} $(ls "${stub_parts_path}/"*)")
 
   generate_deployment_config \
 	  "${PWD}" \
