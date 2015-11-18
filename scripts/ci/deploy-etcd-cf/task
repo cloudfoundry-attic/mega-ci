@@ -55,7 +55,7 @@ main() {
 	  ${stubs[@]} \
 	  > "${PWD}/config.json"
 
-  install_spiff
+  install_spiff()
 
   "${PWD}/cf-deployment/tools/prepare-deployments" \
 	  "aws" \
