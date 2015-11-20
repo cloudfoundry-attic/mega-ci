@@ -134,7 +134,6 @@ jobs:
       resource: etcd-release-develop
       passed: [test-etcd]
       trigger: true
-    - get: cf-release
     - get: cf-deployment
     - get: stemcell
       resource: aws-stemcell
@@ -147,6 +146,7 @@ jobs:
         BOSH_DIRECTOR: {{cf_bosh_director}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
+        CF_DEPLOYMENT_TRACE: true
 
 - name: test-with-cf
   public: false

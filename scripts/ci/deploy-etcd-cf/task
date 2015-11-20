@@ -16,7 +16,6 @@ generate_deployment_config() {
 
   cat <<CONFIG
 {
-	"cf": "${dir}/cf-release",
 	"etcd": "${dir}/etcd-release",
 	"stemcell": "${stemcell_location}",
 	"deployments-dir": "${deployments_dir}",
