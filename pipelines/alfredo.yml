@@ -2,7 +2,9 @@ groups:
 - name: alfredo
   jobs:
   - cf-deployment-unit-tests
-  - deploy-and-test-alfredo
+  - deploy-cf
+  - run-smoke-tests
+  - run-acceptance-tests
   - bless
   - merge-master-into-develop
 
@@ -63,6 +65,7 @@ resources:
     regexp: acceptance_tests.*.tgz
     access_key_id: {{access_key}}
     secret_access_key: {{secret_key}}
+
 jobs:
 - name: cf-deployment-unit-tests
   public: false
@@ -78,9 +81,9 @@ jobs:
       params:
         CF_DEPLOYMENT_TRACE: true
 
-- name: deploy-and-test-alfredo
+- name: deploy-cf
   public: false
-  serial: true
+  serial_group: [deploy_cf]
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -99,12 +102,15 @@ jobs:
     - get: consul-release
       trigger: true
   - task: deploy-cf
-    file: mega-ci/scripts/ci/deploy-cf.yml
+    file: mega-ci/scripts/ci/deploy-cf-alone/task.yml
     config:
       params:
-        ENVIRONMENT: alfredo
-        STUB_PATH: deployments-runtime/alfredo/stubs/cf/cf-stub.yml
-        STUB_PARTS_PATH: deployments-runtime/alfredo/generated-stubs/cf
+        STUB_PATH: {{cf_stub_path}}
+        STUB_PARTS_PATH: {{cf_stub_parts_path}}
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        CF_DEPLOYMENT_TRACE: true
   - task: cleanup
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
@@ -112,6 +118,31 @@ jobs:
         ENVIRONMENT: alfredo
         DEPLOYMENT_NAME: cf-alfredo
         COMMAND: cleanup
+
+- name: run-smoke-tests
+  public: false
+  serial_group: [deploy_cf]
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: cf-release
+      passed: [deploy-cf]
+      trigger: true
+    - get: etcd-release
+      trigger: true
+      passed: [deploy-cf]
+    - get: cf-deployment
+      resource: cf-deployment-develop
+      passed: [deploy-cf]
+      trigger: true
+    - get: stemcell
+      resource: aws-stemcell
+      passed: [deploy-cf]
+      trigger: true
+    - get: consul-release
+      passed: [deploy-cf]
+      trigger: true
   - task: smoke-tests
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
@@ -119,6 +150,31 @@ jobs:
         COMMAND: 'run errand smoke_tests'
         DEPLOYMENT_NAME: cf-alfredo
         ENVIRONMENT: alfredo
+
+- name: run-acceptance-tests
+  public: false
+  serial_group: [deploy_cf]
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: cf-release
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: etcd-release
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: cf-deployment
+      resource: cf-deployment-develop
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: stemcell
+      resource: aws-stemcell
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: consul-release
+      passed: [run-smoke-tests]
+      trigger: true
   - task: acceptance-tests-1
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
@@ -155,6 +211,7 @@ jobs:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests-3/acceptance_tests(.*).tgz
+
 - name: bless
   public: false
   serial: true
@@ -163,23 +220,23 @@ jobs:
     - get: deployments-runtime
     - get: mega-ci
     - get: cf-release
-      passed: [deploy-and-test-alfredo]
+      passed: [run-acceptance-tests]
       trigger: true
     - get: etcd-release
-      passed: [deploy-and-test-alfredo]
+      passed: [run-acceptance-tests]
       trigger: true
     - get: release-repo
       resource: cf-deployment-develop
-      passed: [deploy-and-test-alfredo]
+      passed: [run-acceptance-tests]
       trigger: true
     - get: release-repo-master
       resource: cf-deployment-master
     - get: stemcell
       resource: aws-stemcell
-      passed: [deploy-and-test-alfredo]
+      passed: [run-acceptance-tests]
       trigger: true
     - get: consul-release
-      passed: [deploy-and-test-alfredo]
+      passed: [run-acceptance-tests]
       trigger: true
   - task: commit-blessing
     file: mega-ci/scripts/ci/commit-blessing.yml

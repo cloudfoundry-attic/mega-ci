@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: cf-deployment
+  - name: cf-release
+  - name: deployments-runtime
+  - name: etcd-release
+  - name: mega-ci
+  - name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/deploy-cf-alone/task
+
+params:
+  STUB_PATH:
+  STUB_PARTS_PATH:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
