@@ -12,12 +12,10 @@ generate_deployment_config() {
   local deployments_dir="${2}"
   local stubs="${@:3}"
   local stubs_array="$(jq -n --arg v "${stubs}" '{ v: $v | split(" ") }' | jq -c .v)"
-  local stemcell_location="$(ls "${dir}/stemcell/"*.tgz | head -n 1)"
 
   cat <<CONFIG
 {
 	"etcd": "${dir}/etcd-release",
-	"stemcell": "${stemcell_location}",
 	"deployments-dir": "${deployments_dir}",
 	"stubs": ${stubs_array}
 }
