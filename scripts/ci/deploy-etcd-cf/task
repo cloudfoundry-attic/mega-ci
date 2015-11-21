@@ -15,8 +15,10 @@ generate_deployment_config() {
 
   cat <<CONFIG
 {
+	"cf": "integration-latest",
 	"etcd": "${dir}/etcd-release",
 	"deployments-dir": "${deployments_dir}",
+	"stemcell": "integration-latest",
 	"stubs": ${stubs_array}
 }
 CONFIG

@@ -65,9 +65,9 @@ var _ = Describe("Task", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(config).To(Equal(deploymentConfig{
-			CF:             filepath.Join(tempDir, "/cf-release"),
+			CF:             "integration-latest",
 			ETCD:           filepath.Join(tempDir, "/etcd-release"),
-			Stemcell:       filepath.Join(tempDir, "/stemcell/a-stemcell.tgz"),
+			Stemcell:       "integration-latest",
 			DeploymentsDir: deploymentsDir,
 			Stubs:          []string{"/stub-1.yml", "/stub-2.yml"},
 		}))
