@@ -212,6 +212,7 @@ spiff merge $script_dir/../templates/bosh/bosh-init-mask.yml \
   generated-stubs/bosh-certs.json \
   generated-stubs/security-groups.yml \
   ${deployment_dir}/stubs/bosh/bosh_passwords.yml \
+  ${deployment_dir}/stubs/bosh/resource_overrides.yml \
   >> ${deployment_dir}/artifacts/deployments/bosh.yml
 
 # deploy BOSH
