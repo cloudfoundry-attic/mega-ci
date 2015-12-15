@@ -221,7 +221,7 @@ jobs:
         from: acceptance-tests-3/acceptance_tests(.*).tgz
 
 - name: bless
-  public: false
+  public: true
   serial: true
   plan:
   - aggregate:
