@@ -37,6 +37,7 @@ jobs:
         cache: true
 
 - name: mega-ci-unit-tests
+  public: true
   plan:
   - do:
     - get: mega-ci
