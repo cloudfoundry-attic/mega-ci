@@ -83,7 +83,7 @@ jobs:
 
 - name: deploy-cf
   public: false
-  serial_group: [deploy_cf]
+  serial_groups: [deploy_cf]
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -121,7 +121,7 @@ jobs:
 
 - name: run-smoke-tests
   public: false
-  serial_group: [deploy_cf]
+  serial_groups: [deploy_cf]
   plan:
   - aggregate:
     - get: deployments-runtime
@@ -153,7 +153,7 @@ jobs:
 
 - name: run-acceptance-tests
   public: false
-  serial_group: [deploy_cf]
+  serial_groups: [deploy_cf]
   plan:
   - aggregate:
     - get: deployments-runtime
