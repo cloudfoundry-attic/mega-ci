@@ -14,11 +14,13 @@ generate_deployment_config() {
   local stubs_array="$(jq -n --arg v "${stubs}" '{ v: $v | split(" ") }' | jq -c .v)"
   local stemcell_location="$(ls "${dir}/stemcell/"*.tgz | head -n 1)"
   local etcd_location="$(ls "${dir}/etcd-release/"*.tgz | head -n 1)"
+  local consul_location="$(ls "${dir}/consul-release/"*.tgz | head -n 1)"
 
   cat <<CONFIG
 {
 	"cf": "${dir}/cf-release",
 	"etcd": "${etcd_location}",
+	"consul": "${consul_location}",
 	"stemcell": "${stemcell_location}",
 	"deployments-dir": "${deployments_dir}",
 	"stubs": ${stubs_array}
