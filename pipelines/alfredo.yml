@@ -74,7 +74,7 @@ resources:
 
 jobs:
 - name: cf-deployment-unit-tests
-  public: false
+  public: true
   plan:
   - aggregate:
     - get: cf-deployment
