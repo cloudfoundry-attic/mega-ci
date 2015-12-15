@@ -65,6 +65,12 @@ resources:
     regexp: acceptance_tests.*.tgz
     access_key_id: {{access_key}}
     secret_access_key: {{secret_key}}
+- name: cf-release-develop
+  type: git
+  source:
+    branch: develop
+    private_key: {{private_key}}
+    uri: git@github.com:cloudfoundry/cf-release.git
 
 jobs:
 - name: cf-deployment-unit-tests
@@ -75,6 +81,8 @@ jobs:
       resource: cf-deployment-develop
       trigger: true
     - get: mega-ci
+    - get: cf-release-develop
+      trigger: true
   - task: unit-tests
     file: mega-ci/scripts/ci/unit-tests-cf-deployment.yml
     config:
