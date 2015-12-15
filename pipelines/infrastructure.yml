@@ -19,6 +19,7 @@ resources:
 
 jobs:
 - name: deploy-mega-ci-bosh
+  public: true
   plan:
   - aggregate:
     - get: deployments-runtime
