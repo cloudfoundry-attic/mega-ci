@@ -26,7 +26,6 @@ resources:
   source:
     repository: cloudfoundry/cf-release
 
-
 jobs:
 - name: announce-rc
   public: true

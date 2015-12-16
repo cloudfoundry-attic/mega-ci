@@ -35,7 +35,8 @@ deploy() {
     -u "${2}" \
     -p "${3}" \
     -d "${4}" \
-    deploy
+    deploy \
+    --redact-diff
 }
 
 main() {
