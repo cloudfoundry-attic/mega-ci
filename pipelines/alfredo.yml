@@ -90,7 +90,7 @@ jobs:
         CF_DEPLOYMENT_TRACE: true
 
 - name: deploy-cf
-  public: false
+  public: true
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
@@ -128,7 +128,7 @@ jobs:
         COMMAND: cleanup
 
 - name: run-smoke-tests
-  public: false
+  public: true
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
@@ -160,7 +160,7 @@ jobs:
         ENVIRONMENT: alfredo
 
 - name: run-acceptance-tests
-  public: false
+  public: true
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
