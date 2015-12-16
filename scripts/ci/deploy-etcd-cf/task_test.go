@@ -102,6 +102,6 @@ var _ = Describe("Task", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(bytes.TrimSpace(outputFileContents)).
-			To(Equal([]byte("-n -t bosh.example.com -u username -p password -d manifest.yml deploy")))
+			To(Equal([]byte("-n -t bosh.example.com -u username -p password -d manifest.yml deploy --redact-diff")))
 	})
 })
