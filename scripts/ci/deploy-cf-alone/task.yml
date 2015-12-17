@@ -8,6 +8,7 @@ inputs:
   - name: cf-release
   - name: deployments-runtime
   - name: etcd-release
+  - name: consul-release
   - name: mega-ci
   - name: stemcell
 
