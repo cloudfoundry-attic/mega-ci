@@ -1,0 +1,27 @@
+groups:
+- name: route-registrar
+  jobs:
+  - test-route-registrar
+
+resources:
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/mega-ci.git
+- name: route-registrar
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry-incubator/route-registrar.git
+
+jobs:
+- name: test-route-registrar
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: route-registrar
+      trigger: true
+  - task: run-tests
+    file: mega-ci/scripts/ci/route-registrar-tests/task.yml
