@@ -9,4 +9,4 @@ inputs:
     path: gopath/src/github.com/cloudfoundry-incubator/route-registrar
 
 run:
-  path: mega-ci/scripts/ci/route-registrar-unit-tests/task
+  path: mega-ci/scripts/ci/route-registrar-tests/task
