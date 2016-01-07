@@ -1,0 +1,19 @@
+#!/bin/sh
+set -eux
+
+# wget \
+#   https://github.com/nats-io/gnatsd/releases/download/v0.7.2/gnatsd-v0.7.2-linux-amd64.tar.gz
+
+# tar -xvf ./gnatsd-v0.7.2-linux-amd64.tar.gz
+
+export GOPATH="${PWD}/gopath"
+export PATH="${GOPATH}/bin":${PATH}
+
+cd "${GOPATH}/src/github.com/cloudfoundry-incubator/route-registrar"
+
+export GOPATH=${PWD}/Godeps/_workspace:${GOPATH}
+export PATH=${PWD}/Godeps/_workspace/bin:${PATH}
+
+go get github.com/onsi/ginkgo/ginkgo
+
+./bin/test
