@@ -58,6 +58,11 @@
       "Type": "String",
       "Default": "10.0.16.0/24"
     },
+    "ConsulSubnetCIDR": {
+      "Description": "CIDR block for the Consul subnet.",
+      "Type": "String",
+      "Default": "10.0.4.0/24"
+    },
     "CFSubnetCIDR": {
       "Description": "CIDR block for the CF Deployment subnet.",
       "Type": "String",
@@ -212,6 +217,47 @@
           },
           {
             "CidrIp": "10.0.16.0/24",
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          }
+        ]
+      }
+    },
+
+    "ConsulSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "Consul",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.0.4.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.0.4.0/24",
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -410,6 +456,24 @@
       "Properties": {
         "RouteTableId": { "Ref": "PublicRouteTable" },
         "SubnetId": { "Ref": "EtcdSubnet" }
+      }
+    },
+
+    "ConsulSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "ConsulSubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "Consul" }]
+      }
+    },
+
+    "ConsulSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "ConsulSubnet" }
       }
     },
 
