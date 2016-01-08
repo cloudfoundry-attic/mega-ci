@@ -13,7 +13,7 @@ resources:
   type: git
   source:
     branch: master
-    uri: https://github.com/pivotal-cf-experimental/cf_canaries.git
+    uri: https://github.com/cloudfoundry-incubator/cf_canaries.git
 jobs:
 - name: push-canaries
   public: true
