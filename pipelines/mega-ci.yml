@@ -5,14 +5,14 @@ resources:
   source:
     uri: git@github.com:cloudfoundry/mega-ci
     branch: master
-    private_key: {{private_key}}
+    private_key: {{mega-ci-private-key}}
 
 - name: mega-ci-dockerfile
   type: git
   source:
     uri: git@github.com:cloudfoundry/mega-ci
     branch: master
-    private_key: {{private_key}}
+    private_key: {{mega-ci-private-key}}
     paths:
     - Dockerfile
 

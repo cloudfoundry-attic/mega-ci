@@ -9,31 +9,31 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{mega-ci-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci.git
 - name: cf-release-release-elect
   type: git
   source:
     branch: release-elect
-    private_key: {{private_key}}
+    private_key: {{cf-release-private-key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-release-develop
   type: git
   source:
     branch: develop
-    private_key: {{private_key}}
+    private_key: {{cf-release-private-key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-release-master
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{cf-release-private-key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-release-credentials
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{cf-release-credentials-private-key}}
     uri: git@github.com:cloudfoundry/cf-release-credentials.git
 
 jobs:

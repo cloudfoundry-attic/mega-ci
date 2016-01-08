@@ -13,7 +13,7 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{deployments-runtime-private-key}}
     uri: git@github.com:cloudfoundry/deployments-runtime.git
 - name: etcd-release
   type: bosh-io-release
@@ -27,32 +27,32 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{mega-ci-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci.git
 - name: cf-release
   type: git
   source:
     branch: runtime-passed
-    private_key: {{private_key}}
+    private_key: {{cf-release-private-key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 - name: cf-deployment-master
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{cf-deployment-private-key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: cf-deployment-develop
   type: git
   source:
     branch: develop
     ignore_paths: [blessed_versions.json]
-    private_key: {{private_key}}
+    private_key: {{cf-deployment-private-key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: cf-deployment-develop-merge-target
   type: git
   source:
     branch: develop
-    private_key: {{private_key}}
+    private_key: {{cf-deployment-private-key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 - name: aws-stemcell
   type: bosh-io-stemcell
@@ -69,7 +69,7 @@ resources:
   type: git
   source:
     branch: develop
-    private_key: {{private_key}}
+    private_key: {{cf-release-private-key}}
     uri: git@github.com:cloudfoundry/cf-release.git
 
 jobs:

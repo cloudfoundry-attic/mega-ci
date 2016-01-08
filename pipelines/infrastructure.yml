@@ -8,13 +8,13 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{deployments-runtime-private-key}}
     uri: git@github.com:cloudfoundry/deployments-runtime.git
 - name: mega-ci
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{mega-ci-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci.git
 
 jobs:
