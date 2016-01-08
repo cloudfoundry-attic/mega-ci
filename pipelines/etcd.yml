@@ -13,44 +13,44 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{deployments-runtime-private-key}}
     uri: git@github.com:cloudfoundry/deployments-runtime.git
 - name: runtime-credentials
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{runtime-credentials-private-key}}
     uri: git@github.com:cloudfoundry/runtime-credentials.git
 - name: mega-ci
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{mega-ci-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci.git
 - name: etcd-release-develop
   type: git
   source:
     branch: develop
     ignore_paths: [.final_builds, releases]
-    private_key: {{private_key}}
+    private_key: {{etcd-release-private-key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 - name: etcd-release-merge-target
   type: git
   source:
     branch: develop
-    private_key: {{private_key}}
+    private_key: {{etcd-release-private-key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 - name: etcd-release-master
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{etcd-release-private-key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
 - name: cf-deployment
   type: git
   source:
     branch: master
-    private_key: {{private_key}}
+    private_key: {{cf-deployment-private-key}}
     uri: git@github.com:cloudfoundry/cf-deployment.git
 
 jobs:
