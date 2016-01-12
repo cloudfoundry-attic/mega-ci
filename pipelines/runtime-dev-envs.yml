@@ -1,0 +1,47 @@
+groups:
+- name: runtime-dev-envs
+  jobs:
+  - check-runtime-1
+  - check-runtime-2
+
+resources:
+- name: weekly
+  type: time
+  source:
+    interval: 168h
+
+jobs:
+- name: check-runtime-1
+  public: true
+  plan:
+  - get: weekly
+    trigger: true
+  - task: check-runtime-1
+    config:
+      platform: linux
+      image: docker:///cloudfoundry/runtime-ci
+      run:
+        path: '/bin/bash'
+        args:
+          - '-c'
+          - 'set -x; source ~/.bashrc; bosh -t micro.runtime1.cf-app.com deployments 2>&1 | grep "No deployments"'
+      params:
+        BOSH_USER: {{runtime_1_bosh_user}}
+        BOSH_PASSWORD: {{runtime_1_bosh_password}}
+- name: check-runtime-2
+  public: true
+  plan:
+  - get: weekly
+    trigger: true
+  - task: check-runtime-2
+    config:
+      platform: linux
+      image: docker:///cloudfoundry/runtime-ci
+      run:
+        path: '/bin/bash'
+        args:
+          - '-c'
+          - 'set -x; source ~/.bashrc; bosh -t micro.runtime2.cf-app.com deployments 2>&1 | grep "No deployments"'
+      params:
+        BOSH_USER: {{runtime_2_bosh_user}}
+        BOSH_PASSWORD: {{runtime_2_bosh_password}}
