@@ -1,12 +1,9 @@
 #!/bin/bash -exu
 
+set +ux
 source ~/.bashrc
-
-echo "Sourcing bosh_environment"
-set +x
 source deployments-runtime/mega-ci/bosh_environment
-set -x
-echo "Done sourcing bosh_environment"
+set -ux
 
 function main() {
   bosh target "${BOSH_DIRECTOR}"

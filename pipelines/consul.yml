@@ -1,6 +1,7 @@
 groups:
 - name: consul
   jobs:
+  - test-consul
   - create-final-release
   - merge-master-into-develop
 
