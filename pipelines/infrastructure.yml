@@ -4,12 +4,12 @@ groups:
   - deploy-mega-ci-bosh
 
 resources:
-- name: deployments-runtime
+- name: mega-ci-env
   type: git
   source:
     branch: master
-    private_key: {{deployments-runtime-private-key}}
-    uri: git@github.com:cloudfoundry/deployments-runtime.git
+    private_key: {{mega-ci-env-private-key}}
+    uri: git@github.com:cloudfoundry/mega-ci-env.git
 - name: mega-ci
   type: git
   source:
@@ -22,10 +22,10 @@ jobs:
   public: true
   plan:
   - aggregate:
-    - get: deployments-runtime
+    - get: mega-ci-env
     - get: mega-ci
   - task: deploy-bosh
     file: mega-ci/scripts/ci/deploy-bosh.yml
     config:
       params:
-        DEPLOYMENT_DIR: 'deployments-runtime/mega-ci'
+        DEPLOYMENT_DIR: 'mega-ci-env'
