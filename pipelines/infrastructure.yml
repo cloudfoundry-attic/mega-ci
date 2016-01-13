@@ -28,4 +28,4 @@ jobs:
     file: mega-ci/scripts/ci/deploy-bosh.yml
     config:
       params:
-        DEPLOYMENT_DIR: 'mega-ci-env'
+        DEPLOYMENT_DIR: 'mega-ci-env/mega-ci'
