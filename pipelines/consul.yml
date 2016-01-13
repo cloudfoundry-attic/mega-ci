@@ -44,7 +44,8 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: deployments-runtime
+    - get: private-credentials
+      resource: deployments-runtime
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop

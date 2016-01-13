@@ -2,21 +2,27 @@
 
 set +ux
 source ~/.bashrc
-source deployments-runtime/mega-ci/bosh_environment
+source private-credentials/mega-ci/bosh_environment
 set -ux
 
 function main() {
   bosh target "${BOSH_DIRECTOR}"
+
   mkdir -p consul-release/manifest-generation/aws-stubs/
 
-  cp deployments-runtime/mega-ci/stubs/consats/iaas-settings-consats.yml consul-release/manifest-generation/aws-stubs/
+  cp \
+    private-credentials/mega-ci/stubs/consats/iaas-settings-consats.yml \
+    consul-release/manifest-generation/aws-stubs/
 
   pushd consul-release > /dev/null
     bosh -n create release
     bosh upload release
 
-    bosh upload release https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4
-    bosh upload release http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=39
+    bosh upload release \
+      "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
+
+    bosh upload release \
+      "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=39"
 
     ./scripts/generate-consats-manifest aws
 
