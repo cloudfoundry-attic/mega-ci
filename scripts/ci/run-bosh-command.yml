@@ -4,7 +4,7 @@ platform: linux
 image: docker:///cloudfoundry/runtime-ci
 
 inputs:
-  - name: deployments-runtime
+  - name: private-credentials
   - name: mega-ci
 
 run:
@@ -15,4 +15,3 @@ params:
   DEPLOYMENT_NAME:
   LOGS_DIR:
   ENVIRONMENT:
-  CREDENTIAL_REPO:

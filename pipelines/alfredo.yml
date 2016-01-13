@@ -94,7 +94,8 @@ jobs:
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
-    - get: mega-ci-env
+    - get: private-credentials
+      resource: mega-ci-env
     - get: mega-ci
     - get: cf-release
       trigger: true
@@ -126,14 +127,14 @@ jobs:
         DEPLOYMENT_NAME: cf-alfredo
         COMMAND: cleanup
         ENVIRONMENT: alfredo
-        CREDENTIAL_REPO: mega-ci-env
 
 - name: run-smoke-tests
   public: true
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
-    - get: mega-ci-env
+    - get: private-credentials
+      resource: mega-ci-env
     - get: mega-ci
     - get: cf-release
       passed: [deploy-cf]
@@ -159,14 +160,14 @@ jobs:
         COMMAND: 'run errand smoke_tests'
         DEPLOYMENT_NAME: cf-alfredo
         ENVIRONMENT: alfredo
-        CREDENTIAL_REPO: mega-ci-env
 
 - name: run-acceptance-tests
   public: true
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
-    - get: mega-ci-env
+    - get: private-credentials
+      resource: mega-ci-env
     - get: mega-ci
     - get: cf-release
       passed: [run-smoke-tests]
@@ -193,7 +194,6 @@ jobs:
         DEPLOYMENT_NAME: cf-alfredo
         LOGS_DIR: acceptance-tests-1
         ENVIRONMENT: alfredo
-        CREDENTIAL_REPO: mega-ci-env
     ensure:
       put: acceptance-tests-logs
       params:
@@ -206,7 +206,6 @@ jobs:
         DEPLOYMENT_NAME: cf-alfredo
         LOGS_DIR: acceptance-tests-2
         ENVIRONMENT: alfredo
-        CREDENTIAL_REPO: mega-ci-env
     ensure:
       put: acceptance-tests-logs
       params:
@@ -219,7 +218,6 @@ jobs:
         DEPLOYMENT_NAME: cf-alfredo
         LOGS_DIR: acceptance-tests-3
         ENVIRONMENT: alfredo
-        CREDENTIAL_REPO: mega-ci-env
     ensure:
       put: acceptance-tests-logs
       params:

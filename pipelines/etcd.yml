@@ -158,7 +158,6 @@ jobs:
         ENVIRONMENT: mega-ci
         DEPLOYMENT_NAME: etcd-cf-deployment
         COMMAND: run errand acceptance_tests
-        CREDENTIAL_REPO: private-credentials
     on_success:
       task: delete-deployment
       file: mega-ci/scripts/ci/run-bosh-command.yml
@@ -167,7 +166,6 @@ jobs:
           ENVIRONMENT: mega-ci
           DEPLOYMENT_NAME: etcd-cf-deployment
           COMMAND: delete deployment etcd-cf-deployment
-          CREDENTIAL_REPO: private-credentials
 
 - name: create-final-release
   public: true
