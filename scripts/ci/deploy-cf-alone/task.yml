@@ -9,7 +9,7 @@ inputs:
   - name: cf-release
   - name: etcd-release
   - name: consul-release
-  - name: mega-ci-env
+  - name: private-credentials
   - name: stemcell
 
 run:
