@@ -1,0 +1,45 @@
+#!/bin/bash -exu
+
+source ~/.bashrc
+
+echo "Sourcing bosh_environment"
+set +x
+source deployments-runtime/mega-ci/bosh_environment
+set -x
+echo "Done sourcing bosh_environment"
+
+function main() {
+  bosh target "${BOSH_DIRECTOR}"
+  mkdir -p consul-release/manifest-generation/aws-stubs/
+
+  cp deployments-runtime/mega-ci/stubs/consats/iaas-settings-consats.yml consul-release/manifest-generation/aws-stubs/
+
+  pushd consul-release > /dev/null
+    bosh create release --force
+    bosh upload release
+
+    bosh upload release https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4
+    bosh upload release http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=39
+
+    ./scripts/generate-consats-manifest aws
+
+    bosh deployment aws/consats.yml
+    bosh -n deploy
+
+    bosh run errand acceptance-tests
+  popd > /dev/null
+}
+
+function cleanup() {
+  set +e
+  bosh -n delete deployment consats
+
+  bosh -n delete release turbulence
+  bosh -n delete release bosh-aws-cpi
+  bosh -n delete release consul
+  set -e
+}
+
+trap cleanup EXIT
+
+main

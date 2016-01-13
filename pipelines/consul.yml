@@ -38,6 +38,19 @@ resources:
     uri: git@github.com:cloudfoundry-incubator/consul-release.git
 
 jobs:
+- name: test-consul
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: deployments-runtime
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      trigger: true
+  - task: run-consats
+    file: mega-ci/scripts/ci/run-consats.yml
+
 - name: create-final-release
   public: true
   serial: true
@@ -48,6 +61,7 @@ jobs:
       resource: deployments-runtime
     - get: release-repo
       resource: consul-release-develop
+      passed: [test-consul]
       trigger: true
     - get: release-repo-master
       resource: consul-release-master
