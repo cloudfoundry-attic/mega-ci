@@ -3,8 +3,10 @@ set -e -x
 
 source ~/.bashrc
 
+CREDENTIAL_REPO="${CREDENTIAL_REPO:-deployments-runtime}"
+
 set +x
-source ./deployments-runtime/$ENVIRONMENT/bosh_environment
+source ./$CREDENTIAL_REPO/$ENVIRONMENT/bosh_environment
 set -x
 
 if [ -n "$LOGS_DIR" ]; then

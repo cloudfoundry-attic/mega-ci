@@ -120,11 +120,13 @@ jobs:
         BOSH_PASSWORD: {{cf_bosh_password}}
         CF_DEPLOYMENT_TRACE: true
   - task: cleanup
-    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
+    file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
         DEPLOYMENT_NAME: cf-alfredo
         COMMAND: cleanup
+        ENVIRONMENT: alfredo
+        CREDENTIAL_REPO: mega-ci-env
 
 - name: run-smoke-tests
   public: true
@@ -151,11 +153,13 @@ jobs:
       passed: [deploy-cf]
       trigger: true
   - task: smoke-tests
-    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
+    file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
         COMMAND: 'run errand smoke_tests'
         DEPLOYMENT_NAME: cf-alfredo
+        ENVIRONMENT: alfredo
+        CREDENTIAL_REPO: mega-ci-env
 
 - name: run-acceptance-tests
   public: true
@@ -182,34 +186,40 @@ jobs:
       passed: [run-smoke-tests]
       trigger: true
   - task: acceptance-tests-1
-    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
+    file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
         COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-1
         DEPLOYMENT_NAME: cf-alfredo
         LOGS_DIR: acceptance-tests-1
+        ENVIRONMENT: alfredo
+        CREDENTIAL_REPO: mega-ci-env
     ensure:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests-1/acceptance_tests(.*).tgz
   - task: acceptance-tests-2
-    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
+    file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
         COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-2
         DEPLOYMENT_NAME: cf-alfredo
         LOGS_DIR: acceptance-tests-2
+        ENVIRONMENT: alfredo
+        CREDENTIAL_REPO: mega-ci-env
     ensure:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests-2/acceptance_tests(.*).tgz
   - task: acceptance-tests-3
-    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
+    file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
         COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-3
         DEPLOYMENT_NAME: cf-alfredo
         LOGS_DIR: acceptance-tests-3
+        ENVIRONMENT: alfredo
+        CREDENTIAL_REPO: mega-ci-env
     ensure:
       put: acceptance-tests-logs
       params:
