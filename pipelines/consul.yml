@@ -6,12 +6,12 @@ groups:
   - merge-master-into-develop
 
 resources:
-- name: deployments-runtime
+- name: mega-ci-env
   type: git
   source:
     branch: master
-    private_key: {{deployments-runtime-private-key}}
-    uri: git@github.com:cloudfoundry/deployments-runtime.git
+    private_key: {{mega-ci-env-private-key}}
+    uri: git@github.com:cloudfoundry/mega-ci-env.git
 - name: mega-ci
   type: git
   source:
@@ -45,7 +45,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
@@ -60,7 +60,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: release-repo
       resource: consul-release-develop
       passed: [test-consul]
