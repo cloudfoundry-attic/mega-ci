@@ -12,7 +12,7 @@ function main() {
   cp deployments-runtime/mega-ci/stubs/consats/iaas-settings-consats.yml consul-release/manifest-generation/aws-stubs/
 
   pushd consul-release > /dev/null
-    bosh create release --force
+    bosh -n create release
     bosh upload release
 
     bosh upload release https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4
