@@ -5,7 +5,7 @@ image: docker:///cloudfoundry/runtime-ci
 
 inputs:
   - name: cf-deployment
-  - name: deployments-runtime
+  - name: private-credentials
   - name: etcd-release
   - name: mega-ci
 

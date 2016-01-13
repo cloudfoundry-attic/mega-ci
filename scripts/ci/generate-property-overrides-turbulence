@@ -6,13 +6,13 @@ source ~/.bashrc
 
 echo "Sourcing aws_environment"
 set +x
-source deployments-runtime/$DEPLOYMENT_DIR/aws_environment
+source private-credentials/$DEPLOYMENT_DIR/aws_environment
 set -x
 echo "Done sourcing aws_environment"
 
 echo "Sourcing bosh_environment"
 set +x
-source deployments-runtime/$DEPLOYMENT_DIR/bosh_environment
+source private-credentials/$DEPLOYMENT_DIR/bosh_environment
 set -x
 echo "Done sourcing bosh_environment"
 

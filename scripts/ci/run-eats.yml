@@ -5,7 +5,7 @@ image: docker:///cloudfoundry/runtime-ci
 
 inputs:
   - name: mega-ci
-  - name: deployments-runtime
+  - name: private-credentials
   - name: etcd-release
   - name: generate-iaas-settings-etcd
   - name: generate-iaas-settings-turbulence

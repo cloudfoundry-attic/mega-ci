@@ -7,7 +7,7 @@ source ~/.bashrc
 echo "Sourcing bosh environment"
 
 set +x
-source deployments-runtime/mega-ci/bosh_environment
+source private-credentials/mega-ci/bosh_environment
 set -x
 
 bosh target $BOSH_DIRECTOR
