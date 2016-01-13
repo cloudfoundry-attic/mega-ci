@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e -x
+
+source ~/.bashrc
+
+set +x
+source ./mega-ci-env/bosh_environment
+set -x
+
+if [ -n "$LOGS_DIR" ]; then
+  mkdir "${LOGS_DIR}"
+fi
+
+bosh \
+  -t "${BOSH_DIRECTOR}" \
+  download manifest \
+  "${DEPLOYMENT_NAME}" \
+  manifest.yml
+
+bosh \
+  -n \
+  --color \
+  -t "${BOSH_DIRECTOR}" \
+  -d manifest.yml \
+  $COMMAND

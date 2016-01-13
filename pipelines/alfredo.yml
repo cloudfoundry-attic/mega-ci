@@ -9,12 +9,12 @@ groups:
   - merge-master-into-develop
 
 resources:
-- name: deployments-runtime
+- name: mega-ci-env
   type: git
   source:
     branch: master
-    private_key: {{deployments-runtime-private-key}}
-    uri: git@github.com:cloudfoundry/deployments-runtime.git
+    private_key: {{mega-ci-env-private-key}}
+    uri: git@github.com:cloudfoundry/mega-ci-env.git
 - name: etcd-release
   type: bosh-io-release
   source:
@@ -94,7 +94,7 @@ jobs:
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
-    - get: deployments-runtime
+    - get: mega-ci-env
     - get: mega-ci
     - get: cf-release
       trigger: true
@@ -120,10 +120,9 @@ jobs:
         BOSH_PASSWORD: {{cf_bosh_password}}
         CF_DEPLOYMENT_TRACE: true
   - task: cleanup
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
     config:
       params:
-        ENVIRONMENT: alfredo
         DEPLOYMENT_NAME: cf-alfredo
         COMMAND: cleanup
 
@@ -132,7 +131,7 @@ jobs:
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
-    - get: deployments-runtime
+    - get: mega-ci-env
     - get: mega-ci
     - get: cf-release
       passed: [deploy-cf]
@@ -152,19 +151,18 @@ jobs:
       passed: [deploy-cf]
       trigger: true
   - task: smoke-tests
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
     config:
       params:
         COMMAND: 'run errand smoke_tests'
         DEPLOYMENT_NAME: cf-alfredo
-        ENVIRONMENT: alfredo
 
 - name: run-acceptance-tests
   public: true
   serial_groups: [deploy_cf]
   plan:
   - aggregate:
-    - get: deployments-runtime
+    - get: mega-ci-env
     - get: mega-ci
     - get: cf-release
       passed: [run-smoke-tests]
@@ -184,36 +182,33 @@ jobs:
       passed: [run-smoke-tests]
       trigger: true
   - task: acceptance-tests-1
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
     config:
       params:
         COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-1
         DEPLOYMENT_NAME: cf-alfredo
-        ENVIRONMENT: alfredo
         LOGS_DIR: acceptance-tests-1
     ensure:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests-1/acceptance_tests(.*).tgz
   - task: acceptance-tests-2
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
     config:
       params:
         COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-2
         DEPLOYMENT_NAME: cf-alfredo
-        ENVIRONMENT: alfredo
         LOGS_DIR: acceptance-tests-2
     ensure:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests-2/acceptance_tests(.*).tgz
   - task: acceptance-tests-3
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/run-bosh-command-mega-ci-env/task.yml
     config:
       params:
         COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-3
         DEPLOYMENT_NAME: cf-alfredo
-        ENVIRONMENT: alfredo
         LOGS_DIR: acceptance-tests-3
     ensure:
       put: acceptance-tests-logs
@@ -225,7 +220,6 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: deployments-runtime
     - get: mega-ci
     - get: cf-release
       passed: [run-acceptance-tests]
