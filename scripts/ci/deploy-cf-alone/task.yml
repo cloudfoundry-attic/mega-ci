@@ -4,11 +4,12 @@ platform: linux
 image: docker:///cloudfoundry/runtime-ci
 
 inputs:
+  - name: mega-ci
   - name: cf-deployment
   - name: cf-release
   - name: etcd-release
   - name: consul-release
-  - name: mega-ci
+  - name: mega-ci-env
   - name: stemcell
 
 run:
