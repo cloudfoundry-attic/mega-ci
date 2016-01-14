@@ -37,5 +37,3 @@ spiff merge mega-ci/templates/$DEPLOYMENT/iaas-settings.yml \
   generated-stubs/aws-resources.json \
   generated-stubs/security-groups.yml \
   > generated-stubs/iaas-settings.yml
-
-cat generated-stubs/iaas-settings.yml

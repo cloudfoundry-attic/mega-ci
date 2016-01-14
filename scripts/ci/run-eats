@@ -23,8 +23,6 @@ cat > eats_config.json <<EOF
 }
 EOF
 
-cat eats_config.json
-
 cd etcd-release
 
 EATS_CONFIG=$PWD/../eats_config.json ./scripts/test
