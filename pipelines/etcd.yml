@@ -9,12 +9,12 @@ groups:
   - test-with-cf
 
 resources:
-- name: deployments-runtime
+- name: mega-ci-env
   type: git
   source:
     branch: master
-    private_key: {{deployments-runtime-private-key}}
-    uri: git@github.com:cloudfoundry/deployments-runtime.git
+    private_key: {{mega-ci-env-private-key}}
+    uri: git@github.com:cloudfoundry/mega-ci-env.git
 - name: runtime-credentials
   type: git
   source:
@@ -60,7 +60,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
@@ -107,7 +107,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release-develop
       trigger: true
@@ -121,7 +121,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
@@ -145,7 +145,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
@@ -174,7 +174,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: private-credentials
-      resource: deployments-runtime
+      resource: mega-ci-env
     - get: release-repo
       resource: etcd-release-develop
       passed: [test-with-cf]
