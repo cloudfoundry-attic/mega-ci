@@ -9,12 +9,12 @@ groups:
   - merge-master-into-develop
 
 resources:
-- name: mega-ci-env
+- name: alfredo-env
   type: git
   source:
     branch: master
-    private_key: {{mega-ci-env-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci-env.git
+    private_key: {{alfredo-env-private-key}}
+    uri: git@github.com:cloudfoundry/alfredo-env.git
 - name: etcd-release
   type: bosh-io-release
   source:
@@ -95,7 +95,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: mega-ci-env
+      resource: alfredo-env
     - get: mega-ci
     - get: cf-release
       trigger: true
@@ -134,7 +134,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: mega-ci-env
+      resource: alfredo-env
     - get: mega-ci
     - get: cf-release
       passed: [deploy-cf]
@@ -167,7 +167,7 @@ jobs:
   plan:
   - aggregate:
     - get: private-credentials
-      resource: mega-ci-env
+      resource: alfredo-env
     - get: mega-ci
     - get: cf-release
       passed: [run-smoke-tests]
