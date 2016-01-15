@@ -1,22 +1,22 @@
 groups:
 - name: runtime-dev-envs
   jobs:
-  - check-runtime-1
-  - check-runtime-2
+  - nothing-deployed-on-runtime1
+  - nothing-deployed-on-runtime2
 
 resources:
-- name: weekly
+- name: every-15-minutes
   type: time
   source:
-    interval: 168h
+    interval: 15m
 
 jobs:
-- name: check-runtime-1
+- name: nothing-deployed-on-runtime1
   public: true
   plan:
-  - get: weekly
+  - get: every-15-minutes
     trigger: true
-  - task: check-runtime-1
+  - task: check-deployments
     config:
       platform: linux
       image: docker:///cloudfoundry/runtime-ci
@@ -28,12 +28,12 @@ jobs:
       params:
         BOSH_USER: {{runtime_1_bosh_user}}
         BOSH_PASSWORD: {{runtime_1_bosh_password}}
-- name: check-runtime-2
+- name: nothing-deployed-on-runtime2
   public: true
   plan:
-  - get: weekly
+  - get: every-15-minutes
     trigger: true
-  - task: check-runtime-2
+  - task: check-deployments
     config:
       platform: linux
       image: docker:///cloudfoundry/runtime-ci
