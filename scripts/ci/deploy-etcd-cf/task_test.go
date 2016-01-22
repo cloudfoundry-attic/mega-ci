@@ -100,7 +100,7 @@ var _ = Describe("Task", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		command := sourceCommand("deploy", "manifest.yml")
+		command := sourceCommand("deploy", "bosh.example.com", "manifest.yml")
 
 		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).ShouldNot(HaveOccurred())
@@ -110,7 +110,7 @@ var _ = Describe("Task", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(bytes.TrimSpace(outputFileContents)).
-			To(Equal([]byte("-n -d manifest.yml deploy --redact-diff")))
+			To(Equal([]byte("-n -t bosh.example.com -d manifest.yml deploy --redact-diff")))
 	})
 
 	Describe("preflight_check", func() {

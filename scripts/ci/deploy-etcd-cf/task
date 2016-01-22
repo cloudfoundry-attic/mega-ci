@@ -27,7 +27,8 @@ CONFIG
 deploy() {
   bosh \
     -n \
-    -d "${1}" \
+    -t "${1}" \
+    -d "${2}" \
     deploy \
     --redact-diff
 }
@@ -63,7 +64,9 @@ main() {
 	  "aws" \
 	  "${PWD}/config.json"
 
-  deploy "${PWD}/cf.yml"
+  deploy \
+	  "${BOSH_DIRECTOR}" \
+	  "${PWD}/cf.yml"
 }
 
 if [ "$(basename "${0}")" = "task" ]; then
