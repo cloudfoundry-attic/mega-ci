@@ -16,7 +16,7 @@ import (
 )
 
 func sourceCommand(command string, args ...string) *exec.Cmd {
-	cmd := fmt.Sprintf(". task && %s %s", command, strings.Join(args, " "))
+	cmd := fmt.Sprintf("set -exu && . task && %s %s", command, strings.Join(args, " "))
 	return exec.Command("bash", "-c", cmd)
 }
 
@@ -29,9 +29,17 @@ type deploymentConfig struct {
 }
 
 var _ = Describe("Task", func() {
-	var tempDir string
+	var (
+		tempDir     string
+		environment map[string]string
+	)
 
 	BeforeEach(func() {
+		environment = map[string]string{
+			"BOSH_DIRECTOR": os.Getenv("BOSH_DIRECTOR"),
+			"BOSH_USER":     os.Getenv("BOSH_USER"),
+			"BOSH_PASSWORD": os.Getenv("BOSH_PASSWORD"),
+		}
 		var err error
 		tempDir, err = ioutil.TempDir("", "")
 		Expect(err).NotTo(HaveOccurred())
@@ -39,6 +47,10 @@ var _ = Describe("Task", func() {
 
 	AfterEach(func() {
 		os.RemoveAll(tempDir)
+
+		for name, value := range environment {
+			os.Setenv(name, value)
+		}
 	})
 
 	It("generates a config for the prepare-deployments tool", func() {
@@ -88,11 +100,7 @@ var _ = Describe("Task", func() {
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		command := sourceCommand("deploy",
-			"bosh.example.com",
-			"username",
-			"password",
-			"manifest.yml")
+		command := sourceCommand("deploy", "manifest.yml")
 
 		session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
 		Expect(err).ShouldNot(HaveOccurred())
@@ -102,6 +110,40 @@ var _ = Describe("Task", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(bytes.TrimSpace(outputFileContents)).
-			To(Equal([]byte("-n -t bosh.example.com -u username -p password -d manifest.yml deploy --redact-diff")))
+			To(Equal([]byte("-n -d manifest.yml deploy --redact-diff")))
+	})
+
+	Describe("preflight_check", func() {
+		Context("when the BOSH credentials are not set", func() {
+			BeforeEach(func() {
+				os.Setenv("BOSH_DIRECTOR", "")
+				os.Setenv("BOSH_USER", "")
+				os.Setenv("BOSH_PASSWORD", "")
+			})
+
+			It("fails the check", func() {
+				command := sourceCommand("preflight_check")
+
+				session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ShouldNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(1))
+			})
+		})
+
+		Context("when the BOSH credentials are set", func() {
+			BeforeEach(func() {
+				os.Setenv("BOSH_DIRECTOR", "bosh.example.com")
+				os.Setenv("BOSH_USER", "username")
+				os.Setenv("BOSH_PASSWORD", "password")
+			})
+
+			It("passes the check", func() {
+				command := sourceCommand("preflight_check")
+
+				session, err := gexec.Start(command, GinkgoWriter, GinkgoWriter)
+				Expect(err).ShouldNot(HaveOccurred())
+				Eventually(session).Should(gexec.Exit(0))
+			})
+		})
 	})
 })

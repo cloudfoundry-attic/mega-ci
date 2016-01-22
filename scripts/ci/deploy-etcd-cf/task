@@ -27,15 +27,21 @@ CONFIG
 deploy() {
   bosh \
     -n \
-    -t "${1}" \
-    -u "${2}" \
-    -p "${3}" \
-    -d "${4}" \
+    -d "${1}" \
     deploy \
     --redact-diff
 }
 
+preflight_check() {
+	set +x
+	test -n "${BOSH_DIRECTOR}"
+	test -n "${BOSH_USER}"
+	test -n "${BOSH_PASSWORD}"
+	set -x
+}
+
 main() {
+  preflight_check
   setup_ruby
 
   local stub_path
@@ -57,11 +63,7 @@ main() {
 	  "aws" \
 	  "${PWD}/config.json"
 
-  deploy \
-    "${BOSH_DIRECTOR}" \
-    "${BOSH_USER}" \
-    "${BOSH_PASSWORD}" \
-    "${PWD}/cf.yml"
+  deploy "${PWD}/cf.yml"
 }
 
 if [ "$(basename "${0}")" = "task" ]; then
