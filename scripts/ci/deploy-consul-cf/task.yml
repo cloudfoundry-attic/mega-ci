@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+  - name: cf-deployment
+  - name: private-credentials
+  - name: consul-release
+  - name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/deploy-consul-cf/task
+
+params:
+  STUB_PATH:
+  STUB_PARTS_PATH:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
