@@ -21,6 +21,12 @@
       "Default": ""
     },
 
+    "ConsulCFHostedZoneName": {
+      "Description": "Route53 Hosted Zone in which to register the Consul CF ELB's DNS record.",
+      "Type": "String",
+      "Default": ""
+    },
+
     "ELBRecordSetName": {
       "Description": "(Optional) Route53 Record Set name for the ELB.",
       "Type": "String",
@@ -68,6 +74,11 @@
       "Type": "String",
       "Default": "10.0.15.0/24"
     },
+    "ConsulCFSubnetCIDR": {
+      "Description": "CIDR block for the CF Deployment subnet.",
+      "Type": "String",
+      "Default": "10.0.50.0/24"
+    },
     "ConcourseLoadBalancerCertName": {
       "Description": "Name of the SSL cert to use for the concourse ELB.",
       "Type": "String",
@@ -75,6 +86,11 @@
     },
     "CFLoadBalancerCertName": {
       "Description": "Name of the SSL cert to use for the CF ELB.",
+      "Type": "String",
+      "Default": ""
+    },
+    "ConsulCFLoadBalancerCertName": {
+      "Description": "Name of the SSL cert to use for the Consul CF ELB.",
       "Type": "String",
       "Default": ""
     }
@@ -116,6 +132,16 @@
     "CreateCFLoadBalancer": {
       "Fn::Not": [
         { "Fn::Equals": [{ "Ref": "CFLoadBalancerCertName" }, ""] }
+      ]
+    },
+    "CreateConsulCFHostedZone": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "ConsulCFHostedZoneName" }, ""] }
+      ]
+    },
+    "CreateConsulCFLoadBalancer": {
+      "Fn::Not": [
+        { "Fn::Equals": [{ "Ref": "ConsulCFLoadBalancerCertName" }, ""] }
       ]
     }
   },
@@ -495,6 +521,24 @@
       }
     },
 
+    "ConsulCFSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "ConsulCFSubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "consul-cf1" }]
+      }
+    },
+
+    "ConsulCFSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "ConsulCFSubnet" }
+      }
+    },
+
     "LoadBalancerSubnet": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
@@ -690,6 +734,97 @@
         "TTL": "300",
         "ResourceRecords" : [
           { "Fn::GetAtt": ["CFLoadBalancer","CanonicalHostedZoneName"] }
+        ]
+      }
+    },
+
+    "ConsulCFLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Condition": "CreateConsulCFLoadBalancer",
+
+      "Properties": {
+        "Subnets": [{ "Ref": "LoadBalancerSubnet" }],
+        "SecurityGroups": [{ "Ref": "LoadBalancerSecurityGroup" }],
+
+        "HealthCheck": {
+          "HealthyThreshold": "2",
+          "Interval": "30",
+          "Target": "tcp:80",
+          "Timeout": "5",
+          "UnhealthyThreshold": "10"
+        },
+
+        "Listeners": [
+          {
+            "Protocol": "http",
+            "LoadBalancerPort": "80",
+            "InstanceProtocol": "http",
+            "InstancePort": "80"
+          },
+          {
+            "Protocol": "https",
+            "LoadBalancerPort": "443",
+            "InstanceProtocol": "http",
+            "InstancePort": "80",
+            "SSLCertificateId" : {
+              "Fn::Join":[
+                "",
+                [
+                  "arn:aws:iam::",
+                  {
+                    "Ref":"AWS::AccountId"
+                  },
+                  ":server-certificate/",
+                  {
+                    "Ref":"ConsulCFLoadBalancerCertName"
+                  }
+                ]
+              ]
+            }
+          },
+          {
+            "Protocol" : "ssl",
+            "LoadBalancerPort" : "4443",
+            "InstanceProtocol": "tcp",
+            "InstancePort" : "80",
+            "SSLCertificateId" : {
+              "Fn::Join":[
+                "",
+                [
+                  "arn:aws:iam::",
+                  {
+                    "Ref":"AWS::AccountId"
+                  },
+                  ":server-certificate/",
+                  {
+                    "Ref":"ConsulCFLoadBalancerCertName"
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+
+    "ConsulCFHostedZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Condition": "CreateConsulCFHostedZone",
+      "Properties": {
+        "Name": { "Ref": "ConsulCFHostedZoneName" }
+      }
+    },
+
+    "ConsulCFEIPRecordSet": {
+      "Type": "AWS::Route53::RecordSet",
+      "Condition": "CreateConsulCFHostedZone",
+      "Properties": {
+        "HostedZoneId": { "Ref": "ConsulCFHostedZone" },
+        "Name": { "Fn::Join" : [ "", [ "*.", {"Ref" : "ConsulCFHostedZoneName"} ,"."]] },
+        "Type": "CNAME",
+        "TTL": "300",
+        "ResourceRecords" : [
+          { "Fn::GetAtt": ["ConsulCFLoadBalancer","CanonicalHostedZoneName"] }
         ]
       }
     },
