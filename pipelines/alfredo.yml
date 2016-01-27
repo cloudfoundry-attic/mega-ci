@@ -186,42 +186,18 @@ jobs:
     - get: consul-release
       passed: [run-smoke-tests]
       trigger: true
-  - task: acceptance-tests-1
+  - task: acceptance-tests
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
-        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-1
+        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests
         DEPLOYMENT_NAME: cf-alfredo
-        LOGS_DIR: acceptance-tests-1
+        LOGS_DIR: acceptance-tests
         ENVIRONMENT: alfredo
     ensure:
       put: acceptance-tests-logs
       params:
-        from: acceptance-tests-1/acceptance_tests(.*).tgz
-  - task: acceptance-tests-2
-    file: mega-ci/scripts/ci/run-bosh-command.yml
-    config:
-      params:
-        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-2
-        DEPLOYMENT_NAME: cf-alfredo
-        LOGS_DIR: acceptance-tests-2
-        ENVIRONMENT: alfredo
-    ensure:
-      put: acceptance-tests-logs
-      params:
-        from: acceptance-tests-2/acceptance_tests(.*).tgz
-  - task: acceptance-tests-3
-    file: mega-ci/scripts/ci/run-bosh-command.yml
-    config:
-      params:
-        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests-3
-        DEPLOYMENT_NAME: cf-alfredo
-        LOGS_DIR: acceptance-tests-3
-        ENVIRONMENT: alfredo
-    ensure:
-      put: acceptance-tests-logs
-      params:
-        from: acceptance-tests-3/acceptance_tests(.*).tgz
+        from: acceptance-tests/acceptance_tests(.*).tgz
 
 - name: bless
   public: true
