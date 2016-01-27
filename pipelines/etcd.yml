@@ -2,7 +2,6 @@ groups:
 - name: etcd
   jobs:
   - test-etcd
-  - clean-deployment
   - create-final-release
   - merge-master-into-develop
   - deploy-with-cf
@@ -100,20 +99,6 @@ jobs:
         PROPERTY_OVERRIDES_TURBULENCE: generate-property-overrides-turbulence/generated-stubs/property-overrides-turbulence.yml
         TURBULENCE_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4
         BOSH_OPERATION_TIMEOUT: 20m
-
-- name: clean-deployment
-  public: true
-  serial: true
-  plan:
-  - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
-    - get: mega-ci
-    - get: etcd-release-develop
-      trigger: true
-      passed: [test-etcd]
-  - task: clean
-    file: mega-ci/scripts/ci/clean-deployment.yml
 
 - name: deploy-with-cf
   public: false

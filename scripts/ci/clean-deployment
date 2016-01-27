@@ -18,6 +18,12 @@ for i in $etcd_deployments; do
   bosh -n delete deployment $i
 done
 
+echo "Cleaning consul deployments"
+consul_deployments=$(bosh deployments | grep -o 'consul-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | uniq)
+for i in $consul_deployments; do
+  bosh -n delete deployment $i
+done
+
 echo "Cleaning turbulence deployments"
 turbulence_deployments=$(bosh deployments | grep -o 'turb-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | uniq)
 for i in $turbulence_deployments; do
@@ -27,11 +33,12 @@ done
 echo "Cleaning all unused releases"
 bosh -n cleanup --all
 
-echo "Checking etcd and turbulence release count"
+echo "Checking etcd, consul, and turbulence release count"
 etcd_deployment_count=$(bosh deployments | grep 'etcd-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
+consul_deployment_count=$(bosh deployments | grep 'consul-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
 turbulence_deployment_count=$(bosh deployments | grep 'turb-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}' | wc -l | awk '{print $1}')
 
-if [ $(($etcd_deployment_count + $turbulence_deployment_count)) -gt 10 ]
+if [ $(($etcd_deployment_count + $consul_deployment_count + $turbulence_deployment_count)) -gt 10 ]
 then
   echo "Deployments are not properly cleaning up"
   exit 1
