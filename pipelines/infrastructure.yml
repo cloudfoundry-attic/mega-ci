@@ -2,6 +2,7 @@ groups:
 - name: infrastructure
   jobs:
   - deploy-mega-ci-bosh
+  - cleanup-deployments
 
 resources:
 - name: mega-ci-env
