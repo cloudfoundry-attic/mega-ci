@@ -3,6 +3,7 @@ groups:
   jobs:
   - test-consul
   - deploy-with-cf
+  - test-with-cf
   - create-final-release
   - merge-master-into-develop
 
@@ -84,6 +85,34 @@ jobs:
         BOSH_PASSWORD: {{cf_bosh_password}}
         CF_DEPLOYMENT_TRACE: true
 
+- name: test-with-cf
+  public: false
+  serial_group: [deploy_consul]
+  plan:
+  - aggregate:
+    - get: private-credentials
+      resource: mega-ci-env
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [deploy-with-cf]
+      trigger: true
+  - task: run-cats
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        ENVIRONMENT: mega-ci
+        DEPLOYMENT_NAME: consul-cf-deployment
+        COMMAND: run errand acceptance_tests
+    on_success:
+      task: delete-deployment
+      file: mega-ci/scripts/ci/run-bosh-command.yml
+      config:
+        params:
+          ENVIRONMENT: mega-ci
+          DEPLOYMENT_NAME: consul-cf-deployment
+          COMMAND: delete deployment consul-cf-deployment
+
 - name: create-final-release
   public: true
   serial: true
@@ -94,7 +123,7 @@ jobs:
       resource: mega-ci-env
     - get: release-repo
       resource: consul-release-develop
-      passed: [deploy-with-cf]
+      passed: [test-with-cf]
       trigger: true
     - get: release-repo-master
       resource: consul-release-master
