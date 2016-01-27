@@ -16,7 +16,7 @@ function main() {
 
   pushd consul-release > /dev/null
     bosh -n create release
-    bosh upload release
+    bosh upload release --rebase
 
     bosh upload release \
       "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
