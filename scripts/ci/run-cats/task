@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eux
+
+CF_API="${CF_API:?}"
+CF_ADMIN_USER="${CF_ADMIN_USER:?}"
+CF_ADMIN_PASSWORD="${CF_ADMIN_PASSWORD:?}"
+CF_APPS_DOMAIN="${CF_APPS_DOMAIN:?}"
+SKIP_SSL_VALIDATION="${SKIP_SSL_VALIDATION:?}"
+USE_HTTP="${USE_HTTP:?}"
+SUITES="${SUITES:-}"
+
+export GOPATH="${PWD}/gopath"
+export PATH="${GOPATH}/bin":${PATH}
+
+cd "${GOPATH}/src/github.com/cloudfoundry/cf-acceptance-tests"
+
+export GOPATH=${PWD}/Godeps/_workspace:${GOPATH}
+export PATH=${PWD}/Godeps/_workspace/bin:${PATH}
+
+go get github.com/onsi/ginkgo/ginkgo
+
+cat > integration_config.json <<EOF
+{
+  "api": "${CF_API}",
+  "admin_user": "${CF_ADMIN_USER}",
+  "admin_password": "${CF_ADMIN_PASSWORD}",
+  "apps_domain": "${CF_APPS_DOMAIN}",
+  "skip_ssl_validation": ${SKIP_SSL_VALIDATION},
+  "use_http": ${USE_HTTP}
+}
+EOF
+export CONFIG=$PWD/integration_config.json
+
+./bin/test "${SUITES}"

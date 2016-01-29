@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/runtime-ci
+
+inputs:
+- name: mega-ci
+- name: cf-acceptance-tests
+  path: gopath/src/github.com/cloudfoundry/cf-acceptance-tests
+
+run:
+  path: mega-ci/scripts/ci/run-cats/task
+
+params:
+  CF_API:
+  CF_ADMIN_USER: ADMIN
+  CF_ADMIN_PASSWORD:
+  CF_APPS_DOMAIN:
+  SKIP_SSL_VALIDATION: false
+  USE_HTTP: false
+  SUITES:
+
