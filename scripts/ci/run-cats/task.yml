@@ -5,8 +5,7 @@ image: docker:///cloudfoundry/runtime-ci
 
 inputs:
 - name: mega-ci
-- name: cf-acceptance-tests
-  path: gopath/src/github.com/cloudfoundry/cf-acceptance-tests
+- name: cf-release
 
 run:
   path: mega-ci/scripts/ci/run-cats/task

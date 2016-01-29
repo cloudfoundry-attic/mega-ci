@@ -9,7 +9,7 @@ SKIP_SSL_VALIDATION="${SKIP_SSL_VALIDATION:?}"
 USE_HTTP="${USE_HTTP:?}"
 SUITES="${SUITES:-}"
 
-export GOPATH="${PWD}/gopath"
+export GOPATH="${PWD}/cf-release"
 export PATH="${GOPATH}/bin":${PATH}
 
 cd "${GOPATH}/src/github.com/cloudfoundry/cf-acceptance-tests"
