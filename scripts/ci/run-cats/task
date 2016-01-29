@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eux
+set -eu
 
 CF_API="${CF_API:?}"
 CF_ADMIN_USER="${CF_ADMIN_USER:?}"
@@ -8,6 +8,8 @@ CF_APPS_DOMAIN="${CF_APPS_DOMAIN:?}"
 SKIP_SSL_VALIDATION="${SKIP_SSL_VALIDATION:?}"
 USE_HTTP="${USE_HTTP:?}"
 SUITES="${SUITES:-}"
+
+set -x
 
 export GOPATH="${PWD}/cf-release"
 export PATH="${GOPATH}/bin":${PATH}
