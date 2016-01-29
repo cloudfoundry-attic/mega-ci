@@ -5,6 +5,7 @@ groups:
   - deploy-cf
   - run-smoke-tests
   - run-acceptance-tests
+  - run-cats-a
   - bless
   - merge-master-into-develop
 
@@ -198,6 +199,38 @@ jobs:
       put: acceptance-tests-logs
       params:
         from: acceptance-tests/acceptance_tests(.*).tgz
+
+- name: run-cats-a
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: cf-release
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: etcd-release
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: cf-deployment
+      resource: cf-deployment-develop
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: stemcell
+      resource: aws-stemcell
+      passed: [run-smoke-tests]
+      trigger: true
+    - get: consul-release
+      passed: [run-smoke-tests]
+      trigger: true
+  - task: run-cats-a
+    file: mega-ci/scripts/ci/run-cats/task.yml
+    config:
+      params:
+        CF_API: {{alfredo-cf-api}}
+        CF_ADMIN_PASSWORD: {{alfredo-cf-admin-password}}
+        CF_APPS_DOMAIN: {{alfredo-cf-apps-domain}}
+        SKIP_SSL_VALIDATION: true
+        SUITES: "apps assets detect internet_dependent"
 
 - name: bless
   public: true
