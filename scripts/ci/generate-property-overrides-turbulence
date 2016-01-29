@@ -45,5 +45,5 @@ spiff merge mega-ci/templates/turbulence/turbulence-property-overrides.yml \
   generated-stubs/bosh-config.yml \
   private-credentials/$DEPLOYMENT_DIR/stubs/bosh/bosh_passwords.yml \
   private-credentials/$DEPLOYMENT_DIR/stubs/etcd/turbulence-certificates.yml \
-  private-credentials/$DEPLOYMENT_DIR/generated-stubs/pipeline/cf-resources.yml \
+  private-credentials/$DEPLOYMENT_DIR/generated-stubs/etcd-pipeline/cf-resources.yml \
   > generated-stubs/property-overrides-turbulence.yml
