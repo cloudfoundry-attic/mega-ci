@@ -12,10 +12,11 @@ run:
 
 params:
   CF_API:
-  CF_ADMIN_USER: ADMIN
+  CF_ADMIN_USER: admin
   CF_ADMIN_PASSWORD:
   CF_APPS_DOMAIN:
   SKIP_SSL_VALIDATION: false
   USE_HTTP: false
+  NODES: 4
   SUITES:
 

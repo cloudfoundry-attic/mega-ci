@@ -1,15 +1,17 @@
 #!/bin/sh
 set -eu
 
+CF_ADMIN_PASSWORD="${CF_ADMIN_PASSWORD:?}"
+
+set -x
+
 CF_API="${CF_API:?}"
 CF_ADMIN_USER="${CF_ADMIN_USER:?}"
-CF_ADMIN_PASSWORD="${CF_ADMIN_PASSWORD:?}"
 CF_APPS_DOMAIN="${CF_APPS_DOMAIN:?}"
 SKIP_SSL_VALIDATION="${SKIP_SSL_VALIDATION:?}"
 USE_HTTP="${USE_HTTP:?}"
+NODES="${NODES:?}"
 SUITES="${SUITES:-}"
-
-set -x
 
 export GOPATH="${PWD}/cf-release"
 export PATH="${GOPATH}/bin":${PATH}
@@ -33,4 +35,6 @@ cat > integration_config.json <<EOF
 EOF
 export CONFIG=$PWD/integration_config.json
 
-./bin/test "${SUITES}"
+./bin/test \
+  -nodes "${NODES}" \
+  "${SUITES}"
