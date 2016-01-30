@@ -5,7 +5,7 @@ groups:
   - deploy-cf
   - run-smoke-tests
   - run-acceptance-tests
-  - run-cats-a
+  - run-cats
   - bless
   - merge-master-into-develop
 
@@ -200,7 +200,7 @@ jobs:
       params:
         from: acceptance-tests/acceptance_tests(.*).tgz
 
-- name: run-cats-a
+- name: run-cats
   public: true
   plan:
   - aggregate:
@@ -222,15 +222,29 @@ jobs:
     - get: consul-release
       passed: [run-smoke-tests]
       trigger: true
-  - task: run-cats-a
-    file: mega-ci/scripts/ci/run-cats/task.yml
-    config:
-      params:
-        CF_API: {{alfredo-cf-api}}
-        CF_ADMIN_PASSWORD: {{alfredo-cf-admin-password}}
-        CF_APPS_DOMAIN: {{alfredo-cf-apps-domain}}
-        SKIP_SSL_VALIDATION: true
-        SUITES: "apps assets detect internet_dependent"
+  - aggregate:
+    - task: everything-else
+      file: mega-ci/scripts/ci/run-cats/task.yml
+      config:
+        params:
+          CF_API: {{alfredo-cf-api}}
+          CF_ADMIN_PASSWORD: {{alfredo-cf-admin-password}}
+          CF_APPS_DOMAIN: {{alfredo-cf-apps-domain}}
+          SKIP_SSL_VALIDATION: true
+          NODES: 8
+          SUITES: "apps assets detect docker internet_dependent operator routing"
+          ADDITIONAL_ARGS: "-skip=NO_DEA_SUPPORT -slowSpecThreshold=240 -keepGoing -failOnPending"
+    - task: services-security_groups-ssh
+      file: mega-ci/scripts/ci/run-cats/task.yml
+      config:
+        params:
+          CF_API: {{alfredo-cf-api}}
+          CF_ADMIN_PASSWORD: {{alfredo-cf-admin-password}}
+          CF_APPS_DOMAIN: {{alfredo-cf-apps-domain}}
+          NODES: 8
+          SKIP_SSL_VALIDATION: true
+          SUITES: "services security_groups ssh"
+          ADDITIONAL_ARGS: "-skip=NO_DEA_SUPPORT -slowSpecThreshold=240 -keepGoing -failOnPending"
 
 - name: bless
   public: true
