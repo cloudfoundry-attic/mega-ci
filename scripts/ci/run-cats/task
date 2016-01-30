@@ -12,6 +12,7 @@ SKIP_SSL_VALIDATION="${SKIP_SSL_VALIDATION:?}"
 USE_HTTP="${USE_HTTP:?}"
 NODES="${NODES:?}"
 SUITES="${SUITES:-}"
+ADDITIONAL_ARGS="${ADDITIONAL_ARGS:-}"
 
 export GOPATH="${PWD}/cf-release"
 export PATH="${GOPATH}/bin":${PATH}
@@ -37,4 +38,5 @@ export CONFIG=$PWD/integration_config.json
 
 ./bin/test \
   -nodes "${NODES}" \
+  "${ADDITIONAL_ARGS}" \
   "${SUITES}"

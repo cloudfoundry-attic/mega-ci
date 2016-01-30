@@ -19,4 +19,4 @@ params:
   USE_HTTP: false
   NODES: 4
   SUITES:
-
+  ADDITIONAL_ARGS:
