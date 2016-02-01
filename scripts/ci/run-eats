@@ -1,16 +1,21 @@
-#!/bin/bash
+#!/bin/bash -exu
 
-set -e -x
-
+set +ux
 source ~/.bashrc
-
-echo "Sourcing bosh_environment"
-set +x
 source private-credentials/mega-ci/bosh_environment
-set -x
-echo "Done sourcing bosh_environment"
+set -ux
 
-cat > eats_config.json <<EOF
+function main() {
+  write_test_configuration
+  run_tests
+  cleanup_deployment "etcd"
+  cleanup_deployment "turb-etcd"
+
+  bosh -n cleanup --all
+}
+
+function write_test_configuration() {
+  cat > eats_config.json <<EOF
 {
   "bosh_target": "$BOSH_DIRECTOR",
   "iaas_settings_etcd_stub_path": "$PWD/$IAAS_SETTINGS_ETCD",
@@ -22,10 +27,23 @@ cat > eats_config.json <<EOF
   "turbulence_release_url": "$TURBULENCE_RELEASE_URL"
 }
 EOF
+}
 
-cd etcd-release
+function run_tests() {
+  pushd etcd-release
+    EATS_CONFIG=$PWD/../eats_config.json ./scripts/test
+  popd
+}
 
-EATS_CONFIG=$PWD/../eats_config.json ./scripts/test
+function cleanup_deployment() {
+  local deployment
+  deployment="${1}-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}"
 
+  for i in $(bosh deployments | grep -o "${deployment}" | uniq); do
+    bosh -n delete deployment $i
+  done
 
+  test -z "$(bosh deployments | grep "${deployment}")"
+}
 
+main

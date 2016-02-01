@@ -31,9 +31,25 @@ function main() {
 
     bosh run errand acceptance-tests
   popd > /dev/null
+
+  cleanup_deployment "consul"
+  cleanup_deployment "turbulence-consul"
+
+  bosh -n cleanup --all
 }
 
-function cleanup() {
+function cleanup_deployment() {
+  local deployment
+  deployment="${1}-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}"
+
+  for i in $(bosh deployments | grep -o "${deployment}" | uniq); do
+    bosh -n delete deployment $i
+  done
+
+  test -z "$(bosh deployments | grep "${deployment}")"
+}
+
+function teardown() {
   set +e
   bosh -n delete deployment consats
 
@@ -43,6 +59,6 @@ function cleanup() {
   set -e
 }
 
-trap cleanup EXIT
+trap teardown EXIT
 
 main
