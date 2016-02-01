@@ -28,14 +28,12 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{mega-ci-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci.git
+    uri: https://github.com/cloudfoundry/mega-ci.git
 - name: cf-release
   type: git
   source:
     branch: runtime-passed
-    private_key: {{cf-release-private-key}}
-    uri: git@github.com:cloudfoundry/cf-release.git
+    uri: https://github.com/cloudfoundry/cf-release
 - name: cf-deployment-master
   type: git
   source:
@@ -47,8 +45,7 @@ resources:
   source:
     branch: develop
     ignore_paths: [blessed_versions.json]
-    private_key: {{cf-deployment-private-key}}
-    uri: git@github.com:cloudfoundry/cf-deployment.git
+    uri: https://github.com/cloudfoundry/cf-deployment.git
 - name: cf-deployment-develop-merge-target
   type: git
   source:
@@ -70,8 +67,7 @@ resources:
   type: git
   source:
     branch: develop
-    private_key: {{cf-release-private-key}}
-    uri: git@github.com:cloudfoundry/cf-release.git
+    uri: https://github.com/cloudfoundry/cf-release.git
 
 jobs:
 - name: cf-deployment-unit-tests
