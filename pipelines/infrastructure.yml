@@ -2,7 +2,6 @@ groups:
 - name: infrastructure
   jobs:
   - deploy-mega-ci-bosh
-  - cleanup-deployments
 
 resources:
 - name: mega-ci-env
@@ -31,15 +30,4 @@ jobs:
     config:
       params:
         DEPLOYMENT_DIR: 'private-credentials/mega-ci'
-
-- name: cleanup-deployments
-  public: true
-  serial: true
-  plan:
-  - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
-    - get: mega-ci
-  - task: clean
-    file: mega-ci/scripts/ci/clean-deployment.yml
 
