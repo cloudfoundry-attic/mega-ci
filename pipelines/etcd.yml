@@ -48,11 +48,18 @@ jobs:
   public: true
   serial: true
   plan:
+  - aggregate:
+    - get: private-credentials
+      resource: mega-ci-env
+    - get: mega-ci
+    - get: etcd-release
+      trigger: true
+      resource: etcd-release-develop
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats.yml
     config:
       params:
-        BOSH_TARGET: {{cf_bosh_target}}
+        BOSH_TARGET: {{cf_bosh_director}}
         BOSH_USERNAME: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
         BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
