@@ -5,34 +5,24 @@ source ~/.bashrc
 source private-credentials/mega-ci/bosh_environment
 set -ux
 
+export GOPATH="$PWD/etcd-release"
+export GO15VENDOREXPERIMENT=1
+
+aws_cpi_version="42"
+turbulence_version="0.4"
+
 function main() {
-  write_test_configuration
-  run_tests
+  write_configuration
+  upload_releases
+
+  pushd etcd-release > /dev/null
+    EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test
+  popd > /dev/null
+
   cleanup_deployment "etcd"
-  cleanup_deployment "turb-etcd"
+  cleanup_deployment "turbulence-etcd"
 
   bosh -n cleanup --all
-}
-
-function write_test_configuration() {
-  cat > eats_config.json <<EOF
-{
-  "bosh_target": "$BOSH_DIRECTOR",
-  "iaas_settings_etcd_stub_path": "$PWD/$IAAS_SETTINGS_ETCD",
-  "iaas_settings_turbulence_stub_path": "$PWD/$IAAS_SETTINGS_TURBULENCE",
-  "turbulence_properties_stub_path": "$PWD/$PROPERTY_OVERRIDES_TURBULENCE",
-  "cpi_release_url": "$CPI_RELEASE_URL",
-  "cpi_release_name": "$CPI_RELEASE_NAME",
-  "bosh_operation_timeout": "$BOSH_OPERATION_TIMEOUT",
-  "turbulence_release_url": "$TURBULENCE_RELEASE_URL"
-}
-EOF
-}
-
-function run_tests() {
-  pushd etcd-release
-    EATS_CONFIG=$PWD/../eats_config.json ./scripts/test
-  popd
 }
 
 function cleanup_deployment() {
@@ -46,4 +36,47 @@ function cleanup_deployment() {
   test -z "$(bosh deployments | grep "${deployment}")"
 }
 
+function write_configuration() {
+  cat > eats_config.json <<EOF
+  {
+    "bosh": {
+      "target": "$BOSH_DIRECTOR",
+      "username": "$BOSH_USER",
+      "password": "$BOSH_PASSWORD",
+      "director_ca_cert": "$BOSH_DIRECTOR_CA_CERT"
+    },
+    "aws": {
+      "subnet": "$AWS_SUBNET",
+      "access_key_id": "$AWS_ACCESS_KEY_ID",
+      "secret_access_key": "$AWS_SECRET_ACCESS_KEY",
+      "default_key_name": "$AWS_DEFAULT_KEY_NAME",
+      "default_security_groups": ["$AWS_DEFAULT_SECURITY_GROUPS"],
+      "region": "$AWS_REGION"
+    },
+    "registry": {
+      "host": "$REGISTRY_HOST",
+      "port": $REGISTRY_PORT,
+      "username": "$REGISTRY_USERNAME",
+      "password": "$REGISTRY_PASSWORD"
+    }
+  }
+EOF
+}
+
+function upload_releases() {
+  wget -O "/tmp/bosh-aws-cpi-release.tgz" "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=${aws_cpi_version}"
+  bosh -t ${BOSH_DIRECTOR} upload release "/tmp/bosh-aws-cpi-release.tgz" --skip-if-exists
+
+  wget -O "/tmp/turbulence-release.tgz" "http://bosh.io/d/github.com/cppforlife/turbulence-release?v=${turbulence_version}"
+  bosh -t ${BOSH_DIRECTOR} upload release "/tmp/turbulence-release.tgz" --skip-if-exists
+}
+
+function cleanup_releases() {
+  set +e
+  bosh -t "${BOSH_DIRECTOR}" -n delete release bosh-aws-cpi "${aws_cpi_version}"
+  bosh -t "${BOSH_DIRECTOR}" -n delete release turbulence "${turbulence_version}"
+  set -e
+}
+
+trap cleanup_releases EXIT
 main

@@ -48,48 +48,24 @@ jobs:
   public: true
   serial: true
   plan:
-  - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
-    - get: mega-ci
-    - get: etcd-release
-      resource: etcd-release-develop
-      trigger: true
-  - aggregate:
-    - task: generate-iaas-settings-etcd
-      file: mega-ci/scripts/ci/generate-iaas-settings.yml
-      config:
-        params:
-          DEPLOYMENT_DIR: mega-ci
-          DEPLOYMENT: etcd
-          SUBNET: EtcdSubnet
-          SECURITY_GROUP: EtcdSecurityGroup
-          STACK_NAME: concourse
-    - task: generate-iaas-settings-turbulence
-      file: mega-ci/scripts/ci/generate-iaas-settings.yml
-      config:
-        params:
-          DEPLOYMENT_DIR: mega-ci
-          DEPLOYMENT: turbulence
-          SUBNET: EtcdSubnet
-          SECURITY_GROUP: EtcdSecurityGroup
-          STACK_NAME: concourse
-    - task: generate-property-overrides-turbulence
-      file: mega-ci/scripts/ci/generate-property-overrides-turbulence.yml
-      config:
-        params:
-          DEPLOYMENT_DIR: mega-ci
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats.yml
     config:
       params:
-        CPI_RELEASE_NAME: bosh-aws-cpi
-        CPI_RELEASE_URL: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=30
-        IAAS_SETTINGS_TURBULENCE: generate-iaas-settings-turbulence/generated-stubs/iaas-settings.yml
-        IAAS_SETTINGS_ETCD: generate-iaas-settings-etcd/generated-stubs/iaas-settings.yml
-        PROPERTY_OVERRIDES_TURBULENCE: generate-property-overrides-turbulence/generated-stubs/property-overrides-turbulence.yml
-        TURBULENCE_RELEASE_URL: http://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4
-        BOSH_OPERATION_TIMEOUT: 20m
+        BOSH_TARGET: {{cf_bosh_target}}
+        BOSH_USERNAME: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        AWS_SUBNET: {{aws_subnet}}
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_DEFAULT_KEY_NAME: {{aws_default_key_name}}
+        AWS_DEFAULT_SECURITY_GROUPS: {{aws_default_security_groups}}
+        AWS_REGION: {{aws_region}}
+        REGISTRY_HOST: {{registry_host}}
+        REGISTRY_PORT: {{registry_port}}
+        REGISTRY_USERNAME: {{registry_username}}
+        REGISTRY_PASSWORD: {{registry_password}}
 
 - name: deploy-with-cf
   public: false

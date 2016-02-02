@@ -1,25 +1,28 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/runtime-ci
+image: docker:///cloudfoundry/mega-ci
 
 inputs:
   - name: mega-ci
   - name: private-credentials
   - name: etcd-release
-  - name: generate-iaas-settings-etcd
-  - name: generate-iaas-settings-turbulence
-  - name: generate-property-overrides-turbulence
 
 run:
   path: mega-ci/scripts/ci/run-eats
 
 params:
-  CPI_RELEASE_NAME:
-  CPI_RELEASE_URL:
-  IAAS_SETTINGS_TURBULENCE:
-  IAAS_SETTINGS_ETCD:
-  PROPERTY_OVERRIDES_TURBULENCE:
-  BOSH_OPERATION_TIMEOUT:
-  TURBULENCE_RELEASE_URL:
-
+  BOSH_TARGET:
+  BOSH_USERNAME:
+  BOSH_PASSWORD:
+  BOSH_DIRECTOR_CA_CERT:
+  AWS_SUBNET:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_KEY_NAME:
+  AWS_DEFAULT_SECURITY_GROUPS:
+  AWS_REGION:
+  REGISTRY_HOST:
+  REGISTRY_PORT:
+  REGISTRY_USERNAME:
+  REGISTRY_PASSWORD:
