@@ -14,8 +14,7 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{mega-ci-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci.git
+    uri: https://github.com/cloudfoundry/mega-ci.git
 
 jobs:
 - name: deploy-mega-ci-bosh

@@ -14,25 +14,17 @@ resources:
     branch: master
     private_key: {{mega-ci-env-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci-env.git
-- name: runtime-credentials
-  type: git
-  source:
-    branch: master
-    private_key: {{runtime-credentials-private-key}}
-    uri: git@github.com:cloudfoundry/runtime-credentials.git
 - name: mega-ci
   type: git
   source:
     branch: master
-    private_key: {{mega-ci-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci.git
+    uri: https://github.com/cloudfoundry/mega-ci.git
 - name: etcd-release-develop
   type: git
   source:
     branch: develop
     ignore_paths: [.final_builds, releases]
-    private_key: {{etcd-release-private-key}}
-    uri: git@github.com:cloudfoundry-incubator/etcd-release.git
+    uri: https://github.com/cloudfoundry-incubator/etcd-release.git
 - name: etcd-release-merge-target
   type: git
   source:
@@ -49,8 +41,7 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{cf-deployment-private-key}}
-    uri: git@github.com:cloudfoundry/cf-deployment.git
+    uri: https://github.com/cloudfoundry/cf-deployment.git
 
 jobs:
 - name: test-etcd

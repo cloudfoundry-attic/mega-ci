@@ -18,15 +18,13 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{mega-ci-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci.git
+    uri: https://github.com/cloudfoundry/mega-ci.git
 - name: consul-release-develop
   type: git
   source:
     branch: develop
     ignore_paths: [.final_builds, releases]
-    private_key: {{consul-release-private-key}}
-    uri: git@github.com:cloudfoundry-incubator/consul-release.git
+    uri: https://github.com/cloudfoundry-incubator/consul-release.git
 - name: consul-release-merge-target
   type: git
   source:
@@ -43,8 +41,7 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{cf-deployment-private-key}}
-    uri: git@github.com:cloudfoundry/cf-deployment.git
+    uri: https://github.com/cloudfoundry/cf-deployment.git
 
 jobs:
 - name: test-consul
