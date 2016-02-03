@@ -8,7 +8,7 @@ cd cf-canaries
 # install the canaries application name
 bundle
 gem build cf_canaries.gemspec
-gem install cf_canaries-0.1.0.gem
+gem install cf_canaries-0.1.1.gem
 
 
 cf api $CF_API_ENDPOINT --skip-ssl-validation
