@@ -8,6 +8,7 @@ set -ux
 export GOPATH="$PWD/etcd-release"
 export GO15VENDOREXPERIMENT=1
 
+etcd_release_version="99999+dev.${RANDOM}"
 aws_cpi_version="42"
 turbulence_version="0.4"
 
@@ -18,22 +19,6 @@ function main() {
   pushd etcd-release > /dev/null
     EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test
   popd > /dev/null
-
-  cleanup_deployment "etcd"
-  cleanup_deployment "turbulence-etcd"
-
-  bosh -t ${BOSH_DIRECTOR} -n cleanup --all
-}
-
-function cleanup_deployment() {
-  local deployment
-  deployment="${1}-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}"
-
-  for i in $(bosh -t ${BOSH_DIRECTOR} deployments | grep -o "${deployment}" | uniq); do
-    bosh -t ${BOSH_DIRECTOR} -n delete deployment $i
-  done
-
-  test -z "$(bosh -t ${BOSH_DIRECTOR} deployments | grep "${deployment}")"
 }
 
 function write_configuration() {
@@ -64,6 +49,11 @@ EOF
 }
 
 function upload_releases() {
+  pushd etcd-release > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${etcd_release_version}"
+    bosh -t "${BOSH_DIRECTOR}" -n upload release
+  popd > /dev/null
+
   wget -O "/tmp/bosh-aws-cpi-release.tgz" "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=${aws_cpi_version}"
   bosh -t ${BOSH_DIRECTOR} upload release "/tmp/bosh-aws-cpi-release.tgz" --skip-if-exists
 
@@ -71,4 +61,9 @@ function upload_releases() {
   bosh -t ${BOSH_DIRECTOR} upload release "/tmp/turbulence-release.tgz" --skip-if-exists
 }
 
+function cleanup_releases() {
+  bosh -t ${BOSH_DIRECTOR} -n cleanup --all
+}
+
+trap cleanup_releases EXIT
 main
