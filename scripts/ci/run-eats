@@ -22,18 +22,18 @@ function main() {
   cleanup_deployment "etcd"
   cleanup_deployment "turbulence-etcd"
 
-  bosh -n cleanup --all
+  bosh -t ${BOSH_DIRECTOR} -n cleanup --all
 }
 
 function cleanup_deployment() {
   local deployment
   deployment="${1}-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}"
 
-  for i in $(bosh deployments | grep -o "${deployment}" | uniq); do
-    bosh -n delete deployment $i
+  for i in $(bosh -t ${BOSH_DIRECTOR} deployments | grep -o "${deployment}" | uniq); do
+    bosh -t ${BOSH_DIRECTOR} -n delete deployment $i
   done
 
-  test -z "$(bosh deployments | grep "${deployment}")"
+  test -z "$(bosh -t ${BOSH_DIRECTOR} deployments | grep "${deployment}")"
 }
 
 function write_configuration() {
