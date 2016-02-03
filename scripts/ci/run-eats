@@ -71,12 +71,4 @@ function upload_releases() {
   bosh -t ${BOSH_DIRECTOR} upload release "/tmp/turbulence-release.tgz" --skip-if-exists
 }
 
-function cleanup_releases() {
-  set +e
-  bosh -t "${BOSH_DIRECTOR}" -n delete release bosh-aws-cpi "${aws_cpi_version}"
-  bosh -t "${BOSH_DIRECTOR}" -n delete release turbulence "${turbulence_version}"
-  set -e
-}
-
-trap cleanup_releases EXIT
 main
