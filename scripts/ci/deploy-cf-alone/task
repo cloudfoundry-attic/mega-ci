@@ -37,6 +37,8 @@ CONFIG
 }
 
 deploy() {
+  echo "bosh -n -t ${1} -u ${2} -p REDACTED -d ${4} deploy --redact-diff"
+
   bosh \
     -n \
     -t "${1}" \
@@ -68,12 +70,13 @@ main() {
   "${PWD}/cf-deployment/tools/prepare-deployments" \
 	  "aws" \
 	  "${PWD}/config.json"
-
+set +x
   deploy \
     "${BOSH_DIRECTOR}" \
     "${BOSH_USER}" \
     "${BOSH_PASSWORD}" \
     "${PWD}/cf.yml"
+set -x
 }
 
 if [ "$(basename "${0}")" = "task" ]; then
