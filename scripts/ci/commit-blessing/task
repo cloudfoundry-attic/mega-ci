@@ -27,4 +27,4 @@ pushd release-repo
   git show --color | cat
 popd
 
-cp release-repo blessed-repo/release-repo
+cp -r release-repo $BLESSED_REPO/release-repo
