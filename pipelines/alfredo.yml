@@ -184,17 +184,15 @@ jobs:
       passed: [run-smoke-tests]
       trigger: true
   - task: acceptance-tests
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/run-cats-errand/task.yml
     config:
       params:
-        COMMAND: run errand acceptance_tests --download-logs --logs-dir acceptance-tests
         DEPLOYMENT_NAME: cf-alfredo
-        LOGS_DIR: acceptance-tests
         ENVIRONMENT: alfredo
     ensure:
       put: acceptance-tests-logs
       params:
-        from: acceptance-tests/acceptance_tests(.*).tgz
+        from: logs-dir/acceptance_tests(.*).tgz
 
 - name: run-cats
   public: true
