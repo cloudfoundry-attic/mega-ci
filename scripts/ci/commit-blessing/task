@@ -26,3 +26,5 @@ pushd release-repo
   git status
   git show --color | cat
 popd
+
+cp release-repo blessed-repo/release-repo

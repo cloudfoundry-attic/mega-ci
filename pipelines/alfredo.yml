@@ -267,10 +267,10 @@ jobs:
       passed: [run-acceptance-tests]
       trigger: true
   - task: commit-blessing
-    file: mega-ci/scripts/ci/commit-blessing.yml
+    file: mega-ci/scripts/ci/commit-blessing/task.yml
   - put: cf-deployment-master
     params:
-      repository: commit-blessing/release-repo
+      repository: blessed-repo/release-repo
 - name: merge-master-into-develop
   public: true
   serial: true

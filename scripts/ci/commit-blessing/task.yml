@@ -12,5 +12,11 @@ inputs:
   - name: etcd-release
   - name: stemcell
 
+output:
+  - name: blessed-repo
+
+params:
+  BLESSED_REPO: blessed-repo
+
 run:
-  path: mega-ci/scripts/ci/commit-blessing
+  path: mega-ci/scripts/ci/commit-blessing/task
