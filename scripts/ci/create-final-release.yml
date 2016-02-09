@@ -10,7 +10,8 @@ inputs:
   - name: release-repo-master
 
 outputs:
-  - name: release-repo
+  - name: final-release-repo
+    path: release-repo
 
 run:
   path: mega-ci/scripts/ci/create-final-release
