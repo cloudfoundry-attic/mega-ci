@@ -150,4 +150,4 @@ jobs:
     file: mega-ci/scripts/ci/merge-master-into-develop.yml
   - put: consul-release-merge-target
     params:
-      repository: merge-master-into-develop/release-repo
+      repository: final-release-repo

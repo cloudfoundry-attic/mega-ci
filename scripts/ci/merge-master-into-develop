@@ -1,15 +1,14 @@
-#!/bin/bash
-set -ex
+#!/bin/bash -exu
 
 MASTER_BRANCH="${MASTER_BRANCH:-master}"
 
 # Cannot set -u before sourcing .bashrc because of all
 # the unbound variables in things beyond our control.
+set +u
 source ~/.bashrc
-
 set -u
 
-pushd release-repo
+pushd release-repo > /dev/null
   git config user.name "CF MEGA BOT"
   git config user.email "cf-mega@pivotal.io"
 
@@ -18,4 +17,6 @@ pushd release-repo
 
   git status
   git show --color | cat
-popd
+popd > /dev/null
+
+cp -R release-repo/* final-release-repo
