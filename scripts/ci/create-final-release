@@ -1,12 +1,11 @@
-#!/bin/bash
-set -ex
+#!/bin/bash -exu
 
 MASTER_BRANCH="${MASTER_BRANCH:-master}"
 
 # Cannot set -u before sourcing .bashrc because of all
 # the unbound variables in things beyond our control.
+set +u
 source ~/.bashrc
-
 set -u
 
 if [ -n "${PRIVATE_YML_PATH}" ]; then
@@ -17,29 +16,31 @@ else
   set -x
 fi
 
-cd release-repo
+pushd release-repo > /dev/null
+  git config user.name "CF MEGA BOT"
+  git config user.email "cf-mega@pivotal.io"
 
-git config user.name "CF MEGA BOT"
-git config user.email "cf-mega@pivotal.io"
+  git remote add -f master-repo ../release-repo-master
+  git merge "master-repo/${MASTER_BRANCH}" -m 'Merge with master'
 
-git remote add -f master-repo ../release-repo-master
-git merge "master-repo/${MASTER_BRANCH}" -m 'Merge with master'
+  for i in {1..5}; do
+    bosh -n create release --with-tarball --final
+    EXIT_STATUS=${PIPESTATUS[0]}
+    if [ "$EXIT_STATUS" = "0" ]; then
+      break
+    fi
+  done
 
-for i in {1..5}; do
-  bosh -n create release --with-tarball --final
-  EXIT_STATUS=${PIPESTATUS[0]}
-  if [ "$EXIT_STATUS" = "0" ]; then
-    break
+  if [ ! "$EXIT_STATUS" = "0" ]; then
+    echo "Failed to Create $RELEASE_NAME Release"
+    exit "$EXIT_STATUS"
   fi
-done
 
-if [ ! "$EXIT_STATUS" = "0" ]; then
-  echo "Failed to Create $RELEASE_NAME Release"
-  exit "$EXIT_STATUS"
-fi
+  new_release_version=$(find releases -regex ".*${RELEASE_NAME}-[0-9]*.yml" | egrep -o "${RELEASE_NAME}-[0-9]+" | egrep -o "[0-9]+" | sort -n | tail -n 1)
 
-new_release_version=$(find releases -regex ".*${RELEASE_NAME}-[0-9]*.yml" | egrep -o "${RELEASE_NAME}-[0-9]+" | egrep -o "[0-9]+" | sort -n | tail -n 1)
+  git add .final_builds releases
+  git commit -m "Final release ${new_release_version}"
+  echo "${new_release_version}" > version_number
+popd > /dev/null
 
-git add .final_builds releases
-git commit -m "Final release ${new_release_version}"
-echo "${new_release_version}" > version_number
+cp -R release-repo create-final-release/release-repo
