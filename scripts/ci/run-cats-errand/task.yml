@@ -11,7 +11,7 @@ outputs:
   - name: logs-dir
 
 run:
-  path: mega-ci/scripts/ci/run-bosh-command
+  path: mega-ci/scripts/ci/run-cats-errand/task
 
 params:
   DEPLOYMENT_NAME:
