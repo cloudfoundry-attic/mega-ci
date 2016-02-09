@@ -131,8 +131,8 @@ jobs:
         RELEASE_NAME: consul
   - put: consul-release-master
     params:
-      repository: create-final-release/release-repo
-      tag: create-final-release/release-repo/version_number
+      repository: final-release-repo
+      tag: final-release-repo/version_number
       tag_prefix: v
 
 - name: merge-master-into-develop
