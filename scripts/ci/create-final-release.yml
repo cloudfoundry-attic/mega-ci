@@ -11,7 +11,7 @@ inputs:
 
 outputs:
   - name: final-release-repo
-    path: release-repo
+    path: create-final-release/release-repo
 
 run:
   path: mega-ci/scripts/ci/create-final-release
