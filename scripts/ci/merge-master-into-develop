@@ -19,4 +19,4 @@ pushd release-repo > /dev/null
   git show --color | cat
 popd > /dev/null
 
-mv release-repo final-release-repo
+cp -R release-repo/* release-repo/.* final-release-repo

@@ -43,4 +43,4 @@ pushd release-repo > /dev/null
   echo "${new_release_version}" > version_number
 popd > /dev/null
 
-mv release-repo final-release-repo
+cp -R release-repo/* release-repo/.* final-release-repo
