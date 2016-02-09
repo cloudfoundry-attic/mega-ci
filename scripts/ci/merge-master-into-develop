@@ -19,4 +19,5 @@ pushd release-repo > /dev/null
   git show --color | cat
 popd > /dev/null
 
-cp -R release-repo/ final-release-repo
+shopt -s dotglob
+cp -R release-repo/* final-release-repo
