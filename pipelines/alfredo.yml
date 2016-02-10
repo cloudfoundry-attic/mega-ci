@@ -288,4 +288,4 @@ jobs:
     file: mega-ci/scripts/ci/merge-master-into-develop/task.yml
   - put: cf-deployment-develop-merge-target
     params:
-      repository: final-release-repo/release-repo
+      repository: final-release-repo
