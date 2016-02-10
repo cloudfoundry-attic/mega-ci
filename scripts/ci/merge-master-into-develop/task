@@ -1,5 +1,6 @@
 #!/bin/bash -exu
 
+MERGED_REPO="${PWD}/${MERGED_REPO:?"MERGED_REPO required"}"
 MASTER_BRANCH="${MASTER_BRANCH:-master}"
 
 # Cannot set -u before sourcing .bashrc because of all
@@ -20,4 +21,4 @@ pushd release-repo > /dev/null
 popd > /dev/null
 
 shopt -s dotglob
-cp -R release-repo/* final-release-repo
+cp -R release-repo/* $MERGED_REPO

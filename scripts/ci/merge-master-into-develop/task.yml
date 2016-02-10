@@ -12,7 +12,8 @@ outputs:
   - name: final-release-repo
 
 run:
-  path: mega-ci/scripts/ci/merge-master-into-develop
+  path: mega-ci/scripts/ci/merge-master-into-develop/task
 
 params:
   MASTER_BRANCH:
+  MERGED_REPO: final-release-repo
