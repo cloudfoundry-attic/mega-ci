@@ -1,0 +1,79 @@
+#!/bin/bash -exu
+
+set +ux
+source ~/.bashrc
+set -ux
+
+function setup_env() {
+  set +x
+  export BUILD_DIR=$PWD
+  export BOSH_LITE_KEYPAIR=bosh-lite
+  export BOSH_LITE_PRIVATE_KEY=$BUILD_DIR/private-credentials/bosh-lite/bosh-lite.pem
+  export BOSH_USER=admin
+  export BOSH_PASSWORD=admin
+  set -x
+}
+
+function deploy_boshlite() {
+  pushd "${BUILD_DIR}/bosh-lite" > /dev/null
+    vagrant up --provider=aws
+    export BOSH_DIRECTOR=$(vagrant ssh-config 2>/dev/null | grep HostName | awk '{print $2}')
+
+    target_director
+  popd > /dev/null
+}
+
+function target_director() {
+  set +e
+  local rc
+  rc=1
+
+  while [ "${rc}" -ne "0" ]; do
+    curl -k -s "https://${BOSH_DIRECTOR}:25555/info" > /dev/null
+    rc=$?
+    sleep 10
+  done
+  set -e
+
+  bosh target "${BOSH_DIRECTOR}"
+}
+
+function upload_stemcell() {
+  bosh upload stemcell \
+    "https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent?v=3147"
+}
+
+function upload_release() {
+  pushd "${BUILD_DIR}/release" > /dev/null
+    bosh -n create release --force
+    bosh -n upload release
+  popd > /dev/null
+}
+
+function deploy_manifest() {
+  pushd "${BUILD_DIR}/release" > /dev/null
+    for manifest in $(find manifests/bosh-lite -name "*.yml"); do
+      sed -i -e "s/BOSH-DIRECTOR-UUID/$(bosh status --uuid)/g" "${manifest}"
+      bosh -d "${manifest}" -n deploy
+      bosh -n delete deployment $(bosh deployments | grep bosh-warden-boshlite | awk '{print $2}')
+    done
+  popd > /dev/null
+}
+
+function destroy_boshlite() {
+  pushd "${BUILD_DIR}/bosh-lite" > /dev/null
+    vagrant destroy -f
+  popd > /dev/null
+}
+
+function main() {
+  setup_env
+  deploy_boshlite
+  upload_stemcell
+  upload_release
+  deploy_manifest
+}
+
+trap destroy_boshlite EXIT
+
+main
