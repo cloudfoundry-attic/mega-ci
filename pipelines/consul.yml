@@ -43,12 +43,6 @@ resources:
   source:
     branch: master
     uri: https://github.com/cloudfoundry/cf-deployment.git
-- name: consul-release-manifests
-  type: git
-  source:
-    branch: develop
-    paths: [manifests/bosh-lite, jobs]
-    uri: https://github.com/cloudfoundry-incubator/consul-release.git
 - name: bosh-lite
   type: git
   source:
@@ -65,7 +59,8 @@ jobs:
     - get: mega-ci
     - get: bosh-lite
     - get: release
-      resource: consul-release-manifests
+      resource: consul-release-develop
+      passed: [test-consul]
       trigger: true
   - task: deploy-bosh-lite-manifests
     file: mega-ci/scripts/ci/deploy-bosh-lite-manifests.yml
