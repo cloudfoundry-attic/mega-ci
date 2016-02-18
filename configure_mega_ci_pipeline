@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+fly \
+  -t mega \
+  sp \
+  -p mega-ci \
+  -c ./pipelines/mega-ci.yml \
+  -v mega-ci-private-key="$(cat /Users/pivotal/workspace/mega-ci-env/deploy_keys/cloudfoundry/mega-ci)" \
+  -v docker-username="cloudfoundrydevelopers" \
+  -v docker-password="scream8badger" \
+  -v docker-email="cf-toolsmiths+dockeross@pivotal.io"

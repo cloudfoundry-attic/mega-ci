@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+fly \
+  -t mega \
+  sp \
+  -p consul \
+  -c ./pipelines/consul.yml \
+  -v mega-ci-env-private-key="$(cat /Users/pivotal/workspace/mega-ci-env/deploy_keys/cloudfoundry/mega-ci-env)" \
+  -v consul-release-private-key="$(cat /Users/pivotal/workspace/mega-ci-env/deploy_keys/cloudfoundry-incubator/consul-release)" \
+  -l /Users/pivotal/workspace/mega-ci-env/pipeline_vars/consul.yml
+  # -v docker-username="cloudfoundrydevelopers" \
+  # -v docker-password="scream8badger" \
+  # -v docker-email="cf-toolsmiths+dockeross@pivotal.io"

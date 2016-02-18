@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+fly \
+  -t mega \
+  sp \
+  -p infrastructure \
+  -c ./pipelines/infrastructure.yml \
+  -v mega-ci-env-private-key="$(cat /Users/pivotal/workspace/mega-ci-env/deploy_keys/cloudfoundry/mega-ci-env)"

@@ -1,0 +1,79 @@
+groups:
+- name: mkman
+  jobs:
+  - test-mkman
+  - shipit
+  - patch
+
+resources:
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/mega-ci.git
+- name: mkman-develop
+  type: git
+  source:
+    branch: develop
+    uri: https://github.com/cloudfoundry/mkman.git
+- name: mkman-master
+  type: git
+  source:
+    branch: master
+    uri: git@github.com:cloudfoundry/mkman.git
+    private_key: {{mkman-private-key}}
+- name: mkman-version
+  type: semver
+  source:
+    driver: git
+    file: version
+    branch: master
+    uri: git@github.com:cloudfoundry/mkman-version.git
+    private_key: {{mkman-version-private-key}}
+- name: cf-release
+  type: git
+  source:
+    branch: develop
+    uri: https://github.com/cloudfoundry/cf-release.git
+- name: spiff
+  type: github-release
+  source:
+    repository: spiff
+    user: cloudfoundry-incubator
+
+jobs:
+- name: test-mkman
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: cf-release
+    - get: spiff
+      params:
+        globs: ["spiff_linux_amd64"]
+    - get: mkman
+      resource: mkman-develop
+      trigger: true
+  - task: run-tests
+    file: mega-ci/scripts/ci/mkman-tests/task.yml
+
+- name: shipit
+  public: true
+  plan:
+  - aggregate:
+    - get: mkman
+      resource: mkman-develop
+      passed: [test-mkman]
+    - get: mkman-version
+  - put: mkman-master
+    params:
+      repository: mkman
+      tag: mkman-version/number
+      tag_prefix: v
+
+- name: patch
+  public: true
+  serial_groups: [version]
+  plan:
+  - put: mkman-version
+    params: {bump: patch}

@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image: docker:///golang#1.5
+
+inputs:
+  - name: mega-ci
+  - name: mkman
+    path: gopath/src/github.com/cloudfoundry/mkman
+  - name: spiff
+  - name: cf-release
+
+run:
+  path: mega-ci/scripts/ci/mkman-tests/task
+
+params:
+  CF_RELEASE_DIR: cf-release
+  MKMAN_DIR: gopath/src/github.com/cloudfoundry/mkman
+  SPIFF_DIR: spiff
+  GOPATH_DIR: gopath
