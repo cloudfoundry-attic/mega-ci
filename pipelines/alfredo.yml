@@ -217,6 +217,16 @@ jobs:
     - get: consul-release
       passed: [run-smoke-tests]
       trigger: true
+  - task: cli-compatibility
+    file: mega-ci/scripts/ci/run-cats/task.yml
+    config:
+      params:
+        CF_API: {{alfredo-cf-api}}
+        CF_ADMIN_PASSWORD: {{alfredo-cf-admin-password}}
+        CF_APPS_DOMAIN: {{alfredo-cf-apps-domain}}
+        SKIP_SSL_VALIDATION: true
+        USE_HTTP: false
+        SUITES: "."
   - aggregate:
     - task: everything-else
       file: mega-ci/scripts/ci/run-cats/task.yml
