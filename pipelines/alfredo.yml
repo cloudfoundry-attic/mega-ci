@@ -88,7 +88,9 @@ jobs:
 
 - name: deploy-cf
   public: true
-  serial_groups: [deploy_cf]
+  serial_groups:
+    - deploy_cf_and_run_cats_errand
+    - deploy_cf_and_run_cats_script
   plan:
   - aggregate:
     - get: private-credentials
@@ -127,7 +129,9 @@ jobs:
 
 - name: run-smoke-tests
   public: true
-  serial_groups: [deploy_cf]
+  serial_groups:
+    - deploy_cf_and_run_cats_errand
+    - deploy_cf_and_run_cats_script
   plan:
   - aggregate:
     - get: private-credentials
@@ -160,7 +164,7 @@ jobs:
 
 - name: run-acceptance-tests
   public: true
-  serial_groups: [deploy_cf]
+  serial_groups: [deploy_cf_and_run_cats_errand]
   plan:
   - aggregate:
     - get: private-credentials
@@ -196,7 +200,7 @@ jobs:
 
 - name: run-cats
   public: true
-  serial_groups: [deploy_cf]
+  serial_groups: [deploy_cf_and_run_cats_script]
   plan:
   - aggregate:
     - get: mega-ci
