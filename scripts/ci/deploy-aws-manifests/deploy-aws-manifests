@@ -1,0 +1,24 @@
+#!/bin/bash -exu
+
+ROOT="${PWD}"
+
+function main() {
+  set +ux
+  source ~/.bashrc
+  set -ux
+
+  mkdir -p "${GOPATH}/src/github.com/cloudfoundry-incubator"
+  ln -s "${ROOT}/mega-ci/scripts/ci/deploy-aws-manifests/vendor/github.com/cloudfoundry-incubator/candiedyaml" "${GOPATH}/src/github.com/cloudfoundry-incubator"
+
+  mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
+  pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
+    ln -s "${ROOT}/mega-ci"
+    pushd ./mega-ci/scripts/ci/deploy-aws-manifests > /dev/null
+      set +x
+      go run main.go "${ROOT}/release" ${BOSH_DIRECTOR} ${BOSH_USER} ${BOSH_PASSWORD}
+      set -x
+    popd > /dev/null
+  popd > /dev/null
+}
+
+main

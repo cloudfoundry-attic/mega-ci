@@ -72,6 +72,23 @@ jobs:
         BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
         BOSH_LITE_NAME: bosh-lite
 
+- name: deploy-aws-manifests
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: release
+      resource: consul-release-develop
+      passed: [test-consul]
+      trigger: true
+  - task: deploy-aws-manifests
+    file: mega-ci/scripts/ci/deploy-aws-manifests.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+
 - name: test-consul
   public: true
   serial: true

@@ -1,0 +1,3 @@
+[submodule "scripts/ci/deploy-aws-manifests/vendor/github.com/cloudfoundry-incubator/candiedyaml"]
+	path = scripts/ci/deploy-aws-manifests/vendor/github.com/cloudfoundry-incubator/candiedyaml
+	url = git://github.com/cloudfoundry-incubator/candiedyaml
