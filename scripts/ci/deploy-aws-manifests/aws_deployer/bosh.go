@@ -10,13 +10,25 @@ import (
 	"strings"
 )
 
-type BOSH struct{}
+type BOSH struct {
+	director string
+	user     string
+	password string
+}
 
-func (b *BOSH) Deploy(manifest string, boshDirector string, boshUser string, boshPassword string) error {
+func NewBOSH(boshDirector string, boshUser string, boshPassword string) *BOSH {
+	return &BOSH{
+		director: boshDirector,
+		user:     boshUser,
+		password: boshPassword,
+	}
+}
+
+func (b *BOSH) Deploy(manifest string) error {
 	contents, err := ioutil.ReadFile(manifest)
 	fmt.Println(string(contents))
 
-	err = execute(os.Stdout, "-t", boshDirector, "-u", boshUser, "-p", boshPassword, "-d", manifest, "-n", "deploy")
+	err = execute(os.Stdout, "-t", b.director, "-u", b.user, "-p", b.password, "-d", manifest, "-n", "deploy")
 	if err != nil {
 		return err
 	}
@@ -24,10 +36,10 @@ func (b *BOSH) Deploy(manifest string, boshDirector string, boshUser string, bos
 	return nil
 }
 
-func (b *BOSH) Status(boshDirector string, boshUser string, boshPassword string) (string, error) {
+func (b *BOSH) Status() (string, error) {
 	output := new(bytes.Buffer)
 
-	err := execute(output, "-t", boshDirector, "-u", boshUser, "-p", boshPassword, "status", "--uuid")
+	err := execute(output, "-t", b.director, "-u", b.user, "-p", b.password, "status", "--uuid")
 	if err != nil {
 		return "", err
 	}
@@ -35,8 +47,8 @@ func (b *BOSH) Status(boshDirector string, boshUser string, boshPassword string)
 	return strings.TrimSpace(output.String()), nil
 }
 
-func (b *BOSH) DeleteDeployment(deploymentName string, boshDirector string, boshUser string, boshPassword string) error {
-	err := execute(os.Stdout, "-t", boshDirector, "-u", boshUser, "-p", boshPassword, "-n", "delete", "deployment", deploymentName)
+func (b *BOSH) DeleteDeployment(deploymentName string) error {
+	err := execute(os.Stdout, "-t", b.director, "-u", b.user, "-p", b.password, "-n", "delete", "deployment", deploymentName)
 	if err != nil {
 		return err
 	}
