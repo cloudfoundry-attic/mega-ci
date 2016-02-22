@@ -70,6 +70,18 @@ var _ = Describe("AWSDeployer", func() {
 			deployedManifest, err := ioutil.ReadFile(fakeBOSH.DeployCalls.Receives[0].Manifest)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(string(deployedManifest)).To(ContainSubstring("director_uuid: retrieved-director-uuid"))
+			Expect(fakeBOSH.StatusCall.Receives.BoshDirector).To(Equal("bosh-director"))
+			Expect(fakeBOSH.StatusCall.Receives.BoshUser).To(Equal("bosh-user"))
+			Expect(fakeBOSH.StatusCall.Receives.BoshPassword).To(Equal("bosh-password"))
+		})
+
+		It("deletes the deployment", func() {
+			writeManifestWithBody(manifestsDirectory, "manifest.yml", "director_uuid: BOSH-DIRECTOR-UUID\nname: some-deployment-name")
+
+			deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
+
+			Expect(deploymentError).NotTo(HaveOccurred())
+			Expect(fakeBOSH.DeleteDeploymentCall.Receives.DeploymentName).To(Equal("some-deployment-name"))
 		})
 
 		Context("failure cases", func() {
@@ -88,9 +100,7 @@ var _ = Describe("AWSDeployer", func() {
 			})
 
 			It("returns an error when the manifest is not valid yaml", func() {
-				err := ioutil.WriteFile(filepath.Join(manifestsDirectory, "invalid_manifest.yml"), []byte("not: valid: yaml:"), os.ModePerm)
-				Expect(err).NotTo(HaveOccurred())
-
+				writeManifestWithBody(manifestsDirectory, "invalid_manifest.yml", "not: valid: yaml:")
 				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
 				Expect(deploymentError.Error()).To(ContainSubstring("mapping values are not allowed in this context"))
 			})
@@ -103,12 +113,29 @@ var _ = Describe("AWSDeployer", func() {
 				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
 				Expect(deploymentError.Error()).To(ContainSubstring("bosh status failed"))
 			})
+
+			It("returns an error when the deployment name is not present in the manifest", func() {
+				writeManifestWithBody(manifestsDirectory, "invalid_manifest.yml", "director_uuid: BOSH-DIRECTOR-UUID")
+				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
+				Expect(deploymentError.Error()).To(ContainSubstring("deployment name missing from manifest"))
+			})
+
+			It("returns an error when deletion of the deployment fails", func() {
+				writeManifestWithBody(manifestsDirectory, "manifest.yml", "director_uuid: BOSH-DIRECTOR-UUID\nname: some-deployment-name")
+				fakeBOSH.DeleteDeploymentCall.Returns.Error = errors.New("failed to delete deployment: some-deployment-name")
+
+				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
+				Expect(deploymentError.Error()).To(ContainSubstring("failed to delete deployment: some-deployment-name"))
+			})
 		})
 	})
 })
 
 func writeManifest(directory string, filename string) {
-	manifest := []byte("director_uuid: BOSH-DIRECTOR-UUID")
-	err := ioutil.WriteFile(filepath.Join(directory, filename), manifest, os.ModePerm)
+	writeManifestWithBody(directory, filename, "director_uuid: BOSH-DIRECTOR-UUID\nname: a-deployment-name")
+}
+
+func writeManifestWithBody(directory string, filename string, body string) {
+	err := ioutil.WriteFile(filepath.Join(directory, filename), []byte(body), os.ModePerm)
 	Expect(err).NotTo(HaveOccurred())
 }

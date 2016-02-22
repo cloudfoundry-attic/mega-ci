@@ -35,6 +35,15 @@ func (b *BOSH) Status(boshDirector string, boshUser string, boshPassword string)
 	return strings.TrimSpace(output.String()), nil
 }
 
+func (b *BOSH) DeleteDeployment(deploymentName string, boshDirector string, boshUser string, boshPassword string) error {
+	err := execute(os.Stdout, "-t", boshDirector, "-u", boshUser, "-p", boshPassword, "-n", "delete", "deployment", deploymentName)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func execute(output io.Writer, arguments ...string) error {
 	boshBinary, err := exec.LookPath("bosh")
 	if err != nil {

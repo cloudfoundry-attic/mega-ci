@@ -16,8 +16,27 @@ type BOSH struct {
 	}
 
 	StatusCall struct {
+		Receives struct {
+			BoshDirector string
+			BoshUser     string
+			BoshPassword string
+		}
+
 		Returns struct {
 			UUID  string
+			Error error
+		}
+	}
+
+	DeleteDeploymentCall struct {
+		Receives struct {
+			DeploymentName string
+			BoshDirector   string
+			BoshUser       string
+			BoshPassword   string
+		}
+
+		Returns struct {
 			Error error
 		}
 	}
@@ -35,5 +54,18 @@ func (b *BOSH) Deploy(manifest string, boshDirector string, boshUser string, bos
 }
 
 func (b *BOSH) Status(boshDirector string, boshUser string, boshPassword string) (string, error) {
+	b.StatusCall.Receives.BoshDirector = boshDirector
+	b.StatusCall.Receives.BoshUser = boshUser
+	b.StatusCall.Receives.BoshPassword = boshPassword
+
 	return b.StatusCall.Returns.UUID, b.StatusCall.Returns.Error
+}
+
+func (b *BOSH) DeleteDeployment(deploymentName string, boshDirector string, boshUser string, boshPassword string) error {
+	b.DeleteDeploymentCall.Receives.DeploymentName = deploymentName
+	b.DeleteDeploymentCall.Receives.BoshDirector = boshDirector
+	b.DeleteDeploymentCall.Receives.BoshUser = boshUser
+	b.DeleteDeploymentCall.Receives.BoshPassword = boshPassword
+
+	return b.DeleteDeploymentCall.Returns.Error
 }

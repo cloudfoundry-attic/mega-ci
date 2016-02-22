@@ -1,6 +1,7 @@
 package aws_deployer
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -12,6 +13,7 @@ type AWSClient interface{}
 type BOSHClient interface {
 	Deploy(manifest string, boshDirector string, boshUser string, boshPassword string) error
 	Status(boshDirector string, boshUser string, boshPassword string) (string, error)
+	DeleteDeployment(deploymentName string, boshDirector string, boshUser string, boshPassword string) error
 }
 
 type AWSDeployer struct {
@@ -31,17 +33,7 @@ func (a AWSDeployer) Deploy(manifestsDirectory string, boshDirector string, bosh
 	}
 
 	for _, manifest := range manifestsToDeploy {
-		directorUUID, err := a.bosh.Status(boshDirector, boshUser, boshPassword)
-		if err != nil {
-			return err
-		}
-
-		err = replaceUUID(manifest, directorUUID)
-		if err != nil {
-			return err
-		}
-
-		err = a.bosh.Deploy(manifest, boshDirector, boshUser, boshPassword)
+		err := a.deployManifest(manifest, boshDirector, boshUser, boshPassword)
 		if err != nil {
 			return err
 		}
@@ -50,14 +42,21 @@ func (a AWSDeployer) Deploy(manifestsDirectory string, boshDirector string, bosh
 	return nil
 }
 
-func replaceUUID(manifestFile string, directorUUID string) error {
-	document, err := manifests.ReadManifest(manifestFile)
+func (a AWSDeployer) deployManifest(manifestFilename string, boshDirector string, boshUser string, boshPassword string) error {
+	err := a.replaceUUID(manifestFilename, boshDirector, boshUser, boshPassword)
 	if err != nil {
 		return err
 	}
 
-	document["director_uuid"] = directorUUID
-	manifests.WriteManifest(manifestFile, document)
+	err = a.bosh.Deploy(manifestFilename, boshDirector, boshUser, boshPassword)
+	if err != nil {
+		return err
+	}
+
+	err = a.deleteDeployment(manifestFilename, boshDirector, boshUser, boshPassword)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -81,4 +80,40 @@ func manifestsInDirectory(directory string) ([]string, error) {
 	}
 
 	return manifests, nil
+}
+
+func (a AWSDeployer) replaceUUID(manifestFilename string, boshDirector string, boshUser string, boshPassword string) error {
+	directorUUID, err := a.bosh.Status(boshDirector, boshUser, boshPassword)
+	if err != nil {
+		return err
+	}
+
+	manifest, err := manifests.ReadManifest(manifestFilename)
+	if err != nil {
+		return err
+	}
+
+	manifest["director_uuid"] = directorUUID
+	manifests.WriteManifest(manifestFilename, manifest)
+
+	return nil
+}
+
+func (a AWSDeployer) deleteDeployment(manifestFilename string, boshDirector string, boshUser string, boshPassword string) error {
+	manifest, err := manifests.ReadManifest(manifestFilename)
+	if err != nil {
+		return err
+	}
+
+	deploymentName, ok := manifest["name"].(string)
+	if !ok {
+		return errors.New("deployment name missing from manifest")
+	}
+
+	err = a.bosh.DeleteDeployment(deploymentName, boshDirector, boshUser, boshPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
