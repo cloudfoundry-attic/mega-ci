@@ -9,7 +9,7 @@ import (
 func ReadManifest(manifestFile string) (map[string]interface{}, error) {
 	file, err := os.Open(manifestFile)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	defer file.Close()
 
@@ -17,7 +17,7 @@ func ReadManifest(manifestFile string) (map[string]interface{}, error) {
 	err = candiedyaml.NewDecoder(file).Decode(&document)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return document, nil
@@ -27,13 +27,12 @@ func WriteManifest(manifestFile string, document map[string]interface{}) error {
 	fileToWrite, err := os.Create(manifestFile)
 	defer fileToWrite.Close()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	encoder := candiedyaml.NewEncoder(fileToWrite)
-	err = encoder.Encode(document)
+	err = candiedyaml.NewEncoder(fileToWrite).Encode(document)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	return nil

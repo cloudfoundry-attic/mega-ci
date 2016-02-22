@@ -86,6 +86,23 @@ var _ = Describe("AWSDeployer", func() {
 				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
 				Expect(deploymentError.Error()).To(ContainSubstring("bosh deployment failed"))
 			})
+
+			It("returns an error when the manifest is not valid yaml", func() {
+				err := ioutil.WriteFile(filepath.Join(manifestsDirectory, "invalid_manifest.yml"), []byte("not: valid: yaml:"), os.ModePerm)
+				Expect(err).NotTo(HaveOccurred())
+
+				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
+				Expect(deploymentError.Error()).To(ContainSubstring("mapping values are not allowed in this context"))
+			})
+
+			It("returns an error when bosh status fails", func() {
+				writeManifest(manifestsDirectory, "manifest.yml")
+
+				fakeBOSH.StatusCall.Returns.Error = errors.New("bosh status failed")
+
+				deploymentError := awsDeployer.Deploy(manifestsDirectory, "bosh-director", "bosh-user", "bosh-password")
+				Expect(deploymentError.Error()).To(ContainSubstring("bosh status failed"))
+			})
 		})
 	})
 })

@@ -33,12 +33,12 @@ func (a AWSDeployer) Deploy(manifestsDirectory string, boshDirector string, bosh
 	for _, manifest := range manifestsToDeploy {
 		directorUUID, err := a.bosh.Status(boshDirector, boshUser, boshPassword)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		err = replaceUUID(manifest, directorUUID)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		err = a.bosh.Deploy(manifest, boshDirector, boshUser, boshPassword)
@@ -53,7 +53,7 @@ func (a AWSDeployer) Deploy(manifestsDirectory string, boshDirector string, bosh
 func replaceUUID(manifestFile string, directorUUID string) error {
 	document, err := manifests.ReadManifest(manifestFile)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	document["director_uuid"] = directorUUID

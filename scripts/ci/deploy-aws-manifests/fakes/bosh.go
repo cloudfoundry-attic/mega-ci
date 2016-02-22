@@ -14,9 +14,11 @@ type BOSH struct {
 			Error error
 		}
 	}
+
 	StatusCall struct {
 		Returns struct {
-			UUID string
+			UUID  string
+			Error error
 		}
 	}
 }
@@ -33,5 +35,5 @@ func (b *BOSH) Deploy(manifest string, boshDirector string, boshUser string, bos
 }
 
 func (b *BOSH) Status(boshDirector string, boshUser string, boshPassword string) (string, error) {
-	return b.StatusCall.Returns.UUID, nil
+	return b.StatusCall.Returns.UUID, b.StatusCall.Returns.Error
 }
