@@ -11,6 +11,7 @@ export GOPATH="${GOPATH_DIR}"
 export PATH="${GOPATH}/bin":${PATH}
 
 go get github.com/onsi/ginkgo/ginkgo
+go get github.com/onsi/gomega
 
 pushd "${MULTIERROR_DIR}" > /dev/null
   ginkgo -r -p .
