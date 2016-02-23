@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/aws_deployer"
+	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/clients"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/flags"
 )
 
@@ -13,13 +14,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	aws := &aws_deployer.AWS{}
-	bosh := aws_deployer.NewBOSH(configuration.BoshDirector, configuration.BoshUser, configuration.BoshPassword)
+	aws := &clients.AWS{}
+	bosh := clients.NewBOSH(configuration.BoshDirector, configuration.BoshUser, configuration.BoshPassword)
 
-	awsDeployer := aws_deployer.NewAWSDeployer(
-		aws,
-		bosh,
-	)
+	awsDeployer := aws_deployer.NewAWSDeployer(aws, bosh)
 
 	err = awsDeployer.Deploy(configuration.ManifestsDirectory)
 	if err != nil {

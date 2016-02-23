@@ -1,4 +1,4 @@
-package aws_deployer
+package clients
 
 import (
 	"bytes"
