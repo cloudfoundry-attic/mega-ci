@@ -18,8 +18,9 @@ jobs:
   public: true
   plan:
   - aggregate:
-    - get: mega-ci
+    - get: multierror
       resource: multierror-master
       trigger: true
+    - get: mega-ci
   - task: run-tests
     file: mega-ci/scripts/ci/multierror-tests/task.yml
