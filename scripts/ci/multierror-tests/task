@@ -1,0 +1,18 @@
+#!/bin/bash
+set -eux
+
+root_dir="${PWD}"
+
+# Inputs
+MULTIERROR_DIR="${root_dir}/${MULTIERROR_DIR:?"\$MULTIERROR_DIR not set"}"
+
+GOPATH_DIR="${root_dir}/${GOPATH_DIR:?"\$GOPATH_DIR not set"}"
+export GOPATH="${GOPATH_DIR}"
+export PATH="${GOPATH}/bin":${PATH}
+
+go get github.com/onsi/ginkgo/ginkgo
+
+pushd "${MULTIERROR_DIR}" > /dev/null
+  ginkgo -r -p .
+popd > /dev/null
+

@@ -1,0 +1,25 @@
+groups:
+- name: multierror
+  jobs:
+  - test-multierror
+resources:
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/mega-ci.git
+- name: multierror-master
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/multierror.git
+jobs:
+- name: test-multierror
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+      resource: multierror-master
+      trigger: true
+  - task: run-tests
+    file: mega-ci/scripts/ci/multierror-tests/task.yml
