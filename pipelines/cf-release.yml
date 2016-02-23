@@ -72,7 +72,7 @@ jobs:
     - get: release-repo
       resource: cf-release-develop
   - task: merge-master-into-develop
-    file: mega-ci/scripts/ci/merge-master-into-develop.yml
+    file: mega-ci/scripts/ci/merge-master-into-develop/task.yml
   - put: cf-release-develop
     params:
-      repository: merge-master-into-develop/release-repo
+      repository: final-release-repo
