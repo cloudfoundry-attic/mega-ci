@@ -15,7 +15,11 @@ function main() {
     ln -s "${ROOT}/mega-ci"
     pushd ./mega-ci/scripts/ci/deploy-aws-manifests > /dev/null
       set +x
-      go run main.go "${ROOT}/release" ${BOSH_DIRECTOR} ${BOSH_USER} ${BOSH_PASSWORD}
+      go run main.go \
+		  --manifests-directory "${ROOT}/release/manifests/aws" \
+		  --director ${BOSH_DIRECTOR} \
+		  --user ${BOSH_USER} \
+		  --password ${BOSH_PASSWORD}
       set -x
     popd > /dev/null
   popd > /dev/null
