@@ -4,6 +4,7 @@ platform: linux
 image: docker:///cloudfoundry/mega-ci
 
 inputs:
+  - name: private-credentials
   - name: mega-ci
   - name: release
 
