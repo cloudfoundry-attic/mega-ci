@@ -1,4 +1,4 @@
-package aws_deployer
+package awsdeployer
 
 import (
 	"errors"
@@ -8,21 +8,25 @@ import (
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/manifests"
 )
 
-type AWSClient interface{}
-
 type BOSHClient interface {
 	Deploy(manifest string) error
 	Status() (string, error)
 	DeleteDeployment(deploymentName string) error
 }
 
-type AWSDeployer struct {
-	bosh BOSHClient
+type SubnetChecker interface {
+	CheckSubnets(manifestFilename string) (bool, error)
 }
 
-func NewAWSDeployer(aws AWSClient, bosh BOSHClient) AWSDeployer {
+type AWSDeployer struct {
+	bosh          BOSHClient
+	subnetChecker SubnetChecker
+}
+
+func NewAWSDeployer(bosh BOSHClient, subnetChecker SubnetChecker) AWSDeployer {
 	return AWSDeployer{
-		bosh: bosh,
+		bosh:          bosh,
+		subnetChecker: subnetChecker,
 	}
 }
 
@@ -32,8 +36,17 @@ func (a AWSDeployer) Deploy(manifestsDirectory string) error {
 		return err
 	}
 
-	for _, manifest := range manifestsToDeploy {
-		err := a.deployManifest(manifest)
+	for _, manifestFilename := range manifestsToDeploy {
+		hasSubnets, err := a.subnetChecker.CheckSubnets(manifestFilename)
+		if err != nil {
+			return err
+		}
+
+		if !hasSubnets {
+			return errors.New("manifest subnets not found on AWS")
+		}
+
+		err = a.deployManifest(manifestFilename)
 		if err != nil {
 			return err
 		}

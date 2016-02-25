@@ -1,4 +1,4 @@
-package aws_deployer_test
+package awsdeployer_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -9,5 +9,5 @@ import (
 
 func TestAWSDeployer(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "aws_deployer")
+	RunSpecs(t, "awsdeployer")
 }

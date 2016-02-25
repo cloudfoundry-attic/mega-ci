@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/runtime-ci
+image: docker:///cloudfoundry/mega-ci
 
 inputs:
   - name: mega-ci
@@ -11,6 +11,9 @@ params:
   BOSH_DIRECTOR:
   BOSH_USER:
   BOSH_PASSWORD:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_REGION:
 
 run:
   path: mega-ci/scripts/ci/deploy-aws-manifests/deploy-aws-manifests

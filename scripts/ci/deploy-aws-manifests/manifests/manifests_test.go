@@ -11,18 +11,34 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+const manifestWithSubnets = `---
+director_uuid: BOSH-DIRECTOR-UUID
+
+name: multi-az-ssl
+
+networks:
+- subnets:
+  - cloud_properties:
+      subnet: "subnet-1"
+    range: 10.0.20.0/24
+- subnets:
+  - cloud_properties:
+      subnet: "subnet-2"
+    range: 10.1.20.0/24
+`
+
 var _ = Describe("manifests", func() {
+	var (
+		manifestsDirectory string
+		err                error
+	)
+
+	BeforeEach(func() {
+		manifestsDirectory, err = ioutil.TempDir("", "")
+		Expect(err).NotTo(HaveOccurred())
+	})
+
 	Describe("ReadManifest", func() {
-		var (
-			manifestsDirectory string
-			err                error
-		)
-
-		BeforeEach(func() {
-			manifestsDirectory, err = ioutil.TempDir("", "")
-			Expect(err).NotTo(HaveOccurred())
-		})
-
 		It("returns the manifest as a map", func() {
 			writeManifest(manifestsDirectory, "manifest.yml")
 
@@ -48,17 +64,22 @@ var _ = Describe("manifests", func() {
 		})
 	})
 
-	Describe("WriteManifest", func() {
-		var (
-			manifestsDirectory string
-			err                error
-		)
+	Describe("ReadNetworksFromManifest", func() {
+		It("reads the network information from the given manifest", func() {
+			writeManifestWithBody(manifestsDirectory, "manifest-with-subnets.yml", manifestWithSubnets)
 
-		BeforeEach(func() {
-			manifestsDirectory, err = ioutil.TempDir("", "")
+			networks, err := manifests.ReadNetworksFromManifest(filepath.Join(manifestsDirectory, "manifest-with-subnets.yml"))
 			Expect(err).NotTo(HaveOccurred())
-		})
 
+			Expect(networks[0].Subnets[0].CloudProperties.Subnet).To(Equal("subnet-1"))
+			Expect(networks[0].Subnets[0].Range).To(Equal("10.0.20.0/24"))
+
+			Expect(networks[1].Subnets[0].CloudProperties.Subnet).To(Equal("subnet-2"))
+			Expect(networks[1].Subnets[0].Range).To(Equal("10.1.20.0/24"))
+		})
+	})
+
+	Describe("WriteManifest", func() {
 		It("writes the given manifest to a file", func() {
 			manifestToWrite := map[string]interface{}{"director_uuid": "BOSH-DIRECTOR-UUID"}
 			manifestFile := filepath.Join(manifestsDirectory, "manifest.yml")
@@ -84,6 +105,11 @@ var _ = Describe("manifests", func() {
 func writeManifest(directory string, filename string) {
 	manifest := []byte("director_uuid: BOSH-DIRECTOR-UUID")
 	err := ioutil.WriteFile(filepath.Join(directory, filename), manifest, os.ModePerm)
+	Expect(err).NotTo(HaveOccurred())
+}
+
+func writeManifestWithBody(directory string, filename string, body string) {
+	err := ioutil.WriteFile(filepath.Join(directory, filename), []byte(body), os.ModePerm)
 	Expect(err).NotTo(HaveOccurred())
 }
 

@@ -3,9 +3,10 @@ package main
 import (
 	"os"
 
-	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/aws_deployer"
+	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/awsdeployer"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/clients"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/flags"
+	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/subnetchecker"
 )
 
 func main() {
@@ -14,10 +15,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	aws := &clients.AWS{}
+	aws := clients.NewAWS(configuration.AWSAccessKeyID, configuration.AWSSecretAccessKey, configuration.AWSRegion)
 	bosh := clients.NewBOSH(configuration.BoshDirector, configuration.BoshUser, configuration.BoshPassword)
+	subnetChecker := subnetchecker.NewSubnetChecker(aws)
 
-	awsDeployer := aws_deployer.NewAWSDeployer(aws, bosh)
+	awsDeployer := awsdeployer.NewAWSDeployer(bosh, subnetChecker)
 
 	err = awsDeployer.Deploy(configuration.ManifestsDirectory)
 	if err != nil {

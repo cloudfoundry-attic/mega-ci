@@ -1,4 +1,4 @@
-package aws_deployer_test
+package awsdeployer_test
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/aws_deployer"
+	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/awsdeployer"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/fakes"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -16,20 +16,21 @@ var _ = Describe("AWSDeployer", func() {
 	Describe("Deploy", func() {
 		var (
 			manifestsDirectory string
-			fakeAWS            *fakes.AWS
 			fakeBOSH           *fakes.BOSH
-			awsDeployer        aws_deployer.AWSDeployer
+			fakeSubnetChecker  *fakes.SubnetChecker
+			awsDeployer        awsdeployer.AWSDeployer
 		)
 
 		BeforeEach(func() {
-			fakeAWS = new(fakes.AWS)
 			fakeBOSH = new(fakes.BOSH)
+			fakeSubnetChecker = new(fakes.SubnetChecker)
 
 			var err error
 			manifestsDirectory, err = ioutil.TempDir("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			awsDeployer = aws_deployer.NewAWSDeployer(fakeAWS, fakeBOSH)
+			awsDeployer = awsdeployer.NewAWSDeployer(fakeBOSH, fakeSubnetChecker)
+			fakeSubnetChecker.CheckSubnetsCall.Returns.Bool = true
 		})
 
 		AfterEach(func() {
@@ -71,6 +72,35 @@ var _ = Describe("AWSDeployer", func() {
 		})
 
 		Context("failure cases", func() {
+			It("returns an error when the BOSH manifest contains subnets not found on AWS", func() {
+				const manifestWithSubnetC8 = `---
+director_uuid: BOSH-DIRECTOR-UUID
+
+name: multi-az-ssl
+
+networks:
+- subnets:
+  - cloud_properties:
+      subnet: "subnet-c8b76f90"
+    range: 10.0.20.0/24
+`
+				writeManifestWithBody(manifestsDirectory, "manifest.yml", manifestWithSubnetC8)
+				fakeSubnetChecker.CheckSubnetsCall.Returns.Bool = false
+
+				deploymentError := awsDeployer.Deploy(manifestsDirectory)
+				Expect(deploymentError).NotTo(BeNil())
+				Expect(deploymentError.Error()).To(ContainSubstring("manifest subnets not found on AWS"))
+			})
+
+			It("returns an error when CheckSubnets returns an error", func() {
+				writeManifest(manifestsDirectory, "manifest.yml")
+				fakeSubnetChecker.CheckSubnetsCall.Returns.Error = errors.New("something bad happened")
+
+				deploymentError := awsDeployer.Deploy(manifestsDirectory)
+				Expect(deploymentError).NotTo(BeNil())
+				Expect(deploymentError.Error()).To(ContainSubstring("something bad happened"))
+			})
+
 			It("returns an error when manifests directory does not exist", func() {
 				deploymentError := awsDeployer.Deploy("/not/a/real/directory")
 				Expect(deploymentError.Error()).To(ContainSubstring("no such file or directory"))

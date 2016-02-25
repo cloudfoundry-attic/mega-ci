@@ -1,5 +1,7 @@
 #!/bin/bash -exu
 
+export GO15VENDOREXPERIMENT=1
+
 ROOT="${PWD}"
 
 function main() {
@@ -19,7 +21,10 @@ function main() {
 		  --manifests-directory "${ROOT}/release/manifests/aws" \
 		  --director ${BOSH_DIRECTOR} \
 		  --user ${BOSH_USER} \
-		  --password ${BOSH_PASSWORD}
+		  --password ${BOSH_PASSWORD} \
+	  	  --aws-access-key-id ${AWS_ACCESS_KEY_ID} \
+	  	  --aws-secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+	  	  --aws-region ${AWS_DEFAULT_REGION}
       set -x
     popd > /dev/null
   popd > /dev/null
