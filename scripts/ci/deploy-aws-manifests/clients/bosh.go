@@ -2,6 +2,7 @@ package clients
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -26,10 +27,11 @@ func NewBOSH(boshDirector string, boshUser string, boshPassword string) *BOSH {
 
 func (b *BOSH) Deploy(manifest string) error {
 	contents, err := ioutil.ReadFile(manifest)
-	fmt.Println(string(contents))
+	fmt.Println("deploying to ", b.director)
 
 	err = execute(os.Stdout, "-t", b.director, "-u", b.user, "-p", b.password, "-d", manifest, "-n", "deploy")
 	if err != nil {
+		fmt.Println("bosh deploy failed")
 		return err
 	}
 
@@ -41,6 +43,7 @@ func (b *BOSH) Status() (string, error) {
 
 	err := execute(output, "-t", b.director, "-u", b.user, "-p", b.password, "status", "--uuid")
 	if err != nil {
+		fmt.Println("bosh status failed")
 		return "", err
 	}
 
@@ -50,6 +53,7 @@ func (b *BOSH) Status() (string, error) {
 func (b *BOSH) DeleteDeployment(deploymentName string) error {
 	err := execute(os.Stdout, "-t", b.director, "-u", b.user, "-p", b.password, "-n", "delete", "deployment", deploymentName)
 	if err != nil {
+		fmt.Println("bosh delete deployment failed")
 		return err
 	}
 
@@ -68,7 +72,7 @@ func execute(output io.Writer, arguments ...string) error {
 
 	err = cmd.Run()
 	if err != nil {
-		return err
+		return errors.New(fmt.Sprintf("bosh command failed %s", boshBinary))
 	}
 
 	return nil
