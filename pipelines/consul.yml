@@ -90,9 +90,9 @@ jobs:
         BOSH_DIRECTOR: {{cf_bosh_director}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
-        AWS_ACCESS_KEY_ID: {{bosh_aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{bosh_aws_secret_access_key}}
-        AWS_DEFAULT_REGION: {{bosh_aws_default_region}}
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{aws_default_region}}
 
 - name: test-consul
   public: true
