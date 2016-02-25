@@ -2,7 +2,7 @@ groups:
 - name: consul
   jobs:
   - deploy-bosh-lite-manifests
-  - deploy-aws-manifest
+  - deploy-aws-manifests
   - test-consul
   - deploy-with-cf
   - test-with-cf
@@ -72,7 +72,7 @@ jobs:
         BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
         BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
         BOSH_LITE_NAME: bosh-lite
-- name: deploy-aws-manifest
+- name: deploy-aws-manifests
   public: true
   plan:
   - aggregate:
@@ -83,7 +83,7 @@ jobs:
       resource: consul-release-develop
       passed: [test-consul]
       trigger: true
-  - task: deploy-aws-manifest
+  - task: deploy-aws-manifests
     file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-aws-manifests.yml
     config:
       params:

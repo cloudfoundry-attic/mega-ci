@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/awsdeployer"
@@ -12,6 +13,7 @@ import (
 func main() {
 	configuration, err := flags.ParseFlags(os.Args[1:])
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "\n\n%s\n", err)
 		os.Exit(1)
 	}
 
@@ -23,6 +25,7 @@ func main() {
 
 	err = awsDeployer.Deploy(configuration.ManifestsDirectory)
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "\n\n%s\n", err)
 		os.Exit(1)
 	}
 
