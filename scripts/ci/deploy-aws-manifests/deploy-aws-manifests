@@ -9,9 +9,6 @@ function main() {
   source ~/.bashrc
   set -ux
 
-  mkdir -p "${GOPATH}/src/github.com/cloudfoundry-incubator"
-  ln -s "${ROOT}/mega-ci/scripts/ci/deploy-aws-manifests/vendor/github.com/cloudfoundry-incubator/candiedyaml" "${GOPATH}/src/github.com/cloudfoundry-incubator"
-
   mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/mega-ci"
@@ -22,9 +19,9 @@ function main() {
 		  --director ${BOSH_DIRECTOR} \
 		  --user ${BOSH_USER} \
 		  --password ${BOSH_PASSWORD} \
-	  	  --aws-access-key-id ${AWS_ACCESS_KEY_ID} \
-	  	  --aws-secret-access-key ${AWS_SECRET_ACCESS_KEY} \
-	  	  --aws-region ${AWS_DEFAULT_REGION}
+	  	--aws-access-key-id ${AWS_ACCESS_KEY_ID} \
+	  	--aws-secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+	  	--aws-region ${AWS_DEFAULT_REGION}
       set -x
     popd > /dev/null
   popd > /dev/null
