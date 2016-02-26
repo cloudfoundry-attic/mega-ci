@@ -8,6 +8,7 @@ import (
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/clients"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/flags"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/subnetchecker"
+	"github.com/pivotal-cf-experimental/bosh-test/bosh"
 )
 
 func main() {
@@ -17,8 +18,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	boshConfig := bosh.Config{
+		URL:              configuration.BoshDirector,
+		Password:         configuration.BoshPassword,
+		Username:         configuration.BoshUser,
+		AllowInsecureSSL: true,
+	}
+
 	aws := clients.NewAWS(configuration.AWSAccessKeyID, configuration.AWSSecretAccessKey, configuration.AWSRegion)
-	bosh := clients.NewBOSH(configuration.BoshDirector, configuration.BoshUser, configuration.BoshPassword)
+	bosh := clients.NewBOSH(bosh.NewClient(boshConfig))
 	subnetChecker := subnetchecker.NewSubnetChecker(aws)
 
 	awsDeployer := awsdeployer.NewAWSDeployer(bosh, subnetChecker)

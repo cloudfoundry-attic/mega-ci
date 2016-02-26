@@ -7,7 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/awsdeployer"
+	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/clients"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/fakes"
+	"github.com/pivotal-cf-experimental/bosh-test/bosh"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -22,14 +25,14 @@ var _ = Describe("AWSDeployer", func() {
 		)
 
 		BeforeEach(func() {
-			fakeBOSH = new(fakes.BOSH)
-			fakeSubnetChecker = new(fakes.SubnetChecker)
+			fakeBOSH = &fakes.BOSH{}
+			fakeSubnetChecker = &fakes.SubnetChecker{}
 
 			var err error
 			manifestsDirectory, err = ioutil.TempDir("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			awsDeployer = awsdeployer.NewAWSDeployer(fakeBOSH, fakeSubnetChecker)
+			awsDeployer = awsdeployer.NewAWSDeployer(clients.NewBOSH(fakeBOSH), fakeSubnetChecker)
 			fakeSubnetChecker.CheckSubnetsCall.Returns.Bool = true
 		})
 
@@ -38,28 +41,28 @@ var _ = Describe("AWSDeployer", func() {
 		})
 
 		It("deploys all of the bosh manifests in the manifests directory", func() {
-			writeManifest(manifestsDirectory, "first_manifest.yml")
-			writeManifest(manifestsDirectory, "second_manifest.yml")
+			writeManifestWithBody(manifestsDirectory, "first_manifest.yml", "director_uuid: BOSH-DIRECTOR-UUID\nname: deployment-1")
+			writeManifestWithBody(manifestsDirectory, "second_manifest.yml", "director_uuid: BOSH-DIRECTOR-UUID\nname: deployment-2")
 			writeManifest(manifestsDirectory, "not_a_manifest.json")
 
 			deploymentError := awsDeployer.Deploy(manifestsDirectory)
 			Expect(deploymentError).NotTo(HaveOccurred())
 
-			Expect(len(fakeBOSH.DeployCalls.Receives.Manifest)).To(Equal(2))
-			Expect(fakeBOSH.DeployCalls.Receives.Manifest[0]).To(ContainSubstring("first_manifest.yml"))
-			Expect(fakeBOSH.DeployCalls.Receives.Manifest[1]).To(ContainSubstring("second_manifest.yml"))
+			Expect(fakeBOSH.DeployCall.CallCount).To(Equal(2))
+			Expect(fakeBOSH.DeployCall.ReceivedManifests[0]).To(ContainSubstring("deployment-1"))
+			Expect(fakeBOSH.DeployCall.ReceivedManifests[1]).To(ContainSubstring("deployment-2"))
 		})
 
 		It("replaces the bosh director uuid before deploying each manifest", func() {
 			writeManifest(manifestsDirectory, "manifest.yml")
-			fakeBOSH.StatusCall.Returns.UUID = "retrieved-director-uuid"
+			fakeBOSH.InfoCall.Returns.Info = bosh.DirectorInfo{
+				UUID: "retrieved-director-uuid",
+			}
 			deploymentError := awsDeployer.Deploy(manifestsDirectory)
 
 			Expect(deploymentError).NotTo(HaveOccurred())
 
-			deployedManifest, err := ioutil.ReadFile(fakeBOSH.DeployCalls.Receives.Manifest[0])
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(deployedManifest)).To(ContainSubstring("director_uuid: retrieved-director-uuid"))
+			Expect(string(fakeBOSH.DeployCall.ReceivedManifests[0])).To(ContainSubstring("director_uuid: retrieved-director-uuid"))
 		})
 
 		It("deletes the deployment", func() {
@@ -68,7 +71,7 @@ var _ = Describe("AWSDeployer", func() {
 			deploymentError := awsDeployer.Deploy(manifestsDirectory)
 
 			Expect(deploymentError).NotTo(HaveOccurred())
-			Expect(fakeBOSH.DeleteDeploymentCall.Receives.DeploymentName).To(Equal("some-deployment-name"))
+			Expect(fakeBOSH.DeleteDeploymentCall.Receives.Name).To(Equal("some-deployment-name"))
 		})
 
 		Context("failure cases", func() {
@@ -109,7 +112,7 @@ networks:
 			It("returns an error when bosh deploy fails", func() {
 				writeManifest(manifestsDirectory, "manifest.yml")
 
-				fakeBOSH.DeployCalls.Returns.Error = errors.New("bosh deployment failed")
+				fakeBOSH.DeployCall.Returns.Error = errors.New("bosh deployment failed")
 
 				deploymentError := awsDeployer.Deploy(manifestsDirectory)
 				Expect(deploymentError.Error()).To(ContainSubstring("bosh deployment failed"))
@@ -121,13 +124,13 @@ networks:
 				Expect(deploymentError.Error()).To(ContainSubstring("mapping values are not allowed in this context"))
 			})
 
-			It("returns an error when bosh status fails", func() {
+			It("returns an error when bosh UUID fails", func() {
 				writeManifest(manifestsDirectory, "manifest.yml")
 
-				fakeBOSH.StatusCall.Returns.Error = errors.New("bosh status failed")
+				fakeBOSH.InfoCall.Returns.Error = errors.New("bosh UUID failed")
 
 				deploymentError := awsDeployer.Deploy(manifestsDirectory)
-				Expect(deploymentError.Error()).To(ContainSubstring("bosh status failed"))
+				Expect(deploymentError.Error()).To(ContainSubstring("bosh UUID failed"))
 			})
 
 			It("returns an error when the deployment name is not present in the manifest", func() {

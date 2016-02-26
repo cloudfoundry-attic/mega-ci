@@ -4,3 +4,6 @@
 [submodule "scripts/ci/deploy-aws-manifests/vendor/github.com/aws/aws-sdk-go"]
 	path = scripts/ci/deploy-aws-manifests/vendor/github.com/aws/aws-sdk-go
 	url = https://github.com/aws/aws-sdk-go.git
+[submodule "scripts/ci/deploy-aws-manifests/vendor/github.com/pivotal-cf-experimental/bosh-test"]
+	path = scripts/ci/deploy-aws-manifests/vendor/github.com/pivotal-cf-experimental/bosh-test
+	url = https://github.com/pivotal-cf-experimental/bosh-test.git

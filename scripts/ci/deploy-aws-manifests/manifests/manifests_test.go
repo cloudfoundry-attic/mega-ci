@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cloudfoundry-incubator/candiedyaml"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/manifests"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -79,27 +78,6 @@ var _ = Describe("manifests", func() {
 		})
 	})
 
-	Describe("WriteManifest", func() {
-		It("writes the given manifest to a file", func() {
-			manifestToWrite := map[string]interface{}{"director_uuid": "BOSH-DIRECTOR-UUID"}
-			manifestFile := filepath.Join(manifestsDirectory, "manifest.yml")
-
-			err := manifests.WriteManifest(manifestFile, manifestToWrite)
-			Expect(err).NotTo(HaveOccurred())
-
-			writtenManifest := readManifest(manifestFile)
-			Expect(writtenManifest["director_uuid"]).To(Equal("BOSH-DIRECTOR-UUID"))
-		})
-
-		Context("failure cases", func() {
-			It("returns an error when manifest file cannot be written", func() {
-				manifestToWrite := map[string]interface{}{"director_uuid": "BOSH-DIRECTOR-UUID"}
-
-				err := manifests.WriteManifest("not/a/directory/manifest.yml", manifestToWrite)
-				Expect(err.Error()).To(ContainSubstring("no such file or directory"))
-			})
-		})
-	})
 })
 
 func writeManifest(directory string, filename string) {
@@ -111,16 +89,4 @@ func writeManifest(directory string, filename string) {
 func writeManifestWithBody(directory string, filename string, body string) {
 	err := ioutil.WriteFile(filepath.Join(directory, filename), []byte(body), os.ModePerm)
 	Expect(err).NotTo(HaveOccurred())
-}
-
-func readManifest(manifestFile string) map[string]interface{} {
-	file, err := os.Open(manifestFile)
-	Expect(err).NotTo(HaveOccurred())
-	defer file.Close()
-
-	var document map[string]interface{}
-	err = candiedyaml.NewDecoder(file).Decode(&document)
-	Expect(err).NotTo(HaveOccurred())
-
-	return document
 }

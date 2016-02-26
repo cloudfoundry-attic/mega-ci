@@ -36,21 +36,6 @@ func ReadManifest(manifestFile string) (map[string]interface{}, error) {
 	return document, nil
 }
 
-func WriteManifest(manifestFile string, document map[string]interface{}) error {
-	fileToWrite, err := os.Create(manifestFile)
-	defer fileToWrite.Close()
-	if err != nil {
-		return err
-	}
-
-	err = candiedyaml.NewEncoder(fileToWrite).Encode(document)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ReadNetworksFromManifest(manifestFilename string) ([]Network, error) {
 	file, err := os.Open(manifestFilename)
 	if err != nil {
