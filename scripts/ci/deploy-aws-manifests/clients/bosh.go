@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -26,10 +25,9 @@ func NewBOSH(boshDirector string, boshUser string, boshPassword string) *BOSH {
 }
 
 func (b *BOSH) Deploy(manifest string) error {
-	contents, err := ioutil.ReadFile(manifest)
 	fmt.Println("deploying to ", b.director)
 
-	err = execute(os.Stdout, "-t", b.director, "-u", b.user, "-p", b.password, "-d", manifest, "-n", "deploy")
+	err := execute(os.Stdout, "-t", b.director, "-u", b.user, "-p", b.password, "-d", manifest, "-n", "deploy")
 	if err != nil {
 		fmt.Println("bosh deploy failed")
 		return err
