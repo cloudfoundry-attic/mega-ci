@@ -2,6 +2,7 @@ package awsdeployer_test
 
 import (
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -22,17 +23,19 @@ var _ = Describe("AWSDeployer", func() {
 			fakeBOSH           *fakes.BOSH
 			fakeSubnetChecker  *fakes.SubnetChecker
 			awsDeployer        awsdeployer.AWSDeployer
+			stdout             io.Writer
 		)
 
 		BeforeEach(func() {
 			fakeBOSH = &fakes.BOSH{}
 			fakeSubnetChecker = &fakes.SubnetChecker{}
+			stdout = ioutil.Discard
 
 			var err error
 			manifestsDirectory, err = ioutil.TempDir("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			awsDeployer = awsdeployer.NewAWSDeployer(clients.NewBOSH(fakeBOSH), fakeSubnetChecker)
+			awsDeployer = awsdeployer.NewAWSDeployer(clients.NewBOSH(fakeBOSH), fakeSubnetChecker, stdout)
 			fakeSubnetChecker.CheckSubnetsCall.Returns.Bool = true
 		})
 

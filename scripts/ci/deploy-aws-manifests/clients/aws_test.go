@@ -19,7 +19,7 @@ var _ = Describe("AWS", func() {
 		fakeSession *fakes.Session
 	)
 	BeforeEach(func() {
-		awsClient = clients.NewAWS("some-access-key-id", "some-secret-access-key", "some-region")
+		awsClient = clients.NewAWS("some-access-key-id", "some-secret-access-key", "some-region", "some-endpoint")
 		fakeSession = &fakes.Session{}
 	})
 
@@ -36,25 +36,26 @@ var _ = Describe("AWS", func() {
 
 			Expect(client.Config.Credentials).To(Equal(credentials.NewStaticCredentials("some-access-key-id", "some-secret-access-key", "")))
 			Expect(client.Config.Region).To(Equal(aws.String("some-region")))
+			Expect(client.Config.Endpoint).To(Equal(aws.String("some-endpoint")))
 		})
 
 		Context("failure cases", func() {
 			It("returns an error if no access key id is provided", func() {
-				awsClient := clients.NewAWS("", "some-secret-access-key", "some-region")
+				awsClient := clients.NewAWS("", "some-secret-access-key", "some-region", "some-endpoint")
 				_, err := awsClient.Session()
 				Expect(err).NotTo(BeNil())
 				Expect(err.Error()).To(ContainSubstring("aws access key id must be provided"))
 			})
 
 			It("returns an error if no secret access key is provided", func() {
-				awsClient := clients.NewAWS("some-access-key-id", "", "some-region")
+				awsClient := clients.NewAWS("some-access-key-id", "", "some-region", "some-endpoint")
 				_, err := awsClient.Session()
 				Expect(err).NotTo(BeNil())
 				Expect(err.Error()).To(ContainSubstring("aws secret access key must be provided"))
 			})
 
 			It("returns an error if no region is provided", func() {
-				awsClient := clients.NewAWS("some-access-key-id", "some-secret-access-key", "")
+				awsClient := clients.NewAWS("some-access-key-id", "some-secret-access-key", "", "some-endpoint")
 				_, err := awsClient.Session()
 				Expect(err).NotTo(BeNil())
 				Expect(err.Error()).To(ContainSubstring("aws region must be provided"))

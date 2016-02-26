@@ -25,11 +25,12 @@ func main() {
 		AllowInsecureSSL: true,
 	}
 
-	aws := clients.NewAWS(configuration.AWSAccessKeyID, configuration.AWSSecretAccessKey, configuration.AWSRegion)
+	aws := clients.NewAWS(configuration.AWSAccessKeyID, configuration.AWSSecretAccessKey,
+		configuration.AWSRegion, configuration.AWSEndpointOverride)
 	bosh := clients.NewBOSH(bosh.NewClient(boshConfig))
 	subnetChecker := subnetchecker.NewSubnetChecker(aws)
 
-	awsDeployer := awsdeployer.NewAWSDeployer(bosh, subnetChecker)
+	awsDeployer := awsdeployer.NewAWSDeployer(bosh, subnetChecker, os.Stdout)
 
 	err = awsDeployer.Deploy(configuration.ManifestsDirectory)
 	if err != nil {

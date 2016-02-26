@@ -16,6 +16,7 @@ var _ = Describe("flags", func() {
 			"--aws-access-key-id", "some-aws-access-key-id",
 			"--aws-secret-access-key", "some-aws-secret-access-key",
 			"--aws-region", "some-aws-region",
+			"--aws-endpoint-override", "some-aws-endpoint-override",
 		})
 
 		Expect(err).NotTo(HaveOccurred())
@@ -26,6 +27,7 @@ var _ = Describe("flags", func() {
 		Expect(configuration.AWSAccessKeyID).To(Equal("some-aws-access-key-id"))
 		Expect(configuration.AWSSecretAccessKey).To(Equal("some-aws-secret-access-key"))
 		Expect(configuration.AWSRegion).To(Equal("some-aws-region"))
+		Expect(configuration.AWSEndpointOverride).To(Equal("some-aws-endpoint-override"))
 	})
 
 	Describe("failure cases", func() {

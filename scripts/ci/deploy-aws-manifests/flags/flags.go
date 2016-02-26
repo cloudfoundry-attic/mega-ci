@@ -6,13 +6,14 @@ import (
 )
 
 type Configuration struct {
-	ManifestsDirectory string
-	BoshDirector       string
-	BoshUser           string
-	BoshPassword       string
-	AWSAccessKeyID     string
-	AWSSecretAccessKey string
-	AWSRegion          string
+	ManifestsDirectory  string
+	BoshDirector        string
+	BoshUser            string
+	BoshPassword        string
+	AWSAccessKeyID      string
+	AWSSecretAccessKey  string
+	AWSRegion           string
+	AWSEndpointOverride string
 }
 
 func ParseFlags(arguments []string) (Configuration, error) {
@@ -27,6 +28,7 @@ func ParseFlags(arguments []string) (Configuration, error) {
 	flags.StringVar(&configuration.AWSAccessKeyID, "aws-access-key-id", "", "aws access key id")
 	flags.StringVar(&configuration.AWSSecretAccessKey, "aws-secret-access-key", "", "aws secret access key")
 	flags.StringVar(&configuration.AWSRegion, "aws-region", "", "aws region")
+	flags.StringVar(&configuration.AWSEndpointOverride, "aws-endpoint-override", "", "aws endpoint override")
 
 	err := flags.Parse(arguments)
 	if err != nil {

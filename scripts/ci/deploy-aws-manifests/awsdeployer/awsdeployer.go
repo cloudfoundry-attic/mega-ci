@@ -2,6 +2,8 @@ package awsdeployer
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -17,12 +19,14 @@ type SubnetChecker interface {
 type AWSDeployer struct {
 	bosh          clients.BOSH
 	subnetChecker SubnetChecker
+	stdout        io.Writer
 }
 
-func NewAWSDeployer(bosh clients.BOSH, subnetChecker SubnetChecker) AWSDeployer {
+func NewAWSDeployer(bosh clients.BOSH, subnetChecker SubnetChecker, stdout io.Writer) AWSDeployer {
 	return AWSDeployer{
 		bosh:          bosh,
 		subnetChecker: subnetChecker,
+		stdout:        stdout,
 	}
 }
 
@@ -33,6 +37,8 @@ func (a AWSDeployer) Deploy(manifestsDirectory string) error {
 	}
 
 	for _, manifestFilename := range manifestsToDeploy {
+		fmt.Fprintf(a.stdout, "found manifest: %s\n", manifestFilename)
+		fmt.Fprintln(a.stdout, "checking subnets...")
 		hasSubnets, err := a.subnetChecker.CheckSubnets(manifestFilename)
 		if err != nil {
 			return err
@@ -52,6 +58,7 @@ func (a AWSDeployer) Deploy(manifestsDirectory string) error {
 }
 
 func (a AWSDeployer) deployManifest(manifestFilename string) error {
+	fmt.Fprintln(a.stdout, "fetching director uuid...")
 	manifest, err := a.replaceUUID(manifestFilename)
 	if err != nil {
 		return err
@@ -62,11 +69,13 @@ func (a AWSDeployer) deployManifest(manifestFilename string) error {
 		return err
 	}
 
+	fmt.Fprintln(a.stdout, "deploying...")
 	err = a.bosh.Deploy(buf)
 	if err != nil {
 		return err
 	}
 
+	fmt.Fprintln(a.stdout, "deleting deployment...")
 	err = a.deleteDeployment(manifest)
 	if err != nil {
 		return err

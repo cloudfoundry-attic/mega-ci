@@ -15,20 +15,22 @@ type Subnet struct {
 }
 
 type AWS struct {
-	AccessKeyID     string
-	SecretAccessKey string
-	Region          string
+	AccessKeyID      string
+	SecretAccessKey  string
+	Region           string
+	EndpointOverride string
 }
 
 type Session interface {
 	DescribeSubnets(*ec2.DescribeSubnetsInput) (*ec2.DescribeSubnetsOutput, error)
 }
 
-func NewAWS(AccessKeyID string, SecretAccessKey string, Region string) AWS {
+func NewAWS(AccessKeyID string, SecretAccessKey string, Region string, EndpointOverride string) AWS {
 	return AWS{
-		AccessKeyID:     AccessKeyID,
-		SecretAccessKey: SecretAccessKey,
-		Region:          Region,
+		AccessKeyID:      AccessKeyID,
+		SecretAccessKey:  SecretAccessKey,
+		Region:           Region,
+		EndpointOverride: EndpointOverride,
 	}
 }
 
@@ -74,6 +76,7 @@ func (a AWS) Session() (Session, error) {
 	awsConfig := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(a.AccessKeyID, a.SecretAccessKey, ""),
 		Region:      aws.String(a.Region),
+		Endpoint:    aws.String(a.EndpointOverride),
 	}
 
 	return ec2.New(session.New(awsConfig)), nil

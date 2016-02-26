@@ -87,7 +87,7 @@ jobs:
     file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-aws-manifests.yml
     config:
       params:
-        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_DIRECTOR: {{cf_bosh_director_url}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
