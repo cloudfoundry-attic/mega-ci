@@ -1,5 +1,5 @@
 groups:
-- name: infrastructure
+- name: bootload-mega-ci
   jobs:
   - deploy-mega-ci-bosh
 
