@@ -48,6 +48,8 @@ func (a AWSDeployer) Deploy(manifestsDirectory string) error {
 			return errors.New("manifest subnets not found on AWS")
 		}
 
+		fmt.Fprintln(a.stdout, "found all manifest subnets on AWS")
+
 		err = a.deployManifest(manifestFilename)
 		if err != nil {
 			return err
