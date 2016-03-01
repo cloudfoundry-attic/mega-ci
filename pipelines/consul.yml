@@ -1,6 +1,7 @@
 groups:
 - name: consul
   jobs:
+  - check-consul-git-submodules
   - deploy-bosh-lite-manifests
   - deploy-aws-manifests
   - test-consul
@@ -51,6 +52,18 @@ resources:
     uri: https://github.com/cloudfoundry/bosh-lite.git
 
 jobs:
+- name: check-consul-git-submodules
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      trigger: true
+  - task: check-consul-git-submodules
+    file: mega-ci/scripts/ci/check-consul-git-submodules.yml
+
 - name: deploy-bosh-lite-manifests
   public: true
   plan:
@@ -104,6 +117,7 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
+      passed: [check-consul-git-submodules]
       trigger: true
   - task: run-consats
     file: mega-ci/scripts/ci/run-consats.yml

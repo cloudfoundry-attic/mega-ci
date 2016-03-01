@@ -1,0 +1,12 @@
+#!/bin/bash -exu
+
+count_all=$(grep 'url = ' consul-release/.gitmodules | wc -l)
+count_https=$(grep 'url = https://' consul-release/.gitmodules | wc -l)
+
+if [ $count_all != $count_https ]; then
+  echo 'gitmodule not using https'
+  grep 'url = ' consul-release/.gitmodules | grep -v 'url = https://'
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,11 @@
+---
+platform: linux
+
+image: docker:///cloudfoundry/mega-ci
+
+inputs:
+  - name: mega-ci
+  - name: consul-release
+
+run:
+  path: mega-ci/scripts/ci/check-consul-git-submodules
