@@ -1,0 +1,20 @@
+groups:
+- name: bosh-test
+  jobs:
+  - test-bosh-test
+
+resources:
+- name: bosh-test
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/pivotal-cf-experimental/bosh-test.git
+
+jobs:
+- name: test-bosh-test
+  public: true
+  plan:
+  - get: bosh-test
+    trigger: true
+  - task: test
+    file: mega-ci/scripts/ci/bosh-test/test.yml

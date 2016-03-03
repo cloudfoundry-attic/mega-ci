@@ -1,0 +1,10 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/bosh-test
+
+inputs:
+- name: bosh-test
+
+run:
+  path: mega-ci/scripts/ci/bosh-test/test
