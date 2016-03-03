@@ -5,6 +5,7 @@ image: docker:///cfinfrastructure/bosh-test
 
 inputs:
 - name: bosh-test
+- name: mega-ci
 
 run:
   path: mega-ci/scripts/ci/bosh-test/test

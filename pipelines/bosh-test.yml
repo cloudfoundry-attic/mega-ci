@@ -9,12 +9,19 @@ resources:
   source:
     branch: master
     uri: https://github.com/pivotal-cf-experimental/bosh-test.git
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/mega-ci.git
 
 jobs:
 - name: test-bosh-test
   public: true
   plan:
-  - get: bosh-test
-    trigger: true
+  - aggregate:
+    - get: mega-ci
+    - get: bosh-test
+      trigger: true
   - task: test
     file: mega-ci/scripts/ci/bosh-test/test.yml
