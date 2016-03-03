@@ -12,7 +12,7 @@ resources:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - Dockerfile
+    - dockerfiles/mega-ci/Dockerfile
 
 - name: mega-ci-docker-image
   type: docker-image
@@ -31,7 +31,7 @@ jobs:
       trigger: true
     - put: mega-ci-docker-image
       params:
-        build: mega-ci
+        build: mega-ci/dockerfiles/mega-ci
         cache: true
 
 - name: mega-ci-unit-tests
