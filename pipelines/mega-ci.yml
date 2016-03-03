@@ -6,18 +6,50 @@ resources:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
 
-- name: mega-ci-dockerfile
+- name: dockerfiles
   type: git
   source:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - dockerfiles/mega-ci/Dockerfile
+    - dockerfiles/
+
+- name: destiny-docker-image
+  type: docker-image
+  source:
+    repository: cfinfrastructure/destiny
+    username: {{docker-username}}
+    password: {{docker-password}}
+    email: {{docker-email}}
+
+- name: bosh-bootloader-docker-image
+  type: docker-image
+  source:
+    repository: cfinfrastructure/bosh-bootloader
+    username: {{docker-username}}
+    password: {{docker-password}}
+    email: {{docker-email}}
+
+- name: bosh-test-docker-image
+  type: docker-image
+  source:
+    repository: cfinfrastructure/bosh-test
+    username: {{docker-username}}
+    password: {{docker-password}}
+    email: {{docker-email}}
+
+- name: gomegamatchers-docker-image
+  type: docker-image
+  source:
+    repository: cfinfrastructure/gomegamatchers
+    username: {{docker-username}}
+    password: {{docker-password}}
+    email: {{docker-email}}
 
 - name: mega-ci-docker-image
   type: docker-image
   source:
-    repository: cloudfoundry/mega-ci
+    repository: cfinfrastructure/mega-ci
     username: {{docker-username}}
     password: {{docker-password}}
     email: {{docker-email}}
@@ -27,11 +59,51 @@ jobs:
   plan:
   - do:
     - get: mega-ci
-      resource: mega-ci-dockerfile
+      resource: dockerfiles
       trigger: true
     - put: mega-ci-docker-image
       params:
         build: mega-ci/dockerfiles/mega-ci
+        cache: true
+- name: destiny-docker-image
+  plan:
+  - do:
+    - get: mega-ci
+      resource: dockerfiles
+      trigger: true
+    - put: destiny-docker-image
+      params:
+        build: mega-ci/dockerfiles/destiny
+        cache: true
+- name: gomegamatchers-docker-image
+  plan:
+  - do:
+    - get: mega-ci
+      resource: dockerfiles
+      trigger: true
+    - put: gomegamatchers-docker-image
+      params:
+        build: mega-ci/dockerfiles/gomegamatchers
+        cache: true
+- name: bosh-bootloader-docker-image
+  plan:
+  - do:
+    - get: mega-ci
+      resource: dockerfiles
+      trigger: true
+    - put: bosh-bootloader-docker-image
+      params:
+        build: mega-ci/dockerfiles/bosh-bootloader
+        cache: true
+- name: bosh-test-docker-image
+  plan:
+  - do:
+    - get: mega-ci
+      resource: dockerfiles
+      trigger: true
+    - put: bosh-test-docker-image
+      params:
+        build: mega-ci/dockerfiles/bosh-test
         cache: true
 
 - name: mega-ci-unit-tests

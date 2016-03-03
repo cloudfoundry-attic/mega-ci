@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/mega-ci
+image: docker:///cfinfrastructure/mega-ci
 
 inputs:
 - name: mega-ci
