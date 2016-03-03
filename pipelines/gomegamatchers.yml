@@ -1,0 +1,27 @@
+groups:
+- name: gomegamatchers
+  jobs:
+  - test-gomegamatchers
+
+resources:
+- name: gomegamatchers
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/pivotal-cf-experimental/gomegamatchers.git
+- name: mega-ci
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/mega-ci.git
+
+jobs:
+- name: test-gomegamatchers
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: gomegamatchers
+      trigger: true
+  - task: test
+    file: mega-ci/scripts/ci/gomegamatchers/test.yml

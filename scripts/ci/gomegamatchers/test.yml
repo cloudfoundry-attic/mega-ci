@@ -1,0 +1,11 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/gomegamatchers
+
+inputs:
+- name: gomegamatchers
+- name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/gomegamatchers/test
