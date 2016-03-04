@@ -85,6 +85,8 @@ jobs:
         BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
         BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
         BOSH_LITE_NAME: bosh-lite
+        BOSH_LITE_PRIVATE_KEY: {{bosh-lite-private-key}}
+
 - name: deploy-aws-manifests
   public: true
   plan:
