@@ -6,11 +6,14 @@ set -ux
 
 function setup_env() {
   set +x
-  export BUILD_DIR=$PWD
-  export BOSH_LITE_KEYPAIR=bosh-lite
-  export BOSH_USER=admin
-  export BOSH_PASSWORD=admin
+  export BUILD_DIR="${PWD}"
+  export BOSH_LITE_KEYPAIR="bosh-lite"
+  export BOSH_LITE_PRIVATE_KEY="${BUILD_DIR}/bosh-lite.pem"
+  export BOSH_USER="admin"
+  export BOSH_PASSWORD="admin"
   set -x
+
+  echo "${BOSH_LITE_PRIVATE_KEY_CONTENTS}" > "${BOSH_LITE_PRIVATE_KEY}"
 }
 
 function deploy_boshlite() {
