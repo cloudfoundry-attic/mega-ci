@@ -8,11 +8,7 @@ set -ux
 function main() {
   bosh target "${BOSH_DIRECTOR}"
 
-  mkdir -p consul-release/manifest-generation/aws-stubs/
-
-  cp \
-    private-credentials/mega-ci/stubs/consats/iaas-settings-consats.yml \
-    consul-release/manifest-generation/aws-stubs/
+  generate_manifest
 
   pushd consul-release > /dev/null
     bosh -n create release
@@ -24,8 +20,6 @@ function main() {
     bosh upload release \
       "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=39"
 
-    ./scripts/generate-consats-manifest aws
-
     bosh deployment aws/consats.yml
     bosh -n deploy
 
@@ -36,6 +30,18 @@ function main() {
   cleanup_deployment "turbulence-consul"
 
   bosh -n cleanup --all
+}
+
+function generate_manifest() {
+  pushd consul-release > /dev/null
+    mkdir -p manifest-generation/aws-stubs/
+
+    cp \
+      private-credentials/mega-ci/stubs/consats/iaas-settings-consats.yml \
+      manifest-generation/aws-stubs/
+
+    ./scripts/generate-consats-manifest aws
+  popd > /dev/null
 }
 
 function cleanup_deployment() {

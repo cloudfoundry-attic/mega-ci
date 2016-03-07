@@ -9,4 +9,4 @@ inputs:
   - name: consul-release
 
 run:
-  path: mega-ci/scripts/ci/run-consats
+  path: mega-ci/scripts/ci/run-consats/task

@@ -122,7 +122,7 @@ jobs:
       passed: [check-consul-git-submodules]
       trigger: true
   - task: run-consats
-    file: mega-ci/scripts/ci/run-consats.yml
+    file: mega-ci/scripts/ci/run-consats/task.yml
 
 - name: deploy-with-cf
   public: false
