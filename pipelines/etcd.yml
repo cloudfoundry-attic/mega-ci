@@ -4,6 +4,7 @@ groups:
   - test-etcd
   - create-final-release
   - merge-master-into-develop
+  - deploy-bosh-lite-manifests
   - deploy-with-cf
   - test-with-cf
 
@@ -42,8 +43,35 @@ resources:
   source:
     branch: master
     uri: https://github.com/cloudfoundry/cf-deployment.git
+- name: bosh-lite
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/bosh-lite.git
 
 jobs:
+- name: deploy-bosh-lite-manifests
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: bosh-lite
+    - get: release
+      resource: etcd-release-develop
+      passed: [test-etcd]
+      trigger: true
+  - task: deploy-bosh-lite-manifests
+    file: mega-ci/scripts/ci/deploy-bosh-lite-manifests.yml
+    config:
+      params:
+        BOSH_AWS_ACCESS_KEY_ID: {{bosh_aws_access_key_id}}
+        BOSH_AWS_SECRET_ACCESS_KEY: {{bosh_aws_secret_access_key}}
+        BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
+        BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
+        BOSH_LITE_NAME: bosh-lite-etcd
+        BOSH_LITE_KEYPAIR: bosh-lite-etcd
+        BOSH_LITE_PRIVATE_KEY_CONTENTS: {{bosh-lite-private-key}}
+
 - name: test-etcd
   public: true
   serial: true

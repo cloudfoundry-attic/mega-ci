@@ -7,7 +7,6 @@ set -ux
 function setup_env() {
   set +x
   export BUILD_DIR="${PWD}"
-  export BOSH_LITE_KEYPAIR="bosh-lite"
   export BOSH_LITE_PRIVATE_KEY="${BUILD_DIR}/bosh-lite.pem"
   export BOSH_USER="admin"
   export BOSH_PASSWORD="admin"
@@ -31,9 +30,9 @@ function target_director() {
   rc=1
 
   while [ "${rc}" -ne "0" ]; do
+    sleep 10
     curl -k -s "https://${BOSH_DIRECTOR}:25555/info" > /dev/null
     rc=$?
-    sleep 10
   done
   set -e
 
