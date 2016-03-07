@@ -1,5 +1,7 @@
 #!/bin/bash -exu
 
+export ROOT="${PWD}"
+
 set +ux
 source ~/.bashrc
 source private-credentials/mega-ci/bosh_environment
@@ -10,7 +12,7 @@ function main() {
 
   generate_manifest
 
-  pushd consul-release > /dev/null
+  pushd "${ROOT}/consul-release" > /dev/null
     bosh -n create release
     bosh upload release --rebase
 
@@ -33,11 +35,11 @@ function main() {
 }
 
 function generate_manifest() {
-  pushd consul-release > /dev/null
+  pushd "${ROOT}/consul-release" > /dev/null
     mkdir -p manifest-generation/aws-stubs/
 
     cp \
-      private-credentials/mega-ci/stubs/consats/iaas-settings-consats.yml \
+      "${ROOT}/private-credentials/mega-ci/stubs/consats/iaas-settings-consats.yml" \
       manifest-generation/aws-stubs/
 
     ./scripts/generate-consats-manifest aws
