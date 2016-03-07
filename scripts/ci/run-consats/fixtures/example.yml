@@ -1,0 +1,84 @@
+---
+name: consats
+
+director_uuid: BOSH_DIRECTOR_UUID
+
+releases:
+- name: consul
+  version: latest
+
+jobs:
+- name: acceptance-tests
+  instances: 1
+  lifecycle: errand
+  resource_pool: consats
+  networks:
+  - name: consats
+  templates:
+  - name: acceptance-tests
+    release: consul
+
+compilation:
+  workers: 3
+  network: consats
+  reuse_compilation_vms: true
+  cloud_properties:
+    availability_zone: AWS_AVAILABILITY_ZONE
+    ephemeral_disk:
+      size: 1024
+      type: gp2
+    instance_type: m3.medium
+
+networks:
+- name: consats
+  type: manual
+  subnets:
+  - cloud_properties:
+      subnet: AWS_SUBNET_ID
+    gateway: 10.0.4.1
+    range: 10.0.4.0/24
+    reserved:
+    - 10.0.4.2-10.0.4.240
+    static: []
+
+properties:
+  consul:
+    acceptance_tests:
+      aws:
+        access_key_id: AWS_ACCESS_KEY_ID
+        secret_access_key: AWS_SECRET_ACCESS_KEY
+        region: AWS_REGION
+        default_key_name: bosh
+        default_security_groups:
+        - AWS_SECURITY_GROUP_NAME
+        subnet: AWS_SUBNET_ID
+      bosh:
+        target: BOSH_TARGET
+        username: BOSH_USERNAME
+        password: BOSH_PASSWORD
+        director_ca_cert: BOSH_DIRECTOR_CA_CERT
+      registry:
+        username: REGISTRY_USERNAME
+        password: REGISTRY_PASSWORD
+        host: 10.0.0.6
+        port: 25777
+
+resource_pools:
+- name: consats
+  network: consats
+  stemcell:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    version: latest
+  cloud_properties:
+    availability_zone: AWS_AVAILABILITY_ZONE
+    ephemeral_disk:
+      size: 1024
+      type: gp2
+    instance_type: m3.medium
+
+update:
+  serial: true
+  canaries: 1
+  max_in_flight: 1
+  canary_watch_time: 1000-180000
+  update_watch_time: 1000-180000

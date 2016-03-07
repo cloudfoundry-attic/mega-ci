@@ -7,3 +7,9 @@
 [submodule "scripts/ci/deploy-aws-manifests/vendor/github.com/pivotal-cf-experimental/bosh-test"]
 	path = scripts/ci/deploy-aws-manifests/vendor/github.com/pivotal-cf-experimental/bosh-test
 	url = https://github.com/pivotal-cf-experimental/bosh-test.git
+[submodule "scripts/ci/run-consats/vendor/github.com/pivotal-cf-experimental/gomegamatchers"]
+	path = scripts/ci/run-consats/vendor/github.com/pivotal-cf-experimental/gomegamatchers
+	url = https://github.com/pivotal-cf-experimental/gomegamatchers.git
+[submodule "scripts/ci/run-consats/vendor/github.com/cloudfoundry-incubator/candiedyaml"]
+	path = scripts/ci/run-consats/vendor/github.com/cloudfoundry-incubator/candiedyaml
+	url = https://github.com/cloudfoundry-incubator/candiedyaml.git

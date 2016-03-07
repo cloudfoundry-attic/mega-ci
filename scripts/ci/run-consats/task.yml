@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/runtime-ci
+image: docker:///cloudfoundry/mega-ci
 
 inputs:
   - name: mega-ci
@@ -10,3 +10,18 @@ inputs:
 
 run:
   path: mega-ci/scripts/ci/run-consats/task
+
+params:
+	AWS_ACCESS_KEY_ID:
+	AWS_AVAILIBILITY_ZONE:
+	AWS_REGION:
+	AWS_SECRET_ACCESS_KEY:
+	AWS_SECURITY_GROUP_NAME:
+	AWS_SUBNET_ID:
+	BOSH_DIRECTOR_CA_CERT:
+	BOSH_DIRECTOR_UUID:
+	BOSH_PASSWORD:
+	BOSH_TARGET:
+	BOSH_USERNAME:
+	REGISTRY_PASSWORD:
+	REGISTRY_USERNAME:
