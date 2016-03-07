@@ -35,8 +35,9 @@ function main() {
 }
 
 function generate_manifest() {
-  mkdir -p "${ROOT}/consul-release/manifests/aws"
+  mkdir -p "${ROOT}/consul-release/aws"
   mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
+
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
 	ln -s "${ROOT}/mega-ci"
 	
