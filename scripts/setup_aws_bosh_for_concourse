@@ -87,23 +87,23 @@ if ! aws cloudformation describe-stacks --stack-name concourse ; then
   if [ -e ${deployment_dir}/cloud_formation/properties.json ]; then
     aws cloudformation create-stack \
       --stack-name concourse \
-      --template-body file://$script_dir/../templates/infrastructure/aws-for-concourse.json \
+      --template-body file://$script_dir/../templates/bootload-mega-ci/aws-for-concourse.json \
       --parameters file://${deployment_dir}/cloud_formation/properties.json
   else
     aws cloudformation create-stack \
       --stack-name concourse \
-      --template-body file://$script_dir/../templates/infrastructure/aws-for-concourse.json
+      --template-body file://$script_dir/../templates/bootload-mega-ci/aws-for-concourse.json
   fi
 else
   if [ -e ${deployment_dir}/cloud_formation/properties.json ]; then
     aws cloudformation update-stack \
       --stack-name concourse \
-      --template-body file://$script_dir/../templates/infrastructure/aws-for-concourse.json \
+      --template-body file://$script_dir/../templates/bootload-mega-ci/aws-for-concourse.json \
       --parameters file://${deployment_dir}/cloud_formation/properties.json || true # update-stack is not idempotent :(
   else
     aws cloudformation update-stack \
           --stack-name concourse \
-          --template-body file://$script_dir/../templates/infrastructure/aws-for-concourse.json || true # update-stack is not idempotent :(
+          --template-body file://$script_dir/../templates/bootload-mega-ci/aws-for-concourse.json || true # update-stack is not idempotent :(
   fi
 fi
 
