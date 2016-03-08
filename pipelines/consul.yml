@@ -98,7 +98,7 @@ jobs:
       passed: [test-consul]
       trigger: true
   - task: deploy-aws-manifests
-    file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-aws-manifests.yml
+    file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-consul-aws-manifests.yml
     config:
       params:
         BOSH_DIRECTOR: {{cf_bosh_director_url}}

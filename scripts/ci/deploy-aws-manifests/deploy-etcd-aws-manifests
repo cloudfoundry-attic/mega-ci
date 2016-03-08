@@ -1,0 +1,41 @@
+#!/bin/bash -exu
+
+export GO15VENDOREXPERIMENT=1
+
+ROOT="${PWD}"
+
+function upload_consul_release() {
+  pushd "${ROOT}/consul-release" > /dev/null
+    bosh -t ${BOSH_DIRECTOR} upload release
+  popd > /dev/null
+}
+
+function deploy_etcd() {
+  set +ux
+  source ~/.bashrc
+  set -ux
+
+  mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
+  pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
+    ln -s "${ROOT}/mega-ci"
+    pushd ./mega-ci/scripts/ci/deploy-aws-manifests > /dev/null
+      set +x
+      go run main.go \
+		  --manifests-directory "${ROOT}/release/manifests/aws" \
+		  --director ${BOSH_DIRECTOR} \
+		  --user ${BOSH_USER} \
+		  --password ${BOSH_PASSWORD} \
+	  	--aws-access-key-id ${AWS_ACCESS_KEY_ID} \
+	  	--aws-secret-access-key ${AWS_SECRET_ACCESS_KEY} \
+	  	--aws-region ${AWS_DEFAULT_REGION}
+      set -x
+    popd > /dev/null
+  popd > /dev/null
+}
+
+function main() {
+  upload_consul_release
+  deploy_etcd
+}
+
+main

@@ -16,5 +16,5 @@ params:
   AWS_DEFAULT_REGION:
 
 run:
-  path: mega-ci/scripts/ci/deploy-aws-manifests/deploy-aws-manifests
+  path: mega-ci/scripts/ci/deploy-aws-manifests/deploy-consul-aws-manifests
 
