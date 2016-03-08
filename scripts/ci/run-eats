@@ -28,7 +28,7 @@ function write_configuration() {
       "target": "$BOSH_DIRECTOR",
       "username": "$BOSH_USER",
       "password": "$BOSH_PASSWORD",
-      "director_ca_cert": "$(rollup "${BOSH_DIRECTOR_CA_CERT}")"
+      "director_ca_cert": "$(set +x; rollup "${BOSH_DIRECTOR_CA_CERT}")"
     },
     "aws": {
       "subnet": "$AWS_SUBNET",
@@ -74,7 +74,7 @@ function rollup() {
 
   IFS=$'\n'
   for line in ${input}; do
-    output="${output}\n${line}"
+    output="${output:-""}\n${line}"
   done
 
   printf "%s" "${output#'\n'}"
