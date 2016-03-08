@@ -13,7 +13,7 @@ outputs:
   - name: final-release-repo
 
 run:
-  path: mega-ci/scripts/ci/create-final-release
+  path: mega-ci/scripts/ci/create-final-release/task
 
 params:
   RELEASE_NAME:

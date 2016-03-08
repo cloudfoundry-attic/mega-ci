@@ -205,7 +205,7 @@ jobs:
     - get: release-repo-master
       resource: consul-release-master
   - task: create-final-release
-    file: mega-ci/scripts/ci/create-final-release.yml
+    file: mega-ci/scripts/ci/create-final-release/task.yml
     config:
       params:
         RELEASE_NAME: consul
