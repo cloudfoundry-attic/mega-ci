@@ -74,6 +74,16 @@
       "Type": "String",
       "Default": "10.0.23.0/24"
     },
+    "EtcdSSLAZ1SubnetCIDR": {
+      "Description": "CIDR block for the Etcd SSL AZ1 subnet.",
+      "Type": "String",
+      "Default": "10.0.24.0/24"
+    },
+    "EtcdSSLAZ2SubnetCIDR": {
+      "Description": "CIDR block for the Etcd SSL AZ2 subnet.",
+      "Type": "String",
+      "Default": "10.0.25.0/24"
+    },
     "ConsulSubnetCIDR": {
       "Description": "CIDR block for the Consul subnet.",
       "Type": "String",
@@ -345,6 +355,88 @@
           },
           {
             "CidrIp": "10.0.23.0/24",
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          }
+        ]
+      }
+    },
+
+    "EtcdSSLAZ1SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "EtcdSSLAZ1",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.0.24.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.0.24.0/24",
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "SourceSecurityGroupId": { "Ref": "ConcourseSecurityGroup" },
+            "IpProtocol": "udp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          }
+        ]
+      }
+    },
+
+    "EtcdSSLAZ2SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "VpcId": { "Ref": "VPC" },
+        "GroupDescription": "EtcdSSLAZ2",
+        "SecurityGroupEgress": [],
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "10.0.25.0/24",
+            "IpProtocol": "tcp",
+            "FromPort": "0",
+            "ToPort": "65535"
+          },
+          {
+            "CidrIp": "10.0.25.0/24",
             "IpProtocol": "udp",
             "FromPort": "0",
             "ToPort": "65535"
@@ -681,6 +773,26 @@
       }
     },
 
+    "EtcdSSLAZ1Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["0", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "EtcdSSLAZ1SubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "EtcdSSLAZ1" }]
+      }
+    },
+
+    "EtcdSSLAZ2Subnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": { "Fn::Select": ["1", { "Fn::GetAZs": { "Ref" : "AWS::Region" } }] },
+        "CidrBlock": { "Ref": "EtcdSSLAZ2SubnetCIDR" },
+        "VpcId": { "Ref": "VPC" },
+        "Tags": [{ "Key": "Name", "Value": "EtcdSSLAZ2" }]
+      }
+    },
+
     "EtcdSubnetRouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
@@ -702,6 +814,22 @@
       "Properties": {
         "RouteTableId": { "Ref": "PublicRouteTable" },
         "SubnetId": { "Ref": "EtcdAZ2Subnet" }
+      }
+    },
+
+    "EtcdSSLAZ1SubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "EtcdSSLAZ1Subnet" }
+      }
+    },
+
+    "EtcdSSLAZ2SubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "SubnetId": { "Ref": "EtcdSSLAZ2Subnet" }
       }
     },
 
