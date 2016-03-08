@@ -5,6 +5,7 @@ groups:
   - create-final-release
   - merge-master-into-develop
   - deploy-bosh-lite-manifests
+  - deploy-aws-manifests
   - deploy-with-cf
   - test-with-cf
 
@@ -71,6 +72,26 @@ jobs:
         BOSH_LITE_NAME: bosh-lite-etcd
         BOSH_LITE_KEYPAIR: bosh-lite-etcd
         BOSH_LITE_PRIVATE_KEY_CONTENTS: {{bosh-lite-private-key}}
+
+- name: deploy-aws-manifests
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: release
+      resource: etcd-release-develop
+      passed: [test-etcd]
+      trigger: true
+  - task: deploy-aws-manifests
+    file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-aws-manifests.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director_url}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{aws_region}}
 
 - name: test-etcd
   public: true
