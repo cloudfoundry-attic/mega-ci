@@ -66,6 +66,7 @@ function cleanup_releases() {
 }
 
 function rollup() {
+  set +x
   local input
   input="${1}"
 
@@ -77,6 +78,7 @@ function rollup() {
   done
 
   printf "%s" "${output#'\n'}"
+  set -x
 }
 
 trap cleanup_releases EXIT
