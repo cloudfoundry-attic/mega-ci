@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/runtime-ci
+image: docker:///cfinfrastructure/mega-ci
 
 inputs:
   - name: mega-ci
@@ -17,5 +17,4 @@ run:
 
 params:
   RELEASE_NAME:
-  PRIVATE_YML_PATH:
   MASTER_BRANCH:
