@@ -28,7 +28,7 @@ function write_configuration() {
       "target": "$BOSH_DIRECTOR",
       "username": "$BOSH_USER",
       "password": "$BOSH_PASSWORD",
-      "director_ca_cert": "$BOSH_DIRECTOR_CA_CERT"
+      "director_ca_cert": "$(rollup "${BOSH_DIRECTOR_CA_CERT}")"
     },
     "aws": {
       "subnet": "$AWS_SUBNET",
@@ -63,6 +63,20 @@ function upload_releases() {
 
 function cleanup_releases() {
   bosh -t ${BOSH_DIRECTOR} -n cleanup --all
+}
+
+function rollup() {
+  local input
+  input="${1}"
+
+  local output
+
+  IFS=$'\n'
+  for line in ${input}; do
+    output="${output}\n${line}"
+  done
+
+  printf "%s" "${output#'\n'}"
 }
 
 trap cleanup_releases EXIT
