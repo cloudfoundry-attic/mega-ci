@@ -3,13 +3,14 @@ MAINTAINER https://github.com/cloudfoundry/mega-ci
 
 RUN \
       apt-get update && \
-      apt-get -y install --fix-missing \
+      apt-get -qqy install --fix-missing \
             build-essential \
             curl \
             git \
             libreadline6 \
             libreadline6-dev\
             wget \
+            awscli \
       && \
       apt-get clean
 
