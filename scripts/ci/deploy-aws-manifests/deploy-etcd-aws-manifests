@@ -6,8 +6,8 @@ ROOT="${PWD}"
 
 function upload_consul_release() {
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh create release
-    bosh -t ${BOSH_DIRECTOR} upload release
+    bosh -n create release
+    bosh -n -t ${BOSH_DIRECTOR} upload release
   popd > /dev/null
 }
 
