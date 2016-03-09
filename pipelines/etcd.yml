@@ -126,8 +126,9 @@ jobs:
       resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release
-      trigger: true
       resource: etcd-release-develop
+      passed: [check-git-submodules]
+      trigger: true
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats.yml
     config:
