@@ -1,0 +1,37 @@
+#!/bin/bash -exu
+
+function main() {
+  local root_dir
+  root_dir="${1}"
+
+  local protocol
+  protocol="${2}"
+
+  local total
+  total="$(count_with_protocol "${root_dir}/repo" "")"
+
+  local with_protocol
+  with_protocol="$(count_with_protocol "${root_dir}/repo" "${protocol}")"
+
+  if [ "${total}" != "${with_protocol}" ]; then
+    echo "found git submodules not using ${protocol}"
+    grep "url = " "${repo}/.gitmodules" | grep -v "url = ${protocol}://"
+    exit 1
+  fi
+}
+
+function count_with_protocol() {
+  local repo
+  repo="${1}"
+
+  local protocol
+  protocol="${2}"
+
+  if [[ -n "${protocol}" ]]; then
+    protocol="${protocol}://"
+  fi
+
+  printf "%s" "$(grep "url = ${protocol}" "${repo}/.gitmodules" | wc -l)"
+}
+
+main "${PWD}" "${PROTOCOL}"

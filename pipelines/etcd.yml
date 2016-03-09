@@ -1,6 +1,7 @@
 groups:
 - name: etcd
   jobs:
+  - check-git-submodules
   - test-etcd
   - create-final-release
   - merge-master-into-develop
@@ -57,6 +58,21 @@ resources:
     uri: https://github.com/cloudfoundry/bosh-lite.git
 
 jobs:
+- name: check-git-submodules
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: repo
+      resource: etcd-release-develop
+      trigger: true
+  - task: check-git-submodules
+    file: mega-ci/scripts/ci/check-git-submodules/task.yml
+    config:
+      params:
+        PROTOCOL: https
+
 - name: deploy-bosh-lite-manifests
   public: true
   plan:

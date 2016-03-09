@@ -5,7 +5,10 @@ image: docker:///cfinfrastructure/mega-ci
 
 inputs:
   - name: mega-ci
-  - name: consul-release
+  - name: repo
 
 run:
-  path: mega-ci/scripts/ci/check-consul-git-submodules
+  path: mega-ci/scripts/ci/check-git-submodules/task
+
+params:
+  PROTOCOL: https
