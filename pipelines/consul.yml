@@ -81,8 +81,8 @@ jobs:
     file: mega-ci/scripts/ci/deploy-bosh-lite-manifests.yml
     config:
       params:
-        BOSH_AWS_ACCESS_KEY_ID: {{bosh_aws_access_key_id}}
-        BOSH_AWS_SECRET_ACCESS_KEY: {{bosh_aws_secret_access_key}}
+        BOSH_AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        BOSH_AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
         BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
         BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
         BOSH_LITE_NAME: bosh-lite-consul
@@ -107,9 +107,9 @@ jobs:
         BOSH_DIRECTOR: {{cf_bosh_director_url}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
-        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-        AWS_DEFAULT_REGION: {{aws_default_region}}
+        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{mega_ci_account_aws_default_region}}
 
 - name: test-consul
   public: true
@@ -127,12 +127,12 @@ jobs:
     file: mega-ci/scripts/ci/run-consats/task.yml
     config:
       params:
-        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-        AWS_REGION: {{aws_default_region}}
-        AWS_AVAILIBILITY_ZONE: {{aws_availability_zone}}
-        AWS_SECURITY_GROUP_NAME: {{aws_security_group_name}}
-        AWS_SUBNET_ID: {{aws_subnet_id}}
+        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
+        AWS_REGION: {{mega_ci_account_aws_default_region}}
+        AWS_AVAILIBILITY_ZONE: {{mega_ci_account_aws_availability_zone}}
+        AWS_SECURITY_GROUP_NAME: {{mega_ci_account_aws_security_group_name}}
+        AWS_SUBNET_ID: {{mega_ci_account_aws_subnet_id}}
         BOSH_TARGET: {{bosh_target}}
         BOSH_DIRECTOR_UUID: {{bosh_director_uuid}}
         BOSH_USERNAME: {{bosh_username}}

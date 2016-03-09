@@ -87,8 +87,8 @@ jobs:
     file: mega-ci/scripts/ci/deploy-bosh-lite-manifests.yml
     config:
       params:
-        BOSH_AWS_ACCESS_KEY_ID: {{bosh_aws_access_key_id}}
-        BOSH_AWS_SECRET_ACCESS_KEY: {{bosh_aws_secret_access_key}}
+        BOSH_AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        BOSH_AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
         BOSH_LITE_SECURITY_GROUP: {{bosh_lite_security_group}}
         BOSH_LITE_SUBNET_ID: {{bosh_lite_subnet_id}}
         BOSH_LITE_NAME: bosh-lite-etcd
@@ -113,9 +113,9 @@ jobs:
         BOSH_DIRECTOR: {{cf_bosh_director_url}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
-        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-        AWS_DEFAULT_REGION: {{aws_region}}
+        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{mega_ci_account_aws_region}}
 
 - name: test-etcd
   public: true
@@ -137,12 +137,12 @@ jobs:
         BOSH_USERNAME: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
         BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
-        AWS_SUBNET: {{aws_subnet}}
-        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
-        AWS_DEFAULT_KEY_NAME: {{aws_default_key_name}}
-        AWS_DEFAULT_SECURITY_GROUPS: {{aws_default_security_groups}}
-        AWS_REGION: {{aws_region}}
+        AWS_SUBNET: {{mega_ci_account_aws_subnet}}
+        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
+        AWS_DEFAULT_KEY_NAME: {{mega_ci_account_aws_default_key_name}}
+        AWS_DEFAULT_SECURITY_GROUPS: {{mega_ci_account_aws_default_security_groups}}
+        AWS_REGION: {{mega_ci_account_aws_region}}
         REGISTRY_HOST: {{registry_host}}
         REGISTRY_PORT: {{registry_port}}
         REGISTRY_USERNAME: {{registry_username}}
