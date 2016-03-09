@@ -20,7 +20,7 @@ function main() {
 	  "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
 
 	bosh upload release \
-	  "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=39"
+	  "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=44"
 
 	bosh deployment aws/consats.yml
 	bosh -n deploy
