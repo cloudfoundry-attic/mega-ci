@@ -22,7 +22,7 @@ function deploy_etcd() {
     pushd ./mega-ci/scripts/ci/deploy-aws-manifests > /dev/null
       set +x
       go run main.go \
-		  --manifests-path "${ROOT}/release/${MANIFEST_PATH}" \
+		  --manifest-path "${ROOT}/release/${MANIFEST_PATH}" \
 		  --director ${BOSH_DIRECTOR} \
 		  --user ${BOSH_USER} \
 		  --password ${BOSH_PASSWORD} \
