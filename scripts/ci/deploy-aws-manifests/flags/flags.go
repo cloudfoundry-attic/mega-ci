@@ -6,7 +6,7 @@ import (
 )
 
 type Configuration struct {
-	ManifestsDirectory  string
+	ManifestPath        string
 	BoshDirector        string
 	BoshUser            string
 	BoshPassword        string
@@ -21,7 +21,7 @@ func ParseFlags(arguments []string) (Configuration, error) {
 	flags.SetOutput(ioutil.Discard)
 
 	configuration := Configuration{}
-	flags.StringVar(&configuration.ManifestsDirectory, "manifests-directory", "", "manifests directory")
+	flags.StringVar(&configuration.ManifestPath, "manifest-path", "", "path to manifests directory or file")
 	flags.StringVar(&configuration.BoshDirector, "director", "", "bosh director")
 	flags.StringVar(&configuration.BoshUser, "user", "", "bosh user")
 	flags.StringVar(&configuration.BoshPassword, "password", "", "bosh password")

@@ -15,7 +15,7 @@ function main() {
     pushd ./mega-ci/scripts/ci/deploy-aws-manifests > /dev/null
       set +x
       go run main.go \
-		  --manifests-directory "${ROOT}/release/manifests/aws" \
+      --manifest-path "${ROOT}/release/${MANIFEST_PATH}" \
 		  --director ${BOSH_DIRECTOR} \
 		  --user ${BOSH_USER} \
 		  --password ${BOSH_PASSWORD} \

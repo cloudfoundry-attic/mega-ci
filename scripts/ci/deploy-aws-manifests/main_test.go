@@ -12,7 +12,7 @@ import (
 )
 
 var _ = Describe("main", func() {
-	It("deploys manifests in the manifest directory", func() {
+	It("deploys manifest file specified", func() {
 		var awsWasCalled bool
 		awsServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			awsWasCalled = true
@@ -47,7 +47,7 @@ var _ = Describe("main", func() {
 		}))
 
 		args := []string{
-			"--manifests-directory", "fixtures",
+			"--manifest-path", "fixtures/multi-az-ssl.yml",
 			"--director", boshServer.URL,
 			"--user", "some-user",
 			"--password", "some-password",
@@ -77,7 +77,7 @@ var _ = Describe("main", func() {
 		}))
 
 		args := []string{
-			"--manifests-directory", "fixtures",
+			"--manifest-path", "fixtures/multi-az-ssl.yml",
 			"--director", boshServer.URL,
 			"--user", "some-user",
 			"--password", "some-password",

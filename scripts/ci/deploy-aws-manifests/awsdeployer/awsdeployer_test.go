@@ -56,6 +56,16 @@ var _ = Describe("AWSDeployer", func() {
 			Expect(fakeBOSH.DeployCall.ReceivedManifests[1]).To(ContainSubstring("deployment-2"))
 		})
 
+		It("deploys specified bosh manifest", func() {
+			writeManifestWithBody(manifestsDirectory, "first_manifest.yml", "director_uuid: BOSH-DIRECTOR-UUID\nname: deployment-1")
+
+			deploymentError := awsDeployer.Deploy(filepath.Join(manifestsDirectory, "first_manifest.yml"))
+			Expect(deploymentError).NotTo(HaveOccurred())
+
+			Expect(fakeBOSH.DeployCall.CallCount).To(Equal(1))
+			Expect(fakeBOSH.DeployCall.ReceivedManifests[0]).To(ContainSubstring("deployment-1"))
+		})
+
 		It("replaces the bosh director uuid before deploying each manifest", func() {
 			writeManifest(manifestsDirectory, "manifest.yml")
 			fakeBOSH.InfoCall.Returns.Info = bosh.DirectorInfo{

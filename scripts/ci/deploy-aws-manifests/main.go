@@ -32,7 +32,7 @@ func main() {
 
 	awsDeployer := awsdeployer.NewAWSDeployer(bosh, subnetChecker, os.Stdout)
 
-	err = awsDeployer.Deploy(configuration.ManifestsDirectory)
+	err = awsDeployer.Deploy(configuration.ManifestPath)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "\n\n%s\n", err)
 		os.Exit(1)

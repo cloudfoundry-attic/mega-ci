@@ -9,7 +9,7 @@ import (
 var _ = Describe("flags", func() {
 	It("extracts configuration data from the command line flags", func() {
 		configuration, err := flags.ParseFlags([]string{
-			"--manifests-directory", "some-manifests-directory",
+			"--manifest-path", "some-manifest-path",
 			"--director", "some-director",
 			"--user", "some-user",
 			"--password", "some-password",
@@ -20,7 +20,7 @@ var _ = Describe("flags", func() {
 		})
 
 		Expect(err).NotTo(HaveOccurred())
-		Expect(configuration.ManifestsDirectory).To(Equal("some-manifests-directory"))
+		Expect(configuration.ManifestPath).To(Equal("some-manifest-path"))
 		Expect(configuration.BoshDirector).To(Equal("some-director"))
 		Expect(configuration.BoshUser).To(Equal("some-user"))
 		Expect(configuration.BoshPassword).To(Equal("some-password"))

@@ -14,6 +14,7 @@ params:
   AWS_ACCESS_KEY_ID:
   AWS_SECRET_ACCESS_KEY:
   AWS_DEFAULT_REGION:
+  MANIFEST_PATH:
 
 run:
   path: mega-ci/scripts/ci/deploy-aws-manifests/deploy-consul-aws-manifests

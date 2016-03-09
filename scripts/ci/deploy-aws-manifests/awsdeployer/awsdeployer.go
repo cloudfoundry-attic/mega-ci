@@ -30,8 +30,8 @@ func NewAWSDeployer(bosh clients.BOSH, subnetChecker SubnetChecker, stdout io.Wr
 	}
 }
 
-func (a AWSDeployer) Deploy(manifestsDirectory string) error {
-	manifestsToDeploy, err := manifestsInDirectory(manifestsDirectory)
+func (a AWSDeployer) Deploy(manifestsDirectoryOrFile string) error {
+	manifestsToDeploy, err := manifestsInDirectory(manifestsDirectoryOrFile)
 	if err != nil {
 		return err
 	}

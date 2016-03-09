@@ -116,6 +116,7 @@ jobs:
         AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
         AWS_DEFAULT_REGION: {{mega_ci_account_aws_region}}
+        MANIFEST_PATH: manifests/aws/
 
 - name: test-etcd
   public: true
