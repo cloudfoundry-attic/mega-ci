@@ -15,7 +15,7 @@ function main() {
 
   if [ "${total}" != "${with_protocol}" ]; then
     echo "found git submodules not using ${protocol}"
-    grep "url = " "${repo}/.gitmodules" | grep -v "url = ${protocol}://"
+    grep "url = " "${root_dir}/repo/.gitmodules" | grep -v "url = ${protocol}://"
     exit 1
   fi
 }
