@@ -6,13 +6,45 @@ resources:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
 
-- name: dockerfiles
+- name: mega-ci-dockerfile
   type: git
   source:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - dockerfiles/
+    - dockerfiles/mega-ci
+
+- name: bosh-bootloader-dockerfile
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/mega-ci
+    branch: master
+    paths:
+    - dockerfiles/bosh-bootloader
+
+- name: gomegamatchers-dockerfile
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/mega-ci
+    branch: master
+    paths:
+    - dockerfiles/gomegamatchers
+
+- name: destiny-dockerfile
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/mega-ci
+    branch: master
+    paths:
+    - dockerfiles/destiny
+
+- name: bosh-test-dockerfile
+  type: git
+  source:
+    uri: https://github.com/cloudfoundry/mega-ci
+    branch: master
+    paths:
+    - dockerfiles/bosh-test
 
 - name: destiny-docker-image
   type: docker-image
@@ -59,7 +91,7 @@ jobs:
   plan:
   - do:
     - get: mega-ci
-      resource: dockerfiles
+      resource: mega-ci-dockerfile 
       trigger: true
     - put: mega-ci-docker-image
       params:
@@ -69,7 +101,7 @@ jobs:
   plan:
   - do:
     - get: mega-ci
-      resource: dockerfiles
+      resource: destiny-dockerfile
       trigger: true
     - put: destiny-docker-image
       params:
@@ -79,7 +111,7 @@ jobs:
   plan:
   - do:
     - get: mega-ci
-      resource: dockerfiles
+      resource: gomegamatchers-dockerfile
       trigger: true
     - put: gomegamatchers-docker-image
       params:
@@ -89,7 +121,7 @@ jobs:
   plan:
   - do:
     - get: mega-ci
-      resource: dockerfiles
+      resource: bosh-bootloader-dockerfile
       trigger: true
     - put: bosh-bootloader-docker-image
       params:
@@ -99,7 +131,7 @@ jobs:
   plan:
   - do:
     - get: mega-ci
-      resource: dockerfiles
+      resource: bosh-test-dockerfile
       trigger: true
     - put: bosh-test-docker-image
       params:
