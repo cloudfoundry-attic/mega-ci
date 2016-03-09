@@ -127,8 +127,8 @@ jobs:
     file: mega-ci/scripts/ci/run-consats/task.yml
     config:
       params:
-        AWS_ACCESS_KEY_ID: {{bosh_aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{bosh_aws_secret_access_key}}
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
         AWS_REGION: {{aws_default_region}}
         AWS_AVAILIBILITY_ZONE: {{aws_availability_zone}}
         AWS_SECURITY_GROUP_NAME: {{aws_security_group_name}}
