@@ -11,7 +11,8 @@ type BOSH struct {
 			Manifest []byte
 		}
 		Returns struct {
-			Error error
+			TaskId int
+			Error  error
 		}
 
 		ReceivedManifests [][]byte
@@ -33,13 +34,23 @@ type BOSH struct {
 			Error error
 		}
 	}
+
+	GetTaskOutputCall struct {
+		Receives struct {
+			TaskId int
+		}
+		Returns struct {
+			TaskOutputs []bosh.TaskOutput
+			Error       error
+		}
+	}
 }
 
-func (b *BOSH) Deploy(manifest []byte) error {
+func (b *BOSH) Deploy(manifest []byte) (int, error) {
 	b.DeployCall.CallCount++
 	b.DeployCall.Receives.Manifest = manifest
 	b.DeployCall.ReceivedManifests = append(b.DeployCall.ReceivedManifests, manifest)
-	return b.DeployCall.Returns.Error
+	return b.DeployCall.Returns.TaskId, b.DeployCall.Returns.Error
 }
 
 func (b *BOSH) Info() (bosh.DirectorInfo, error) {
@@ -49,4 +60,9 @@ func (b *BOSH) Info() (bosh.DirectorInfo, error) {
 func (b *BOSH) DeleteDeployment(name string) error {
 	b.DeleteDeploymentCall.Receives.Name = name
 	return b.DeleteDeploymentCall.Returns.Error
+}
+
+func (b *BOSH) GetTaskOutput(taskId int) ([]bosh.TaskOutput, error) {
+	b.GetTaskOutputCall.Receives.TaskId = taskId
+	return b.GetTaskOutputCall.Returns.TaskOutputs, b.GetTaskOutputCall.Returns.Error
 }

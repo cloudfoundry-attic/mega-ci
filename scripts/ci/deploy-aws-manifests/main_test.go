@@ -37,7 +37,9 @@ var _ = Describe("main", func() {
 				w.Header().Set("Location", fmt.Sprintf("http://%s/tasks/1", r.Host))
 				w.WriteHeader(http.StatusFound)
 			case "/tasks/1":
-				w.Write([]byte(`{"state": "done"}`))
+				w.Write([]byte(`{"id": 1, "state": "done"}`))
+			case "/tasks/1/output":
+				w.Write([]byte(`{"time": 0, "stage": "some-stage", "task": "some-task", "state": "some-state", "progress": 0}`))
 			case "/info":
 				boshcalls.InfoCall++
 				w.Write([]byte(`{"uuid":"some-director-uuid", "cpi":"some-cpi"}`))

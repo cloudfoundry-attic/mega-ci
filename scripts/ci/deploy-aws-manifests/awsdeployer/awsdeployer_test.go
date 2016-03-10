@@ -35,7 +35,7 @@ var _ = Describe("AWSDeployer", func() {
 			manifestsDirectory, err = ioutil.TempDir("", "")
 			Expect(err).NotTo(HaveOccurred())
 
-			awsDeployer = awsdeployer.NewAWSDeployer(clients.NewBOSH(fakeBOSH), fakeSubnetChecker, stdout)
+			awsDeployer = awsdeployer.NewAWSDeployer(clients.NewBOSH(fakeBOSH, stdout), fakeSubnetChecker, stdout)
 			fakeSubnetChecker.CheckSubnetsCall.Returns.Bool = true
 		})
 
