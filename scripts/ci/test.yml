@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cfinfrastructure/mega-ci
+image: docker:///cfinfrastructure/golang
 
 inputs:
 - name: mega-ci
