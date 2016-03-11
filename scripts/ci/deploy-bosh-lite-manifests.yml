@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/runtime-ci
+image: docker:///cfinfrastructure/vagrant
 
 inputs:
   - name: mega-ci
