@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cfinfrastructure/bosh-test
+image: docker:///cfinfrastructure/golang
 
 inputs:
 - name: bosh-test

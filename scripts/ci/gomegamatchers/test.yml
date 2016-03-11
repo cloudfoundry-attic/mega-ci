@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cfinfrastructure/gomegamatchers
+image: docker:///cfinfrastructure/golang
 
 inputs:
 - name: gomegamatchers

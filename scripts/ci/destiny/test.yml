@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cfinfrastructure/destiny
+image: docker:///cfinfrastructure/golang
 
 inputs:
 - name: destiny
