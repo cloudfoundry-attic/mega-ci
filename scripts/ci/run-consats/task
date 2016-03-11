@@ -4,7 +4,7 @@ export ROOT="${PWD}"
 
 set +ux
 source ~/.bashrc
-source private-credentials/mega-ci/bosh_environment
+source private-credentials/bosh_environment
 set -ux
 
 function main() {

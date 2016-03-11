@@ -195,7 +195,6 @@ jobs:
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
-        ENVIRONMENT: mega-ci
         DEPLOYMENT_NAME: etcd-cf-deployment
         COMMAND: run errand acceptance_tests
     on_success:
@@ -203,7 +202,6 @@ jobs:
       file: mega-ci/scripts/ci/run-bosh-command.yml
       config:
         params:
-          ENVIRONMENT: mega-ci
           DEPLOYMENT_NAME: etcd-cf-deployment
           COMMAND: delete deployment etcd-cf-deployment
 

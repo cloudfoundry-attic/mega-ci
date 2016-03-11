@@ -202,7 +202,6 @@ jobs:
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
-        ENVIRONMENT: mega-ci
         DEPLOYMENT_NAME: consul-cf-deployment
         COMMAND: run errand acceptance_tests
     on_success:
@@ -210,7 +209,6 @@ jobs:
       file: mega-ci/scripts/ci/run-bosh-command.yml
       config:
         params:
-          ENVIRONMENT: mega-ci
           DEPLOYMENT_NAME: consul-cf-deployment
           COMMAND: delete deployment consul-cf-deployment
 

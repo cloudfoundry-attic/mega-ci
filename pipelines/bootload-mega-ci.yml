@@ -28,5 +28,5 @@ jobs:
     file: mega-ci/scripts/ci/deploy-bosh.yml
     config:
       params:
-        DEPLOYMENT_DIR: 'private-credentials/mega-ci'
+        DEPLOYMENT_DIR: 'private-credentials'
 
