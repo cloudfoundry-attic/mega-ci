@@ -4,6 +4,7 @@ groups:
   - check-git-submodules
   - deploy-bosh-lite-manifests
   - deploy-aws-manifests
+  - test-confab
   - test-consul
   - deploy-with-cf
   - test-with-cf
@@ -118,6 +119,19 @@ jobs:
         AWS_DEFAULT_REGION: {{mega_ci_account_aws_default_region}}
         MANIFEST_PATH: manifests/aws/multi-az-ssl.yml
 
+- name: test-confab
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [check-git-submodules]
+      trigger: true
+  - task: test-confab
+    file: mega-ci/scripts/ci/confab/test.yml
+
 - name: test-consul
   public: true
   serial: true
@@ -128,7 +142,7 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
-      passed: [check-git-submodules]
+      passed: [test-confab]
       trigger: true
   - task: run-consats
     file: mega-ci/scripts/ci/run-consats/task.yml

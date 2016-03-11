@@ -1,0 +1,11 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/golang
+
+inputs:
+- name: consul-release
+- name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/confab/test

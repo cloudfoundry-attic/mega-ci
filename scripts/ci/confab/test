@@ -1,0 +1,10 @@
+#!/bin/bash -exu
+
+ROOT="${PWD}"
+
+mkdir -p "${GOPATH}/src/github.com/cloudfoundry-incubator"
+
+pushd "${GOPATH}/src/github.com/cloudfoundry-incubator" > /dev/null
+  ln -s "${ROOT}/consul-release"
+  chpst -u testuser:testuser ./consul-release/src/confab/scripts/test
+popd > /dev/null
