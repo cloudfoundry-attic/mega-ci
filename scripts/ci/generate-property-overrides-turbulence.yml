@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cloudfoundry/runtime-ci
+image: docker:///cfinfrastructure/deployment
 
 inputs:
   - name: mega-ci
