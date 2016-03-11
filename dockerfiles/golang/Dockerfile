@@ -1,13 +1,5 @@
-FROM ubuntu:14.04
-MAINTAINER https://github.com/pivotal-cf-experimental/gomegamatchers
-
-RUN \
-      apt-get update && \
-      apt-get -y install --fix-missing \
-        git \
-        wget \
-      && \
-      apt-get clean
+FROM cfinfrastructure/minimal
+MAINTAINER https://github.com/cloudfoundry/mega-ci
 
 # Install go
 RUN wget https://storage.googleapis.com/golang/go1.5.3.linux-amd64.tar.gz && \

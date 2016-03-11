@@ -6,13 +6,13 @@ resources:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
 
-- name: mega-ci-dockerfile
+- name: deployment-dockerfile
   type: git
   source:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - dockerfiles/mega-ci
+    - dockerfiles/deployment
 
 - name: bosh-bootloader-dockerfile
   type: git
@@ -22,34 +22,34 @@ resources:
     paths:
     - dockerfiles/bosh-bootloader
 
-- name: gomegamatchers-dockerfile
+- name: golang-dockerfile
   type: git
   source:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - dockerfiles/gomegamatchers
+    - dockerfiles/golang
 
-- name: destiny-dockerfile
+- name: vagrant-dockerfile
   type: git
   source:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - dockerfiles/destiny
+    - dockerfiles/vagrant
 
-- name: bosh-test-dockerfile
+- name: minimal-dockerfile
   type: git
   source:
     uri: https://github.com/cloudfoundry/mega-ci
     branch: master
     paths:
-    - dockerfiles/bosh-test
+    - dockerfiles/minimal
 
-- name: destiny-docker-image
+- name: golang-docker-image
   type: docker-image
   source:
-    repository: cfinfrastructure/destiny
+    repository: cfinfrastructure/golang
     username: {{docker-username}}
     password: {{docker-password}}
     email: {{docker-email}}
@@ -62,61 +62,53 @@ resources:
     password: {{docker-password}}
     email: {{docker-email}}
 
-- name: bosh-test-docker-image
+- name: deployment-docker-image
   type: docker-image
   source:
-    repository: cfinfrastructure/bosh-test
+    repository: cfinfrastructure/deployment
     username: {{docker-username}}
     password: {{docker-password}}
     email: {{docker-email}}
 
-- name: gomegamatchers-docker-image
+- name: minimal-docker-image
   type: docker-image
   source:
-    repository: cfinfrastructure/gomegamatchers
+    repository: cfinfrastructure/minimal
     username: {{docker-username}}
     password: {{docker-password}}
     email: {{docker-email}}
 
-- name: mega-ci-docker-image
+- name: vagrant-docker-image
   type: docker-image
   source:
-    repository: cfinfrastructure/mega-ci
+    repository: cfinfrastructure/vagrant
     username: {{docker-username}}
     password: {{docker-password}}
     email: {{docker-email}}
 
 jobs:
-- name: mega-ci-docker-image
+- name: deployment-docker-image
   plan:
   - do:
     - get: mega-ci
-      resource: mega-ci-dockerfile 
+      resource: deployment-dockerfile
       trigger: true
-    - put: mega-ci-docker-image
+    - put: deployment-docker-image
       params:
-        build: mega-ci/dockerfiles/mega-ci
+        build: mega-ci/dockerfiles/deployment
         cache: true
-- name: destiny-docker-image
+
+- name: golang-docker-image
   plan:
   - do:
     - get: mega-ci
-      resource: destiny-dockerfile
+      resource: golang-dockerfile
       trigger: true
-    - put: destiny-docker-image
+    - put: golang-docker-image
       params:
-        build: mega-ci/dockerfiles/destiny
+        build: mega-ci/dockerfiles/golang
         cache: true
-- name: gomegamatchers-docker-image
-  plan:
-  - do:
-    - get: mega-ci
-      resource: gomegamatchers-dockerfile
-      trigger: true
-    - put: gomegamatchers-docker-image
-      params:
-        build: mega-ci/dockerfiles/gomegamatchers
-        cache: true
+
 - name: bosh-bootloader-docker-image
   plan:
   - do:
@@ -127,15 +119,27 @@ jobs:
       params:
         build: mega-ci/dockerfiles/bosh-bootloader
         cache: true
-- name: bosh-test-docker-image
+
+- name: minimal-docker-image
   plan:
   - do:
     - get: mega-ci
-      resource: bosh-test-dockerfile
+      resource: minimal-dockerfile
       trigger: true
-    - put: bosh-test-docker-image
+    - put: minimal-docker-image
       params:
-        build: mega-ci/dockerfiles/bosh-test
+        build: mega-ci/dockerfiles/minimal
+        cache: true
+
+- name: vagrant-docker-image
+  plan:
+  - do:
+    - get: mega-ci
+      resource: vagrant-dockerfile
+      trigger: true
+    - put: vagrant-docker-image
+      params:
+        build: mega-ci/dockerfiles/vagrant
         cache: true
 
 - name: mega-ci-unit-tests
