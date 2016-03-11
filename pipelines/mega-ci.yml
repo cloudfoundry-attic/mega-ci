@@ -14,14 +14,6 @@ resources:
     paths:
     - dockerfiles/deployment
 
-- name: bosh-bootloader-dockerfile
-  type: git
-  source:
-    uri: https://github.com/cloudfoundry/mega-ci
-    branch: master
-    paths:
-    - dockerfiles/bosh-bootloader
-
 - name: golang-dockerfile
   type: git
   source:
@@ -54,14 +46,6 @@ resources:
     password: {{docker-password}}
     email: {{docker-email}}
 
-- name: bosh-bootloader-docker-image
-  type: docker-image
-  source:
-    repository: cfinfrastructure/bosh-bootloader
-    username: {{docker-username}}
-    password: {{docker-password}}
-    email: {{docker-email}}
-
 - name: deployment-docker-image
   type: docker-image
   source:
@@ -88,6 +72,7 @@ resources:
 
 jobs:
 - name: deployment-docker-image
+  public: true
   plan:
   - do:
     - get: mega-ci
@@ -99,6 +84,7 @@ jobs:
         cache: true
 
 - name: golang-docker-image
+  public: true
   plan:
   - do:
     - get: mega-ci
@@ -109,18 +95,8 @@ jobs:
         build: mega-ci/dockerfiles/golang
         cache: true
 
-- name: bosh-bootloader-docker-image
-  plan:
-  - do:
-    - get: mega-ci
-      resource: bosh-bootloader-dockerfile
-      trigger: true
-    - put: bosh-bootloader-docker-image
-      params:
-        build: mega-ci/dockerfiles/bosh-bootloader
-        cache: true
-
 - name: minimal-docker-image
+  public: true
   plan:
   - do:
     - get: mega-ci
@@ -132,6 +108,7 @@ jobs:
         cache: true
 
 - name: vagrant-docker-image
+  public: true
   plan:
   - do:
     - get: mega-ci
@@ -151,5 +128,3 @@ jobs:
       trigger: true
     - task: mega-ci-tests
       file: mega-ci/scripts/ci/test.yml
-
-

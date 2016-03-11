@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cfinfrastructure/bosh-bootloader
+image: docker:///cfinfrastructure/golang
 
 inputs:
 - name: bosh-bootloader

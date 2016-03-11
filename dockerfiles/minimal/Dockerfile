@@ -8,7 +8,13 @@ RUN \
             curl \
             git \
             libreadline6 \
-            libreadline6-dev\
+            libreadline6-dev \
             wget \
+            runit \
       && \
       apt-get clean
+
+# Create testuser
+RUN mkdir -p /home/testuser && \
+	groupadd -r testuser -g 433 && \
+	useradd -u 431 -r -g testuser -d /home/testuser -s /usr/sbin/nologin -c "Docker image test user" testuser
