@@ -1,7 +1,7 @@
 ---
 platform: linux
 
-image: docker:///cfinfrastructure/minimal
+image: docker:///cfinfrastructure/deployment
 
 inputs:
   - name: mega-ci
