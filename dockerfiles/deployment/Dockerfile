@@ -23,6 +23,9 @@ ENV PATH $PATH:/home/root/.gem/ruby/2.2.4/bin:/opt/rubies/ruby-2.2.4/lib/ruby/ge
 # Set permissions on ruby directory
 RUN chmod -R 777 /opt/rubies/
 
+# Install bundler
+RUN /opt/rubies/ruby-2.2.4/bin/gem install bundler --no-rdoc --no-ri
+
 # Install bosh_cli
 RUN /opt/rubies/ruby-2.2.4/bin/gem install bosh_cli --no-rdoc --no-ri
 
