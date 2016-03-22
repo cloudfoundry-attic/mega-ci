@@ -54,6 +54,7 @@ func (a AWSDeployer) Deploy(manifestsDirectoryOrFile string) error {
 		if err != nil {
 			return err
 		}
+		fmt.Fprintln(a.stdout, "\n\n")
 	}
 
 	return nil
