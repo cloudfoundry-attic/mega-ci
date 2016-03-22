@@ -2,6 +2,7 @@ groups:
 - name: etcd
   jobs:
   - check-git-submodules
+  - test-etcd-metrics-server
   - test-etcd
   - create-final-release
   - merge-master-into-develop
@@ -124,6 +125,18 @@ jobs:
         AWS_DEFAULT_REGION: {{mega_ci_account_aws_region}}
         MANIFEST_PATH: manifests/aws/
 
+- name: test-etcd-metrics-server
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [check-git-submodules]
+      trigger: true
+  - task: test-etcd-metrics-server
+    file: mega-ci/scripts/ci/test-etcd-metrics-server/test.yml
+
 - name: test-etcd
   public: true
   serial: true
@@ -134,7 +147,7 @@ jobs:
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
-      passed: [check-git-submodules]
+      passed: [test-etcd-metrics-server]
       trigger: true
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats.yml
