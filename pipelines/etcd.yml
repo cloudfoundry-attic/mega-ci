@@ -47,10 +47,10 @@ resources:
     branch: master
     private_key: {{etcd-release-private-key}}
     uri: git@github.com:cloudfoundry-incubator/etcd-release.git
-- name: consul-release-develop
+- name: consul-release-master
   type: git
   source:
-    branch: develop
+    branch: master
     ignore_paths: [.final_builds, releases]
     uri: https://github.com/cloudfoundry-incubator/consul-release.git
 - name: cf-deployment
@@ -108,7 +108,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: consul-release
-      resource: consul-release-develop
+      resource: consul-release-master
     - get: release
       resource: etcd-release-develop
       passed: [test-etcd]
