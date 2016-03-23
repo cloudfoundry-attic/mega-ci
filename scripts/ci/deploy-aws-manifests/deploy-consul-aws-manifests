@@ -7,7 +7,7 @@ ROOT="${PWD}"
 function upload_consul_release() {
   pushd "${ROOT}/release" > /dev/null
     bosh -n create release
-    bosh -n -t ${BOSH_DIRECTOR} upload release
+    bosh -n -t ${BOSH_DIRECTOR} upload release --rebase
   popd > /dev/null
 }
 
@@ -25,7 +25,7 @@ function deploy_consul() {
         --manifest-path "${ROOT}/release/${MANIFEST_PATH}" \
         --director "${BOSH_DIRECTOR}" \
         --user "${BOSH_USER}" \
-		--password "${BOSH_PASSWORD}" \
+        --password "${BOSH_PASSWORD}" \
         --aws-access-key-id "${AWS_ACCESS_KEY_ID}" \
         --aws-secret-access-key "${AWS_SECRET_ACCESS_KEY}" \
         --aws-region "${AWS_DEFAULT_REGION}"

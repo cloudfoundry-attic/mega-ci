@@ -9,7 +9,7 @@ function upload_release() {
 
   pushd "${ROOT}/${release_path}" > /dev/null
     bosh -n create release
-    bosh -n -t ${BOSH_DIRECTOR} upload release
+    bosh -n -t ${BOSH_DIRECTOR} upload release --rebase
   popd > /dev/null
 }
 
