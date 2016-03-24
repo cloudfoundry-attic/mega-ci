@@ -8,7 +8,7 @@ consul_release_version="99999+dev.$(date +%s)"
 function upload_consul_release() {
   pushd "${ROOT}/release" > /dev/null
     bosh -n create release --force --version ${consul_release_version}
-    bosh -n -t ${bosh_director} upload release --rebase
+    bosh -n -t ${BOSH_DIRECTOR} upload release --rebase
   popd > /dev/null
 }
 
@@ -38,12 +38,12 @@ function deploy_consul() {
 function main() {
   upload_consul_release
   deploy_consul
-  bosh -n -t ${bosh_director} cleanup --all
+  bosh -n -t ${BOSH_DIRECTOR} cleanup --all
 }
 
 function teardown() {
   set +e
-  bosh -n -t ${bosh_director} delete release consul
+  bosh -n -t ${BOSH_DIRECTOR} delete release consul
   set -e
 }
 
