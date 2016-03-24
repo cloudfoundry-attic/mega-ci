@@ -1,4 +1,4 @@
-#!/bin/bash -euxf -o pipefail
+#!/bin/bash -exu
 
 function validate_arguments() {
   if [ $# -ne 3 ]; then
