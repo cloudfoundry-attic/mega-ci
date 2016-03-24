@@ -148,9 +148,9 @@ function write_private_yaml() {
   cat > "${release_config_dir}/private.yml" <<EOF
 ---
 blobstore:
-s3:
-  access_key_id: ${access_key_id}
-  secret_access_key: ${secret_access_key}
+  s3:
+    access_key_id: ${access_key_id}
+    secret_access_key: ${secret_access_key}
 EOF
 
   rm "${bucket_output}"
