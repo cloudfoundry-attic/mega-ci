@@ -3,11 +3,12 @@
 export GO15VENDOREXPERIMENT=1
 
 ROOT="${PWD}"
+consul_release_version="99999+dev.$(date +%s)"
 
 function upload_consul_release() {
   pushd "${ROOT}/release" > /dev/null
-    bosh -n create release
-    bosh -n -t ${BOSH_DIRECTOR} upload release --rebase
+    bosh -n create release --force --version ${consul_release_version}
+    bosh -n -t ${bosh_director} upload release --rebase
   popd > /dev/null
 }
 
@@ -37,6 +38,15 @@ function deploy_consul() {
 function main() {
   upload_consul_release
   deploy_consul
+  bosh -n cleanup --all
 }
+
+function teardown() {
+  set +e
+  bosh -n delete release consul
+  set -e
+}
+
+trap teardown EXIT
 
 main

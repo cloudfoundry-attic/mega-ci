@@ -3,13 +3,14 @@
 export GO15VENDOREXPERIMENT=1
 
 ROOT="${PWD}"
+release_version="99999+dev.$(date +%s)"
 
 function upload_release() {
   local release_path="$1"
 
   pushd "${ROOT}/${release_path}" > /dev/null
-    bosh -n create release
-    bosh -n -t ${BOSH_DIRECTOR} upload release --rebase
+    bosh -n create release --force --version ${release_version}
+    bosh -n -t ${bosh_director} upload release --rebase
   popd > /dev/null
 }
 
@@ -43,6 +44,16 @@ function main() {
   upload_release "${consul_release_path}"
   upload_release "${etcd_release_path}"
   deploy_etcd
+  bosh -n cleanup --all
 }
+
+function teardown() {
+  set +e
+  bosh -n delete release consul
+  bosh -n delete release etcd
+  set -e
+}
+
+trap teardown EXIT
 
 main
