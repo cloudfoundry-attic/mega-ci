@@ -38,12 +38,12 @@ function deploy_consul() {
 function main() {
   upload_consul_release
   deploy_consul
-  bosh -n cleanup --all
+  bosh -n -t ${bosh_director} cleanup --all
 }
 
 function teardown() {
   set +e
-  bosh -n delete release consul
+  bosh -n -t ${bosh_director} delete release consul
   set -e
 }
 
