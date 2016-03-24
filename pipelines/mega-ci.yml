@@ -71,30 +71,6 @@ resources:
     email: {{docker-email}}
 
 jobs:
-- name: deployment-docker-image
-  public: true
-  plan:
-  - do:
-    - get: mega-ci
-      resource: deployment-dockerfile
-      trigger: true
-    - put: deployment-docker-image
-      params:
-        build: mega-ci/dockerfiles/deployment
-        cache: true
-
-- name: golang-docker-image
-  public: true
-  plan:
-  - do:
-    - get: mega-ci
-      resource: golang-dockerfile
-      trigger: true
-    - put: golang-docker-image
-      params:
-        build: mega-ci/dockerfiles/golang
-        cache: true
-
 - name: minimal-docker-image
   public: true
   plan:
@@ -107,13 +83,49 @@ jobs:
         build: mega-ci/dockerfiles/minimal
         cache: true
 
+- name: golang-docker-image
+  public: true
+  plan:
+  - do:
+    - aggregate:
+      - get: minimal-docker-image
+        passed: [minimal-docker-image]
+        trigger: true
+      - get: mega-ci
+        resource: golang-dockerfile
+        trigger: true
+    - put: golang-docker-image
+      params:
+        build: mega-ci/dockerfiles/golang
+        cache: true
+
+- name: deployment-docker-image
+  public: true
+  plan:
+  - do:
+    - aggregate:
+      - get: golang-docker-image
+        passed: [golang-docker-image]
+        trigger: true
+      - get: mega-ci
+        resource: deployment-dockerfile
+        trigger: true
+    - put: deployment-docker-image
+      params:
+        build: mega-ci/dockerfiles/deployment
+        cache: true
+
 - name: vagrant-docker-image
   public: true
   plan:
   - do:
-    - get: mega-ci
-      resource: vagrant-dockerfile
-      trigger: true
+    - aggregate:
+      - get: deployment-docker-image
+        passed: [deployment-docker-image]
+        trigger: true
+      - get: mega-ci
+        resource: vagrant-dockerfile
+        trigger: true
     - put: vagrant-docker-image
       params:
         build: mega-ci/dockerfiles/vagrant
