@@ -44,7 +44,6 @@ function main() {
   upload_release "${consul_release_path}"
   upload_release "${etcd_release_path}"
   deploy_etcd
-  bosh -n -t ${BOSH_DIRECTOR} cleanup --all
 }
 
 function teardown() {

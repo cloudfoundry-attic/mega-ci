@@ -38,7 +38,6 @@ function deploy_consul() {
 function main() {
   upload_consul_release
   deploy_consul
-  bosh -n -t ${BOSH_DIRECTOR} cleanup --all
 }
 
 function teardown() {
