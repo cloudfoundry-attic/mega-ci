@@ -42,7 +42,7 @@ function main() {
 
 function teardown() {
   set +e
-  bosh -n -t ${BOSH_DIRECTOR} delete release consul
+  bosh -n -t ${BOSH_DIRECTOR} delete release consul ${consul_release_version}
   set -e
 }
 
