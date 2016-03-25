@@ -38,6 +38,20 @@ resources:
     paths:
     - dockerfiles/minimal
 
+- name: ubuntu-docker-image
+  type: docker-image
+  source:
+    repository: ubuntu
+    tag: "14.04"
+
+- name: minimal-docker-image
+  type: docker-image
+  source:
+    repository: cfinfrastructure/minimal
+    username: {{docker-username}}
+    password: {{docker-password}}
+    email: {{docker-email}}
+
 - name: golang-docker-image
   type: docker-image
   source:
@@ -50,14 +64,6 @@ resources:
   type: docker-image
   source:
     repository: cfinfrastructure/deployment
-    username: {{docker-username}}
-    password: {{docker-password}}
-    email: {{docker-email}}
-
-- name: minimal-docker-image
-  type: docker-image
-  source:
-    repository: cfinfrastructure/minimal
     username: {{docker-username}}
     password: {{docker-password}}
     email: {{docker-email}}
@@ -75,9 +81,14 @@ jobs:
   public: true
   plan:
   - do:
-    - get: mega-ci
-      resource: minimal-dockerfile
-      trigger: true
+    - aggregate:
+      - get: ubuntu-docker-image
+        trigger: true
+        params:
+          skip_download: true
+      - get: mega-ci
+        resource: minimal-dockerfile
+        trigger: true
     - put: minimal-docker-image
       params:
         build: mega-ci/dockerfiles/minimal
