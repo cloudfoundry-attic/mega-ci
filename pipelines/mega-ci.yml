@@ -91,6 +91,8 @@ jobs:
       - get: minimal-docker-image
         passed: [minimal-docker-image]
         trigger: true
+        params:
+          skip_download: true
       - get: mega-ci
         resource: golang-dockerfile
         trigger: true
@@ -107,6 +109,8 @@ jobs:
       - get: golang-docker-image
         passed: [golang-docker-image]
         trigger: true
+        params:
+          skip_download: true
       - get: mega-ci
         resource: deployment-dockerfile
         trigger: true
@@ -123,6 +127,8 @@ jobs:
       - get: deployment-docker-image
         passed: [deployment-docker-image]
         trigger: true
+        params:
+          skip_download: true
       - get: mega-ci
         resource: vagrant-dockerfile
         trigger: true
