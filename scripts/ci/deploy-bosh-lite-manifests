@@ -40,7 +40,7 @@ function target_director() {
 }
 
 function upload_stemcell() {
-  bosh upload stemcell ${BUILD_DIR}/bosh-lite-stemcell
+  bosh upload stemcell "${BUILD_DIR}/bosh-lite-stemcell/stemcell.tgz"
 }
 
 function upload_release() {
