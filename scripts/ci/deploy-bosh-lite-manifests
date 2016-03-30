@@ -40,8 +40,7 @@ function target_director() {
 }
 
 function upload_stemcell() {
-  bosh upload stemcell \
-    "https://bosh.io/d/stemcells/bosh-warden-boshlite-ubuntu-trusty-go_agent?v=3147"
+  bosh upload stemcell ${BUILD_DIR}/bosh-lite-stemcell
 }
 
 function upload_release() {

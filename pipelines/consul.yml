@@ -57,6 +57,10 @@ resources:
   source:
     branch: master
     uri: https://github.com/cloudfoundry/bosh-lite.git
+- name: bosh-lite-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-warden-boshlite-ubuntu-trusty-go_agent
 
 jobs:
 - name: check-git-submodules
@@ -80,6 +84,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: bosh-lite
+    - get: bosh-lite-stemcell
     - get: release
       resource: consul-release-develop
       passed: [test-consul]
