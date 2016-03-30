@@ -91,6 +91,7 @@ jobs:
     - get: mega-ci
     - get: bosh-lite
     - get: bosh-lite-stemcell
+      resource: bosh-lite-stemcell
     - get: release
       resource: etcd-release-develop
       passed: [test-etcd]
