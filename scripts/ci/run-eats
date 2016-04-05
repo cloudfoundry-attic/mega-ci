@@ -54,6 +54,9 @@ function upload_releases() {
     bosh -t "${BOSH_DIRECTOR}" -n upload release
   popd > /dev/null
 
+  wget -O "/tmp/consul-release.tgz" "http://bosh.io/d/github.com/cloudfoundry-incubator/consul-release"
+  bosh -t ${BOSH_DIRECTOR} upload release "/tmp/consul-release.tgz" --skip-if-exists
+
   wget -O "/tmp/bosh-aws-cpi-release.tgz" "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=${aws_cpi_version}"
   bosh -t ${BOSH_DIRECTOR} upload release "/tmp/bosh-aws-cpi-release.tgz" --skip-if-exists
 
