@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+- name: bosh-bootloader
+- name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/bosh-bootloader/integration
+
+params:
+  AWS_REGION:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
