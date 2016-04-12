@@ -938,11 +938,11 @@
       }
     },
 
-    "ConsulCFSubnetRouteTableAssociation": {
+    "ConsulDiegoCFSubnetRouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
         "RouteTableId": { "Ref": "PublicRouteTable" },
-        "SubnetId": { "Ref": "ConsulCFSubnet" }
+        "SubnetId": { "Ref": "ConsulDiegoCFSubnet" }
       }
     },
 
