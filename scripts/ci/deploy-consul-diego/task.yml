@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: private-credentials
+  - name: diego-release
+  - name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/deploy-consul-diego/task
+
+params:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:

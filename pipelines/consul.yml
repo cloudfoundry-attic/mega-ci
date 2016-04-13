@@ -7,7 +7,10 @@ groups:
   - test-confab
   - test-consul
   - deploy-with-cf
+  - deploy-with-diego
   - test-with-cf
+  - test-with-diego
+  - delete-deployments
   - create-final-release
   - merge-master-into-develop
 
@@ -47,6 +50,12 @@ resources:
     branch: master
     private_key: {{consul-release-private-key}}
     uri: git@github.com:cloudfoundry-incubator/consul-release.git
+- name: diego-release-develop
+  type: git
+  source:
+    branch: develop
+    ignore_paths: [.final_builds, releases]
+    uri: https://github.com/cloudfoundry-incubator/diego-release.git
 - name: cf-deployment
   type: git
   source:
@@ -169,7 +178,7 @@ jobs:
 
 - name: deploy-with-cf
   public: false
-  serial_group: [deploy_consul]
+  serial_group: [cf, diego]
   plan:
   - aggregate:
     - get: private-credentials
@@ -191,9 +200,31 @@ jobs:
         BOSH_PASSWORD: {{cf_bosh_password}}
         CF_DEPLOYMENT_TRACE: true
 
+- name: deploy-with-diego
+  public: false
+  serial_group: [cf, diego]
+  plan:
+  - aggregate:
+    - get: private-credentials
+      resource: mega-ci-env
+    - get: mega-ci
+    - get: diego-release
+      resource: diego-release-develop
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [deploy-with-cf]
+      trigger: true
+  - task: deploy-consul-diego
+    file: mega-ci/scripts/ci/deploy-consul-diego/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+
 - name: test-with-cf
   public: false
-  serial_group: [deploy_consul]
+  serial_group: [cf]
   plan:
   - aggregate:
     - get: private-credentials
@@ -201,7 +232,7 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
-      passed: [deploy-with-cf]
+      passed: [deploy-with-diego]
       trigger: true
   - task: run-cats
     file: mega-ci/scripts/ci/run-bosh-command.yml
@@ -209,8 +240,47 @@ jobs:
       params:
         DEPLOYMENT_NAME: consul-cf-deployment
         COMMAND: run errand acceptance_tests
-    on_success:
-      task: delete-deployment
+
+- name: test-with-diego
+  public: false
+  serial_group: [diego]
+  plan:
+  - aggregate:
+    - get: private-credentials
+      resource: mega-ci-env
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [deploy-with-diego]
+      trigger: true
+  - task: run-cats
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        DEPLOYMENT_NAME: consul-diego-deployment
+        COMMAND: run errand acceptance_tests
+
+- name: delete-deployments
+  public: false
+  serial_group: [cf, diego]
+  plan:
+  - aggregate:
+    - get: private-credentials
+      resource: mega-ci-env
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed:
+      - test-with-cf
+      - test-with-diego
+      trigger: true
+    - task: delete-diego-deployment
+      file: mega-ci/scripts/ci/run-bosh-command.yml
+      config:
+        params:
+          DEPLOYMENT_NAME: consul-diego-deployment
+          COMMAND: delete deployment consul-diego-deployment
+    - task: delete-cf-deployment
       file: mega-ci/scripts/ci/run-bosh-command.yml
       config:
         params:
@@ -227,7 +297,7 @@ jobs:
       resource: oss-s3-buckets-stack
     - get: release-repo
       resource: consul-release-develop
-      passed: [test-with-cf]
+      passed: [delete-deployments]
       trigger: true
     - get: release-repo-master
       resource: consul-release-master
