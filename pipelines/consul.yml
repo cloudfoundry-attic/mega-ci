@@ -50,10 +50,10 @@ resources:
     branch: master
     private_key: {{consul-release-private-key}}
     uri: git@github.com:cloudfoundry-incubator/consul-release.git
-- name: diego-release-develop
+- name: diego-release-master
   type: git
   source:
-    branch: develop
+    branch: master
     ignore_paths: [.final_builds, releases]
     uri: https://github.com/cloudfoundry-incubator/diego-release.git
 - name: cf-deployment
@@ -209,7 +209,7 @@ jobs:
       resource: mega-ci-env
     - get: mega-ci
     - get: diego-release
-      resource: diego-release-develop
+      resource: diego-release-master
     - get: consul-release
       resource: consul-release-develop
       passed: [deploy-with-cf]
