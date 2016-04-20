@@ -298,6 +298,13 @@ jobs:
         BOSH_DIRECTOR: {{consul_cf_bosh_director}}
         BOSH_USER: {{consul_cf_bosh_user}}
         BOSH_PASSWORD: {{consul_cf_bosh_password}}
+  - task: cleanup-releases
+    file: mega-ci/scripts/ci/run-bosh-cleanup.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
 
 - name: create-final-release
   public: true

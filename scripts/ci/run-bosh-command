@@ -1,7 +1,8 @@
-#!/bin/bash
-set -e -x
+#!/bin/bash -exu
 
+set +u
 source ~/.bashrc
+set -u
 
 if [ -n "$LOGS_DIR" ]; then
   mkdir $LOGS_DIR

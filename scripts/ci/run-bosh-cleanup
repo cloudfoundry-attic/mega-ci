@@ -1,0 +1,11 @@
+#!/bin/bash -exu
+
+set +u
+source ~/.bashrc
+set -u
+
+if [ -n "$LOGS_DIR" ]; then
+  mkdir $LOGS_DIR
+fi
+
+bosh -t $BOSH_DIRECTOR cleanup --all
