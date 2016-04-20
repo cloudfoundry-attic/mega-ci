@@ -213,8 +213,7 @@ jobs:
   serial_group: [cf, diego]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
+    - get: consul-cf-env
     - get: mega-ci
     - get: diego-release
       resource: diego-release-master
