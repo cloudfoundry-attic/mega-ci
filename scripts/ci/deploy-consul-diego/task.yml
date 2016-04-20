@@ -4,7 +4,7 @@ platform: linux
 image: docker:///cfinfrastructure/deployment
 
 inputs:
-  - name: private-credentials
+  - name: consul-cf-env
   - name: diego-release
   - name: mega-ci
 

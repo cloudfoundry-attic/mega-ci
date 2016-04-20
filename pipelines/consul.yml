@@ -21,6 +21,12 @@ resources:
     branch: master
     private_key: {{mega-ci-env-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci-env.git
+- name: consul-cf-env
+  type: git
+  source:
+    branch: master
+    private_key: {{consul-cf-env-private-key}}
+    uri: git@github.com:cloudfoundry/consul-cf-env.git
 - name: oss-s3-buckets-stack
   type: git
   source:
@@ -61,6 +67,11 @@ resources:
   source:
     branch: master
     uri: https://github.com/cloudfoundry/cf-deployment.git
+- name: cf-acceptance-tests
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
 - name: bosh-lite
   type: git
   source:
@@ -181,8 +192,7 @@ jobs:
   serial_group: [cf, diego]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
+    - get: consul-cf-env
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
@@ -193,11 +203,9 @@ jobs:
     file: mega-ci/scripts/ci/deploy-consul-cf/task.yml
     config:
       params:
-        STUB_PATH: {{cf_stub_path}}
-        STUB_PARTS_PATH: {{cf_stub_parts_path}}
-        BOSH_DIRECTOR: {{cf_bosh_director}}
-        BOSH_USER: {{cf_bosh_user}}
-        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
         CF_DEPLOYMENT_TRACE: true
 
 - name: deploy-with-diego
@@ -218,17 +226,15 @@ jobs:
     file: mega-ci/scripts/ci/deploy-consul-diego/task.yml
     config:
       params:
-        BOSH_DIRECTOR: {{cf_bosh_director}}
-        BOSH_USER: {{cf_bosh_user}}
-        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
 
 - name: test-with-cf
   public: false
   serial_group: [cf]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
@@ -238,6 +244,9 @@ jobs:
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
+        BOSH_DIRECTOR: {{cf_bosh_director_url}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
         DEPLOYMENT_NAME: consul-cf-deployment
         COMMAND: run errand acceptance_tests
 
@@ -246,19 +255,19 @@ jobs:
   serial_group: [diego]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
     - get: mega-ci
+    - get: cf-acceptance-tests
     - get: consul-release
       resource: consul-release-develop
       passed: [deploy-with-diego]
       trigger: true
   - task: run-cats
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+    file: mega-ci/scripts/ci/test-diego/task.yml
     config:
       params:
-        DEPLOYMENT_NAME: consul-diego-deployment
-        COMMAND: run errand acceptance_tests
+        CF_DOMAIN: {{consul_cf_domain}}
+        CF_USER: {{consul_cf_user}}
+        CF_PASSWORD: {{consul_cf_password}}
 
 - name: delete-deployments
   public: false
@@ -278,14 +287,20 @@ jobs:
       file: mega-ci/scripts/ci/run-bosh-command.yml
       config:
         params:
-          DEPLOYMENT_NAME: consul-diego-deployment
-          COMMAND: delete deployment consul-diego-deployment
+          DEPLOYMENT_NAME: consul-diego-deployment-diego
+          COMMAND: delete deployment consul-cf-deployment-diego
+          BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+          BOSH_USER: {{consul_cf_bosh_user}}
+          BOSH_PASSWORD: {{consul_cf_bosh_password}}
     - task: delete-cf-deployment
       file: mega-ci/scripts/ci/run-bosh-command.yml
       config:
         params:
           DEPLOYMENT_NAME: consul-cf-deployment
           COMMAND: delete deployment consul-cf-deployment
+          BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+          BOSH_USER: {{consul_cf_bosh_user}}
+          BOSH_PASSWORD: {{consul_cf_bosh_password}}
 
 - name: create-final-release
   public: true

@@ -1,0 +1,39 @@
+#!/bin/bash -exu
+
+function main() {
+  curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx
+
+  chmod +x cf
+  mv cf /usr/local/bin/
+
+  mkdir -p $GOPATH/src/github.com/cloudfoundry
+  ln -s $PWD/cf-acceptance-tests $GOPATH/src/github.com/cloudfoundry/
+
+  cf api api.$CF_DOMAIN --skip-ssl-validation
+
+  set +x
+  cf auth $CF_USER $CF_PASSWORD
+  set -x
+
+  cf enable-feature-flag diego_docker
+
+cat > integration_config.json <<EOF
+{
+  "api": "api.${CF_DOMAIN}",
+  "admin_user": "${CF_USER}",
+  "admin_password": "${CF_PASSWORD}",
+  "apps_domain": "${CF_DOMAIN}",
+  "skip_ssl_validation": true,
+  "use_http": true,
+  "backend": "diego"
+}
+EOF
+  export CONFIG=$PWD/integration_config.json
+
+  pushd $GOPATH/src/github.com/cloudfoundry/cf-acceptance-tests > /dev/null
+    ./bin/update_submodules
+    ./bin/diego_test_default -nodes=4
+  popd > /dev/null
+}
+
+main

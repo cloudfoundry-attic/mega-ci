@@ -15,21 +15,21 @@ generate_deployment_config() {
 
   cat <<CONFIG
 {
-	"cf": "integration-latest",
-	"consul": "${dir}/consul-release",
-	"deployments-dir": "${deployments_dir}",
-	"stemcell": "integration-latest",
-	"stubs": ${stubs_array}
+  "cf": "integration-latest",
+  "consul": "${dir}/consul-release",
+  "deployments-dir": "${deployments_dir}",
+  "stemcell": "integration-latest",
+  "stubs": ${stubs_array}
 }
 CONFIG
 }
 
 preflight_check() {
-	set +x
-	test -n "${BOSH_DIRECTOR}"
-	test -n "${BOSH_USER}"
-	test -n "${BOSH_PASSWORD}"
-	set -x
+  set +x
+  test -n "${BOSH_DIRECTOR}"
+  test -n "${BOSH_USER}"
+  test -n "${BOSH_PASSWORD}"
+  set -x
 }
 
 deploy() {
@@ -45,30 +45,24 @@ main() {
   preflight_check
   setup_ruby
 
-  local stub_path
-  stub_path="${PWD}/${STUB_PATH}"
-
-  local stub_parts_path
-  stub_parts_path="${PWD}/${STUB_PARTS_PATH}"
-
-  local stubs
-  stubs=("${stub_path} $(ls "${stub_parts_path}/"*)")
-
   generate_deployment_config \
-	  "${PWD}" \
-	  "${PWD}" \
-	  ${stubs[@]} \
-	  > "${PWD}/config.json"
+    "${PWD}" \
+    "${PWD}" \
+    consul-cf-env/stubs/director-uuid.yml \
+    consul-cf-env/stubs/cf/diego.yml \
+    consul-cf-env/stubs/cf/properties.yml \
+    consul-cf-env/stubs/cf/stub.yml \
+    > "${PWD}/config.json"
 
   "${PWD}/cf-deployment/tools/prepare-deployments" \
-	  "aws" \
-	  "${PWD}/config.json"
+    "aws" \
+    "${PWD}/config.json"
 
   deploy \
-	  "${BOSH_DIRECTOR}" \
-	  "${PWD}/cf.yml"
+    "${BOSH_DIRECTOR}" \
+    "${PWD}/cf.yml"
 }
 
 if [ "$(basename "${0}")" = "task" ]; then
-	main
+  main
 fi

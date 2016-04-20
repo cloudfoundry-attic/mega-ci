@@ -5,7 +5,7 @@ image: docker:///cfinfrastructure/deployment
 
 inputs:
   - name: cf-deployment
-  - name: private-credentials
+  - name: consul-cf-env
   - name: consul-release
   - name: mega-ci
 
@@ -13,8 +13,6 @@ run:
   path: mega-ci/scripts/ci/deploy-consul-cf/task
 
 params:
-  STUB_PATH:
-  STUB_PARTS_PATH:
   BOSH_DIRECTOR:
   BOSH_USER:
   BOSH_PASSWORD:

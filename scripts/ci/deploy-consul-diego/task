@@ -1,35 +1,38 @@
 #!/bin/bash -exu
 
-export GO15VENDOREXPERIMENT=1
-
 ROOT="${PWD}"
-diego_release_version="99999+dev.$(date +%s)"
-
-function upload_diego_release() {
-  pushd "${ROOT}/diego-release" > /dev/null
-    bosh -n create release --force --version ${diego_release_version}
-    bosh -n \
-      -t ${BOSH_DIRECTOR} \
-      upload release --rebase
-  popd > /dev/null
-}
 
 function deploy_diego() {
+  bosh -t $BOSH_DIRECTOR download manifest consul-cf-deployment cf.yml
+
+  pushd diego-release > /dev/null
+    ./scripts/generate-deployment-manifest \
+      -c $ROOT/cf.yml \
+      -i $ROOT/consul-cf-env/stubs/diego/iaas-settings.yml \
+      -p $ROOT/consul-cf-env/stubs/diego/property-overrides.yml \
+      -n $ROOT/consul-cf-env/stubs/diego/instance-count-overrides.yml \
+      -v $ROOT/consul-cf-env/stubs/diego/release-versions.yml \
+      > $ROOT/diego.yml
+  popd > /dev/null
+
   bosh -n \
-    -d ./private-credentials/stubs/diego/diego-consul.yml \
+    -d diego.yml \
     -t ${BOSH_DIRECTOR} \
     deploy
 }
 
 function upload_release() {
-  local release=${1}
-  bosh -t ${BOSH_DIRECTOR} upload release https://bosh.io/d/github.com/cloudfoundry-incubator/${release}
+  local release
+  release=${1}
+  bosh -t ${BOSH_DIRECTOR} upload release https://bosh.io/d/github.com/${release}
 }
 
 function main() {
-  upload_release "garden-linux-release"
-  upload_release "etcd-release"
-  upload_diego_release
+  upload_release "cloudfoundry/cflinuxfs2-rootfs-release"
+  upload_release "cloudfoundry-incubator/diego-release"
+  upload_release "cloudfoundry-incubator/garden-linux-release"
+  upload_release "cloudfoundry-incubator/etcd-release"
+
   deploy_diego
 }
 

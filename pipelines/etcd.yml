@@ -202,8 +202,6 @@ jobs:
   serial_group: [deploy_etcd]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
@@ -215,6 +213,9 @@ jobs:
       params:
         DEPLOYMENT_NAME: etcd-cf-deployment
         COMMAND: run errand acceptance_tests
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
     on_success:
       task: delete-deployment
       file: mega-ci/scripts/ci/run-bosh-command.yml
@@ -222,6 +223,9 @@ jobs:
         params:
           DEPLOYMENT_NAME: etcd-cf-deployment
           COMMAND: delete deployment etcd-cf-deployment
+          BOSH_DIRECTOR: {{cf_bosh_director}}
+          BOSH_USER: {{cf_bosh_user}}
+          BOSH_PASSWORD: {{cf_bosh_password}}
 
 - name: create-final-release
   public: true

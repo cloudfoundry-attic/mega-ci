@@ -3,10 +3,6 @@ set -e -x
 
 source ~/.bashrc
 
-set +x
-source ./private-credentials/bosh_environment
-set -x
-
 if [ -n "$LOGS_DIR" ]; then
   mkdir $LOGS_DIR
 fi

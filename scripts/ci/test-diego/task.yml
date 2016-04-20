@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: mega-ci
+  - name: cf-acceptance-tests
+
+run:
+  path: mega-ci/scripts/ci/test-diego/task
+
+params:
+  CF_DOMAIN:
+  CF_USER:
+  CF_PASSWORD:
