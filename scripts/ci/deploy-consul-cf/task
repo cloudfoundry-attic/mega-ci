@@ -48,10 +48,10 @@ main() {
   generate_deployment_config \
     "${PWD}" \
     "${PWD}" \
-    consul-cf-env/stubs/director-uuid.yml \
-    consul-cf-env/stubs/cf/diego.yml \
-    consul-cf-env/stubs/cf/properties.yml \
-    consul-cf-env/stubs/cf/stub.yml \
+    "${PWD}/consul-cf-env/stubs/director-uuid.yml" \
+    "${PWD}/consul-cf-env/stubs/cf/diego.yml" \
+    "${PWD}/consul-cf-env/stubs/cf/properties.yml" \
+    "${PWD}/consul-cf-env/stubs/cf/stub.yml" \
     > "${PWD}/config.json"
 
   "${PWD}/cf-deployment/tools/prepare-deployments" \
