@@ -243,9 +243,9 @@ jobs:
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
-        BOSH_DIRECTOR: {{cf_bosh_director_url}}
-        BOSH_USER: {{cf_bosh_user}}
-        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
         DEPLOYMENT_NAME: consul-cf-deployment
         COMMAND: run errand acceptance_tests
 
