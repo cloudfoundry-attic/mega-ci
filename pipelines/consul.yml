@@ -273,8 +273,6 @@ jobs:
   serial_group: [cf, diego]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
@@ -282,24 +280,24 @@ jobs:
       - test-with-cf
       - test-with-diego
       trigger: true
-    - task: delete-diego-deployment
-      file: mega-ci/scripts/ci/run-bosh-command.yml
-      config:
-        params:
-          DEPLOYMENT_NAME: consul-diego-deployment-diego
-          COMMAND: delete deployment consul-cf-deployment-diego
-          BOSH_DIRECTOR: {{consul_cf_bosh_director}}
-          BOSH_USER: {{consul_cf_bosh_user}}
-          BOSH_PASSWORD: {{consul_cf_bosh_password}}
-    - task: delete-cf-deployment
-      file: mega-ci/scripts/ci/run-bosh-command.yml
-      config:
-        params:
-          DEPLOYMENT_NAME: consul-cf-deployment
-          COMMAND: delete deployment consul-cf-deployment
-          BOSH_DIRECTOR: {{consul_cf_bosh_director}}
-          BOSH_USER: {{consul_cf_bosh_user}}
-          BOSH_PASSWORD: {{consul_cf_bosh_password}}
+  - task: delete-diego-deployment
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        DEPLOYMENT_NAME: consul-cf-deployment-diego
+        COMMAND: delete deployment consul-cf-deployment-diego
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
+  - task: delete-cf-deployment
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        DEPLOYMENT_NAME: consul-cf-deployment
+        COMMAND: delete deployment consul-cf-deployment
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
 
 - name: create-final-release
   public: true
