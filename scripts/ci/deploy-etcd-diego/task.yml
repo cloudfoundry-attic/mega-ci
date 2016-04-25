@@ -4,13 +4,12 @@ platform: linux
 image: docker:///cfinfrastructure/deployment
 
 inputs:
-  - name: cf-deployment
   - name: etcd-cf-env
-  - name: etcd-release
+  - name: diego-release
   - name: mega-ci
 
 run:
-  path: mega-ci/scripts/ci/deploy-etcd-cf/task
+  path: mega-ci/scripts/ci/deploy-etcd-diego/task
 
 params:
   BOSH_DIRECTOR:

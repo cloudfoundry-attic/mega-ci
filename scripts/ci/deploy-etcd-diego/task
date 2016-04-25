@@ -1,0 +1,38 @@
+#!/bin/bash -exu
+
+ROOT="${PWD}"
+
+function deploy_diego() {
+  bosh -t $BOSH_DIRECTOR download manifest etcd-cf-deployment cf.yml
+
+  pushd diego-release > /dev/null
+    ./scripts/generate-deployment-manifest \
+      -c $ROOT/cf.yml \
+      -i $ROOT/etcd-cf-env/stubs/diego/iaas-settings.yml \
+      -p $ROOT/etcd-cf-env/stubs/diego/property-overrides.yml \
+      -n $ROOT/etcd-cf-env/stubs/diego/instance-count-overrides.yml \
+      -v $ROOT/etcd-cf-env/stubs/diego/release-versions.yml \
+      > $ROOT/diego.yml
+  popd > /dev/null
+
+  bosh -n \
+    -d diego.yml \
+    -t ${BOSH_DIRECTOR} \
+    deploy
+}
+
+function upload_release() {
+  local release
+  release=${1}
+  bosh -t ${BOSH_DIRECTOR} upload release https://bosh.io/d/github.com/${release}
+}
+
+function main() {
+  upload_release "cloudfoundry/cflinuxfs2-rootfs-release"
+  upload_release "cloudfoundry-incubator/diego-release"
+  upload_release "cloudfoundry-incubator/garden-linux-release"
+
+  deploy_diego
+}
+
+main

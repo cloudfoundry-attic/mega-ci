@@ -4,12 +4,15 @@ groups:
   - check-git-submodules
   - test-etcd-metrics-server
   - test-etcd
-  - create-final-release
-  - merge-master-into-develop
   - deploy-bosh-lite-manifests
   - deploy-aws-manifests
   - deploy-with-cf
+  - deploy-with-diego
   - test-with-cf
+  - test-with-diego
+  - delete-deployments
+  - create-final-release
+  - merge-master-into-develop
 
 resources:
 - name: mega-ci-env
@@ -18,6 +21,12 @@ resources:
     branch: master
     private_key: {{mega-ci-env-private-key}}
     uri: git@github.com:cloudfoundry/mega-ci-env.git
+- name: etcd-cf-env
+  type: git
+  source:
+    branch: master
+    private_key: {{etcd-cf-env-private-key}}
+    uri: git@github.com:cloudfoundry/etcd-cf-env.git
 - name: oss-s3-buckets-stack
   type: git
   source:
@@ -53,11 +62,22 @@ resources:
     branch: master
     ignore_paths: [.final_builds, releases]
     uri: https://github.com/cloudfoundry-incubator/consul-release.git
+- name: diego-release-master
+  type: git
+  source:
+    branch: master
+    ignore_paths: [.final_builds, releases]
+    uri: https://github.com/cloudfoundry-incubator/diego-release.git
 - name: cf-deployment
   type: git
   source:
     branch: master
     uri: https://github.com/cloudfoundry/cf-deployment.git
+- name: cf-acceptance-tests
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
 - name: bosh-lite
   type: git
   source:
@@ -175,11 +195,10 @@ jobs:
 
 - name: deploy-with-cf
   public: false
-  serial_group: [deploy_etcd]
+  serial_group: [cf, diego]
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
+    - get: etcd-cf-env
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
@@ -190,42 +209,108 @@ jobs:
     file: mega-ci/scripts/ci/deploy-etcd-cf/task.yml
     config:
       params:
-        STUB_PATH: {{cf_stub_path}}
-        STUB_PARTS_PATH: {{cf_stub_parts_path}}
-        BOSH_DIRECTOR: {{cf_bosh_director}}
-        BOSH_USER: {{cf_bosh_user}}
-        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
+        BOSH_USER: {{etcd_cf_bosh_user}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
         CF_DEPLOYMENT_TRACE: true
+
+- name: deploy-with-diego
+  public: false
+  serial_group: [cf, diego]
+  plan:
+  - aggregate:
+    - get: etcd-cf-env
+    - get: mega-ci
+    - get: diego-release
+      resource: diego-release-master
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [deploy-with-cf]
+      trigger: true
+  - task: deploy-etcd-diego
+    file: mega-ci/scripts/ci/deploy-etcd-diego/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
+        BOSH_USER: {{etcd_cf_bosh_user}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
 
 - name: test-with-cf
   public: false
-  serial_group: [deploy_etcd]
+  serial_group: [cf]
   plan:
   - aggregate:
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
-      passed: [deploy-with-cf]
+      passed: [deploy-with-diego]
       trigger: true
   - task: run-cats
     file: mega-ci/scripts/ci/run-bosh-command.yml
     config:
       params:
+        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
+        BOSH_USER: {{etcd_cf_bosh_user}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
         DEPLOYMENT_NAME: etcd-cf-deployment
         COMMAND: run errand acceptance_tests
-        BOSH_DIRECTOR: {{cf_bosh_director}}
-        BOSH_USER: {{cf_bosh_user}}
-        BOSH_PASSWORD: {{cf_bosh_password}}
-    on_success:
-      task: delete-deployment
-      file: mega-ci/scripts/ci/run-bosh-command.yml
-      config:
-        params:
-          DEPLOYMENT_NAME: etcd-cf-deployment
-          COMMAND: delete deployment etcd-cf-deployment
-          BOSH_DIRECTOR: {{cf_bosh_director}}
-          BOSH_USER: {{cf_bosh_user}}
-          BOSH_PASSWORD: {{cf_bosh_password}}
+
+- name: test-with-diego
+  public: false
+  serial_group: [diego]
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: cf-acceptance-tests
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [deploy-with-diego]
+      trigger: true
+  - task: run-cats
+    file: mega-ci/scripts/ci/test-diego/task.yml
+    config:
+      params:
+        CF_DOMAIN: {{etcd_cf_domain}}
+        CF_USER: {{etcd_cf_user}}
+        CF_PASSWORD: {{etcd_cf_password}}
+
+- name: delete-deployments
+  public: false
+  serial_group: [cf, diego]
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed:
+      - test-with-cf
+      - test-with-diego
+      trigger: true
+  - task: delete-diego-deployment
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        DEPLOYMENT_NAME: etcd-cf-deployment-diego
+        COMMAND: delete deployment etcd-cf-deployment-diego
+        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
+        BOSH_USER: {{etcd_cf_bosh_user}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+  - task: delete-cf-deployment
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        DEPLOYMENT_NAME: etcd-cf-deployment
+        COMMAND: delete deployment etcd-cf-deployment
+        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
+        BOSH_USER: {{etcd_cf_bosh_user}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+  - task: cleanup-releases
+    file: mega-ci/scripts/ci/run-bosh-cleanup.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
+        BOSH_USER: {{etcd_cf_bosh_user}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
 
 - name: create-final-release
   public: true
@@ -237,7 +322,7 @@ jobs:
       resource: oss-s3-buckets-stack
     - get: release-repo
       resource: etcd-release-develop
-      passed: [test-with-cf]
+      passed: [delete-deployments]
       trigger: true
     - get: release-repo-master
       resource: etcd-release-master
