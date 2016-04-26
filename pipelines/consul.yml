@@ -189,7 +189,7 @@ jobs:
 
 - name: deploy-with-cf
   public: false
-  serial_group: [cf, diego]
+  serial_groups: [cf, diego]
   plan:
   - aggregate:
     - get: consul-cf-env
@@ -210,7 +210,7 @@ jobs:
 
 - name: deploy-with-diego
   public: false
-  serial_group: [cf, diego]
+  serial_groups: [cf, diego]
   plan:
   - aggregate:
     - get: consul-cf-env
@@ -231,7 +231,7 @@ jobs:
 
 - name: test-with-cf
   public: false
-  serial_group: [cf]
+  serial_groups: [cf]
   plan:
   - aggregate:
     - get: mega-ci
@@ -251,7 +251,7 @@ jobs:
 
 - name: test-with-diego
   public: false
-  serial_group: [diego]
+  serial_groups: [diego]
   plan:
   - aggregate:
     - get: mega-ci
@@ -270,7 +270,7 @@ jobs:
 
 - name: delete-deployments
   public: false
-  serial_group: [cf, diego]
+  serial_groups: [cf, diego]
   plan:
   - aggregate:
     - get: mega-ci
