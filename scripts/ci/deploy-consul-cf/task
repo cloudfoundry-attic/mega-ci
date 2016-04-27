@@ -1,12 +1,5 @@
 #!/bin/bash -exu
 
-setup_ruby() {
-  set +eu
-  source /usr/local/share/chruby/chruby.sh
-  chruby 2.2.4
-  set -eu
-}
-
 generate_deployment_config() {
   local dir="${1}"
   local deployments_dir="${2}"
@@ -43,7 +36,6 @@ deploy() {
 
 main() {
   preflight_check
-  setup_ruby
 
   generate_deployment_config \
     "${PWD}" \
