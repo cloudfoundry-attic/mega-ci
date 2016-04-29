@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <style>
+      html, body {
+        margin:0;
+        padding:0;
+      }
+
+      iframe {
+          width: 100%;
+      }
+
+      .can-i-bump {
+          height: 15%;
+      }
+
+      .pipeline {
+          height: 85%;
+      }
+    </style>
+    <script>
+      window.setInterval("reloadIFrame();", 30000);
+
+      function reloadIFrame() {
+        document.querySelector(".can-i-bump").src += ""
+      }
+    </script>
+  </head>
+  <body>
+    <iframe class="can-i-bump" src="https://canibump.cfapps.io"></iframe>
+    <iframe class="pipeline" src="https://runtime.ci.cf-app.com/pipelines/cf-release"></iframe>
+  </body>
+</html>

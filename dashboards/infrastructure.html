@@ -1,0 +1,47 @@
+<html>
+  <head>
+    <style>
+      html, body {
+        margin:0;
+        padding:0;
+      }
+
+      iframe {
+          width: 100%;
+      }
+
+      .short-pipeline {
+          height: 16.4%;
+      }
+
+      .long-pipeline {
+          height: 33%;
+      }
+
+      .small-column {
+          width:25%;
+          float:left;
+      }
+
+      .large-column {
+          width:auto;
+          overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="small-column">
+      <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/bosh-bootloader"></iframe>
+      <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/bosh-test"></iframe>
+      <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/destiny"></iframe>
+      <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/gomegamatchers"></iframe>
+      <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/bootload-mega-ci"></iframe>
+      <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/check-a-record"></iframe>
+    </div>
+    <div class="large-column">
+      <iframe class="long-pipeline" src="https://mega.ci.cf-app.com/pipelines/etcd"></iframe>
+      <iframe class="long-pipeline" src="https://mega.ci.cf-app.com/pipelines/consul"></iframe>
+      <iframe class="long-pipeline" src="https://mega.ci.cf-app.com/pipelines/mega-ci"></iframe>
+    </div>
+  </body>
+</html>
