@@ -6,3 +6,10 @@ source ~/.bashrc
 
 ./mega-ci/scripts/setup_aws_bosh_for_concourse $DEPLOYMENT_DIR
 
+git config --global user.email "cf-infrastructure@pivotal.io"
+git config --global user.name "bootload-mega-ci"
+
+pushd ./private-credentials > /dev/null
+  git add artifacts/deployments/bosh-state.json
+  git commit -m "Update bosh-state.json"
+popd

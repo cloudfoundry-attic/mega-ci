@@ -8,8 +8,7 @@ resources:
   type: git
   source:
     branch: master
-    private_key: {{mega-ci-env-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci-env.git
+    private_key: {{mega-ci-env-writeable-private-key}}
 - name: mega-ci
   type: git
   source:
@@ -29,4 +28,4 @@ jobs:
     config:
       params:
         DEPLOYMENT_DIR: 'private-credentials'
-
+  - put: mega-ci-env
