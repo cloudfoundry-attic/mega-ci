@@ -1,4 +1,13 @@
 ---
+groups:
+- name: mega-ci
+  jobs:
+  - minimal-docker-image
+  - golang-docker-image
+  - deployment-docker-image
+  - vagrant-docker-image
+  - mega-ci-unit-tests
+
 resources:
 - name: mega-ci-master
   type: git

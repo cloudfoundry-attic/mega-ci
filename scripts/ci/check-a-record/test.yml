@@ -1,0 +1,11 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/golang
+
+inputs:
+- name: check-a-record
+- name: mega-ci
+
+run:
+  path: mega-ci/scripts/ci/check-a-record/test
