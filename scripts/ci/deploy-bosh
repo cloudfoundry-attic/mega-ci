@@ -10,6 +10,7 @@ git config --global user.email "cf-infrastructure@pivotal.io"
 git config --global user.name "bootload-mega-ci"
 
 pushd ./private-credentials > /dev/null
+  git checkout master
   git add artifacts/deployments/bosh-state.json
   git commit -m "Update bosh-state.json"
 popd
