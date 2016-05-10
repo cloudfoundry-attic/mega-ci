@@ -133,8 +133,7 @@ bosh -n upload release $GARDEN_RELEASE_PATH --skip-if-exists
 bosh \
   -n \
   -d "${deployment_dir}/artifacts/deployments/concourse.yml" \
-  deploy \
-  --redact-diff
+  deploy
 
 # display result
 LOAD_BALANCER_DNSName=$(aws elb describe-load-balancers --load-balancer-names $LOAD_BALANCER| jq -r .LoadBalancerDescriptions[0].DNSName)

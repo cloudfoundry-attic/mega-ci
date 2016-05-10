@@ -110,7 +110,7 @@ var _ = Describe("Task", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(bytes.TrimSpace(outputFileContents)).
-			To(Equal([]byte("-n -t bosh.example.com -d manifest.yml deploy --redact-diff")))
+			To(Equal([]byte("-n -t bosh.example.com -d manifest.yml deploy")))
 	})
 
 	Describe("preflight_check", func() {
