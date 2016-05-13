@@ -11,6 +11,7 @@ RUN \
             libreadline6-dev \
             wget \
             runit \
+            lsof \
       && \
       apt-get clean
 
