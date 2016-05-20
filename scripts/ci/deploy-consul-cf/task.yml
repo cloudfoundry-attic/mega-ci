@@ -4,7 +4,7 @@ platform: linux
 image: docker:///cfinfrastructure/deployment
 
 inputs:
-  - name: cf-deployment
+  - name: cf-release
   - name: consul-cf-env
   - name: consul-release
   - name: mega-ci

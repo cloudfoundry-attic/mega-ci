@@ -62,11 +62,11 @@ resources:
     branch: master
     ignore_paths: [.final_builds, releases]
     uri: https://github.com/cloudfoundry-incubator/diego-release.git
-- name: cf-deployment
+- name: cf-release
   type: git
   source:
-    branch: master
-    uri: https://github.com/cloudfoundry/cf-deployment.git
+    branch: develop
+    uri: https://github.com/cloudfoundry/cf-release.git
 - name: cf-acceptance-tests
   type: git
   source:
@@ -188,7 +188,7 @@ jobs:
         REGISTRY_PASSWORD: {{registry_password}}
 
 - name: deploy-with-cf
-  public: false
+  public: true
   serial_groups: [cf, diego]
   plan:
   - aggregate:
@@ -198,7 +198,7 @@ jobs:
       resource: consul-release-develop
       passed: [test-consul]
       trigger: true
-    - get: cf-deployment
+    - get: cf-release
   - task: deploy-consul-cf
     file: mega-ci/scripts/ci/deploy-consul-cf/task.yml
     config:
@@ -209,7 +209,7 @@ jobs:
         CF_DEPLOYMENT_TRACE: true
 
 - name: deploy-with-diego
-  public: false
+  public: true
   serial_groups: [cf, diego]
   plan:
   - aggregate:
@@ -230,7 +230,7 @@ jobs:
         BOSH_PASSWORD: {{consul_cf_bosh_password}}
 
 - name: test-with-cf
-  public: false
+  public: true
   serial_groups: [cf]
   plan:
   - aggregate:
@@ -250,7 +250,7 @@ jobs:
         COMMAND: run errand acceptance_tests
 
 - name: test-with-diego
-  public: false
+  public: true
   serial_groups: [diego]
   plan:
   - aggregate:
@@ -269,7 +269,7 @@ jobs:
         CF_PASSWORD: {{consul_cf_password}}
 
 - name: delete-deployments
-  public: false
+  public: true
   serial_groups: [cf, diego]
   plan:
   - aggregate:
