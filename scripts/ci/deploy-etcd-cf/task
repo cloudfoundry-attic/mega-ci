@@ -1,28 +1,11 @@
 #!/bin/bash -exu
 
-generate_deployment_config() {
-  local dir="${1}"
-  local deployments_dir="${2}"
-  local stubs="${@:3}"
-  local stubs_array="$(jq -n --arg v "${stubs}" '{ v: $v | split(" ") }' | jq -c .v)"
-
-  cat <<CONFIG
-{
-	"cf": "integration-latest",
-	"etcd": "${dir}/etcd-release",
-	"deployments-dir": "${deployments_dir}",
-	"stemcell": "integration-latest",
-	"stubs": ${stubs_array}
-}
-CONFIG
-}
-
 preflight_check() {
-	set +x
-	test -n "${BOSH_DIRECTOR}"
-	test -n "${BOSH_USER}"
-	test -n "${BOSH_PASSWORD}"
-	set -x
+  set +x
+  test -n "${BOSH_DIRECTOR}"
+  test -n "${BOSH_USER}"
+  test -n "${BOSH_PASSWORD}"
+  set -x
 }
 
 deploy() {
@@ -33,27 +16,88 @@ deploy() {
     deploy
 }
 
+generate_releases_stub() {
+  local build_dir
+  build_dir="${1}"
+
+  cat <<EOF
+---
+releases:
+- name: cf
+  version: create
+  url: file://${build_dir}/cf-release
+- name: etcd
+  version: create
+  url: file://${build_dir}/etcd-release
+EOF
+}
+
+generate_stemcell_stub() {
+  pushd /tmp > /dev/null
+    curl -Ls -o /dev/null -w %{url_effective} https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent | xargs -n 1 curl -O
+  popd > /dev/null
+
+  local stemcell_filename
+  stemcell_filename=$(echo /tmp/light-bosh-stemcell-*-aws-xen-hvm-ubuntu-trusty-go_agent.tgz)
+
+  local stemcell_version
+  stemcell_version=$(echo ${stemcell_filename} | cut -d "-" -f4)
+
+  cat <<EOF
+---
+meta:
+  stemcell:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    version: ${stemcell_version}
+    url: file://${stemcell_filename}
+EOF
+}
+
+generate_job_templates_stub() {
+  cat <<EOF
+meta:
+  <<: (( merge ))
+  etcd_templates:
+  - name: etcd
+    release: etcd
+  - name: etcd_metrics_server
+    release: etcd
+  consul_templates:
+  - name: consul_agent
+    release: cf
+EOF
+}
+
 main() {
+  local root_dir
+  root_dir=$PWD
+
   preflight_check
 
-  generate_deployment_config \
-    "${PWD}" \
-    "${PWD}" \
-    "${PWD}/etcd-cf-env/stubs/director-uuid.yml" \
-    "${PWD}/etcd-cf-env/stubs/cf/diego.yml" \
-    "${PWD}/etcd-cf-env/stubs/cf/properties.yml" \
-    "${PWD}/etcd-cf-env/stubs/cf/stub.yml" \
-    > "${PWD}/config.json"
+  mkdir stubs
 
-  "${PWD}/cf-deployment/tools/prepare-deployments" \
-	  "aws" \
-	  "${PWD}/config.json"
+  pushd stubs > /dev/null
+    generate_releases_stub ${root_dir} > releases.yml
+    generate_stemcell_stub > stemcells.yml
+    generate_job_templates_stub > job_templates.yml
+  popd > /dev/null
+
+  "${root_dir}/cf-release/scripts/generate_deployment_manifest" \
+    "aws" \
+    "${root_dir}/stubs/releases.yml" \
+    "${root_dir}/stubs/stemcells.yml" \
+    "${root_dir}/stubs/job_templates.yml" \
+    "${root_dir}/etcd-cf-env/stubs/director-uuid.yml" \
+    "${root_dir}/etcd-cf-env/stubs/cf/diego.yml" \
+    "${root_dir}/etcd-cf-env/stubs/cf/properties.yml" \
+    "${root_dir}/etcd-cf-env/stubs/cf/stub.yml" \
+     > "${root_dir}/cf.yml"
 
   deploy \
-	  "${BOSH_DIRECTOR}" \
-	  "${PWD}/cf.yml"
+    "${BOSH_DIRECTOR}" \
+    "${root_dir}/cf.yml"
 }
 
 if [ "$(basename "${0}")" = "task" ]; then
-	main
+  main
 fi
