@@ -120,6 +120,7 @@ jobs:
         BOSH_LITE_NAME: bosh-lite-consul
         BOSH_LITE_KEYPAIR: bosh-lite
         BOSH_LITE_PRIVATE_KEY_CONTENTS: {{bosh-lite-private-key}}
+        MANIFESTS: "manifests/bosh-lite/3-node-with-ssl.yml"
 
 - name: deploy-aws-manifests
   public: true

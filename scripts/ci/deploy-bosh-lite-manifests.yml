@@ -17,6 +17,8 @@ params:
   BOSH_LITE_NAME:
   BOSH_LITE_KEYPAIR:
   BOSH_LITE_PRIVATE_KEY_CONTENTS:
+  MANIFESTS:
+  DEPENDENCIES:
 
 run:
   path: mega-ci/scripts/ci/deploy-bosh-lite-manifests
