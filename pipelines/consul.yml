@@ -8,7 +8,6 @@ groups:
   - test-consul
   - deploy-with-cf
   - deploy-with-diego
-  - test-with-cf
   - test-with-diego
   - delete-deployments
   - create-final-release
@@ -67,11 +66,6 @@ resources:
   source:
     branch: develop
     uri: https://github.com/cloudfoundry/cf-release.git
-- name: cf-acceptance-tests
-  type: git
-  source:
-    branch: master
-    uri: https://github.com/cloudfoundry/cf-acceptance-tests.git
 - name: bosh-lite
   type: git
   source:
@@ -190,7 +184,7 @@ jobs:
 
 - name: deploy-with-cf
   public: true
-  serial_groups: [cf, diego]
+  serial_groups: [cf]
   plan:
   - aggregate:
     - get: consul-cf-env
@@ -211,7 +205,7 @@ jobs:
 
 - name: deploy-with-diego
   public: true
-  serial_groups: [cf, diego]
+  serial_groups: [cf]
   plan:
   - aggregate:
     - get: consul-cf-env
@@ -230,33 +224,12 @@ jobs:
         BOSH_USER: {{consul_cf_bosh_user}}
         BOSH_PASSWORD: {{consul_cf_bosh_password}}
 
-- name: test-with-cf
+- name: test-with-diego
   public: true
   serial_groups: [cf]
   plan:
   - aggregate:
     - get: mega-ci
-    - get: consul-release
-      resource: consul-release-develop
-      passed: [deploy-with-diego]
-      trigger: true
-  - task: run-cats
-    file: mega-ci/scripts/ci/run-bosh-command.yml
-    config:
-      params:
-        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
-        BOSH_USER: {{consul_cf_bosh_user}}
-        BOSH_PASSWORD: {{consul_cf_bosh_password}}
-        DEPLOYMENT_NAME: consul-cf-deployment
-        COMMAND: run errand acceptance_tests
-
-- name: test-with-diego
-  public: true
-  serial_groups: [diego]
-  plan:
-  - aggregate:
-    - get: mega-ci
-    - get: cf-acceptance-tests
     - get: consul-release
       resource: consul-release-develop
       passed: [deploy-with-diego]
@@ -268,17 +241,20 @@ jobs:
         CF_DOMAIN: {{consul_cf_domain}}
         CF_USER: {{consul_cf_user}}
         CF_PASSWORD: {{consul_cf_password}}
+        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
+        BOSH_USER: {{consul_cf_bosh_user}}
+        BOSH_PASSWORD: {{consul_cf_bosh_password}}
+        DEPLOYMENT_NAME: consul-cf-deployment
 
 - name: delete-deployments
   public: true
-  serial_groups: [cf, diego]
+  serial_groups: [cf]
   plan:
   - aggregate:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
       passed:
-      - test-with-cf
       - test-with-diego
       trigger: true
   - task: delete-diego-deployment
