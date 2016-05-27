@@ -21,14 +21,10 @@ jobs:
   public: true
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
+    - get: mega-ci-env
     - get: mega-ci
   - task: deploy-bosh
     file: mega-ci/scripts/ci/deploy-bosh.yml
-    config:
-      params:
-        DEPLOYMENT_DIR: 'private-credentials'
   - put: mega-ci-env
     params:
-      repository: private-credentials
+      repository: mega-ci-env
