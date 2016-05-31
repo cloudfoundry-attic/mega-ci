@@ -18,16 +18,9 @@
           height: 85%;
       }
     </style>
-    <script>
-      window.setInterval("reloadIFrame();", 30000);
-
-      function reloadIFrame() {
-        document.querySelector(".can-i-bump").src += ""
-      }
-    </script>
   </head>
   <body>
-    <iframe class="can-i-bump" src="https://canibump.cfapps.io"></iframe>
+    <iframe class="can-i-bump" src="canibump_iframe.html"></iframe>
     <iframe class="pipeline" src="https://runtime.ci.cf-app.com/pipelines/cf-release"></iframe>
   </body>
 </html>
