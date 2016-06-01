@@ -2,13 +2,14 @@
 
 ./mega-ci/scripts/setup_aws_bosh_for_concourse "mega-ci-env"
 
-git config user.name "CF MEGA BOT"
-git config user.email "cf-mega@pivotal.io"
+git config --global user.name "CF MEGA BOT"
+git config --global user.email "cf-mega@pivotal.io"
 
 pushd mega-ci-env > /dev/null
   git checkout master
   git add artifacts/deployments/bosh-state.json
-  git commit -m "Update bosh-state.json"
+  git add artifacts/deployments/bosh.yml
+  git commit -m "Update bosh-state.json and bosh.yml"
 popd > /dev/null
 
 shopt -s dotglob
