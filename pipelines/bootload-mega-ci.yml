@@ -27,4 +27,4 @@ jobs:
     file: mega-ci/scripts/ci/deploy-bosh.yml
   - put: mega-ci-env
     params:
-      repository: mega-ci-env
+      repository: mega-ci-env-out

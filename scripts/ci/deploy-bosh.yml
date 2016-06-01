@@ -7,6 +7,9 @@ inputs:
   - name: mega-ci
   - name: mega-ci-env
 
+outputs:
+  - name: mega-ci-env-out
+
 run:
   path: mega-ci/scripts/ci/deploy-bosh
 
