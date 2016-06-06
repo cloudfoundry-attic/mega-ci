@@ -3,6 +3,7 @@ groups:
   jobs:
   - test-bosh-bootloader
   - integration-tests
+  - concourse-integration-tests
 
 resources:
 - name: bosh-bootloader
@@ -37,6 +38,22 @@ jobs:
       trigger: true
   - task: test
     file: mega-ci/scripts/ci/bosh-bootloader/integration.yml
+    config:
+      params:
+        AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
+        AWS_REGION: {{aws_region}}
+
+- name: concourse-integration-tests
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: bosh-bootloader
+      passed: [integration-tests]
+      trigger: true
+  - task: test
+    file: mega-ci/scripts/ci/bosh-bootloader/concourse-integration.yml
     config:
       params:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
