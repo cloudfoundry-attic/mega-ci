@@ -15,5 +15,5 @@ pushd "${GOPATH}/src/github.com/pivotal-cf-experimental" > /dev/null
   }
 EOF
   set -x
-  BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/concourse_integration_test
+  BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/concourse_integration_tests
 popd > /dev/null
