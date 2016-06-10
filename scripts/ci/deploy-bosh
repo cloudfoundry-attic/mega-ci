@@ -9,7 +9,9 @@ pushd mega-ci-env > /dev/null
   git checkout master
   git add artifacts/deployments/bosh-state.json
   git add artifacts/deployments/bosh.yml
+  set +e
   git commit -m "Update bosh-state.json and bosh.yml"
+  set -e
 popd > /dev/null
 
 shopt -s dotglob
