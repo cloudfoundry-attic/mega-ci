@@ -72,7 +72,7 @@ resource_pools:
   cloud_properties:
     availability_zone: AWS_AVAILABILITY_ZONE
     ephemeral_disk:
-      size: 1024
+      size: 2048
       type: gp2
     instance_type: m3.medium
 
