@@ -14,8 +14,6 @@ type BOSH struct {
 			TaskId int
 			Error  error
 		}
-
-		ReceivedManifests [][]byte
 	}
 
 	InfoCall struct {
@@ -49,7 +47,6 @@ type BOSH struct {
 func (b *BOSH) Deploy(manifest []byte) (int, error) {
 	b.DeployCall.CallCount++
 	b.DeployCall.Receives.Manifest = manifest
-	b.DeployCall.ReceivedManifests = append(b.DeployCall.ReceivedManifests, manifest)
 	return b.DeployCall.Returns.TaskId, b.DeployCall.Returns.Error
 }
 

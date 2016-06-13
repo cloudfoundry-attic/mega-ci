@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/cloudfoundry-incubator/candiedyaml"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/clients"
@@ -30,32 +28,25 @@ func NewAWSDeployer(bosh clients.BOSH, subnetChecker SubnetChecker, stdout io.Wr
 	}
 }
 
-func (a AWSDeployer) Deploy(manifestsDirectoryOrFile string) error {
-	manifestsToDeploy, err := manifestsInDirectory(manifestsDirectoryOrFile)
+func (a AWSDeployer) Deploy(manifestFilename string) error {
+	fmt.Fprintf(a.stdout, "deploying manifest: %s\n", manifestFilename)
+	fmt.Fprintln(a.stdout, "checking subnets...")
+	hasSubnets, err := a.subnetChecker.CheckSubnets(manifestFilename)
 	if err != nil {
 		return err
 	}
 
-	for _, manifestFilename := range manifestsToDeploy {
-		fmt.Fprintf(a.stdout, "found manifest: %s\n", manifestFilename)
-		fmt.Fprintln(a.stdout, "checking subnets...")
-		hasSubnets, err := a.subnetChecker.CheckSubnets(manifestFilename)
-		if err != nil {
-			return err
-		}
-
-		if !hasSubnets {
-			return errors.New("manifest subnets not found on AWS")
-		}
-
-		fmt.Fprintln(a.stdout, "found all manifest subnets on AWS")
-
-		err = a.deployManifest(manifestFilename)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintln(a.stdout, "\n\n")
+	if !hasSubnets {
+		return errors.New("manifest subnets not found on AWS")
 	}
+
+	fmt.Fprintln(a.stdout, "found all manifest subnets on AWS")
+
+	err = a.deployManifest(manifestFilename)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(a.stdout, "\n\n")
 
 	return nil
 }
@@ -85,27 +76,6 @@ func (a AWSDeployer) deployManifest(manifestFilename string) error {
 	}
 
 	return nil
-}
-
-func manifestsInDirectory(directory string) ([]string, error) {
-	var manifests []string
-	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if filepath.Ext(path) == ".yml" {
-			manifests = append(manifests, path)
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return []string{}, err
-	}
-
-	return manifests, nil
 }
 
 func (a AWSDeployer) replaceUUID(manifestFilename string) (map[string]interface{}, error) {

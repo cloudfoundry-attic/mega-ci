@@ -33,7 +33,7 @@ var _ = Describe("BOSH", func() {
 			manifest := []byte("some-manifest")
 			err := client.Deploy(manifest)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(boshClient.DeployCall.ReceivedManifests[0]).To(Equal([]byte("some-manifest")))
+			Expect(boshClient.DeployCall.Receives.Manifest).To(Equal([]byte("some-manifest")))
 
 			Expect(boshClient.GetTaskOutputCall.Receives.TaskId).To(Equal(1))
 			Expect(logger.String()).To(ContainSubstring("Bosh Task 1:"))
