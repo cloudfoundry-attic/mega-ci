@@ -9,7 +9,7 @@ resources:
 - name: bosh-bootloader
   type: git
   source:
-    branch: master
+    branch: develop
     uri: https://github.com/pivotal-cf-experimental/bosh-bootloader.git
 - name: mega-ci
   type: git
