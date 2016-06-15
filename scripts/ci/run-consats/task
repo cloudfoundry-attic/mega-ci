@@ -13,19 +13,19 @@ function main() {
   generate_manifest
 
   pushd "${ROOT}/consul-release" > /dev/null
-	bosh -n create release
-	bosh upload release --rebase
+    bosh -n create release
+    bosh upload release --rebase
 
-	bosh upload release \
-	  "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
+    bosh upload release \
+      "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
 
-	bosh upload release \
-	  "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=44"
+    bosh upload release \
+      "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=44"
 
-	bosh deployment aws/consats.yml
-	bosh -n deploy
+    bosh deployment aws/consats.yml
+    bosh -n deploy
 
-	bosh run errand acceptance-tests
+    bosh run errand acceptance-tests
   popd > /dev/null
 
   cleanup_deployment "consul"
@@ -39,14 +39,14 @@ function generate_manifest() {
   mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
 
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
-	ln -s "${ROOT}/mega-ci"
-	
-	pushd "${GOPATH}/src/github.com/cloudfoundry/mega-ci" > /dev/null
-	  GO15VENDOREXPERIMENT=1 go run \
-		  "./scripts/ci/run-consats/generate_manifest.go" \
-		  "${ROOT}/consul-release/manifests/aws/consats.yml" \
-		  > "${ROOT}/consul-release/aws/consats.yml"
-	popd > /dev/null
+    ln -s "${ROOT}/mega-ci"
+
+    pushd "${GOPATH}/src/github.com/cloudfoundry/mega-ci" > /dev/null
+      GO15VENDOREXPERIMENT=1 go run \
+        "./scripts/ci/run-consats/generate_manifest.go" \
+        "${ROOT}/consul-release/manifests/aws/consats.yml" \
+        > "${ROOT}/consul-release/aws/consats.yml"
+    popd > /dev/null
   popd > /dev/null
 }
 
@@ -55,7 +55,7 @@ function cleanup_deployment() {
   deployment="${1}-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}"
 
   for i in $(bosh deployments | grep -o "${deployment}" | uniq); do
-	bosh -n delete deployment $i
+    bosh -n delete deployment $i
   done
 
   test -z "$(bosh deployments | grep "${deployment}")"
