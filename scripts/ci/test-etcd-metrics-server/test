@@ -4,7 +4,7 @@ function main() {
   local root
   root="${1}"
 
-  curl -L https://github.com/coreos/etcd/releases/download/v2.0.0/etcd-v2.0.0-linux-amd64.tar.gz | tar zxf - -C /tmp
+  curl -L https://github.com/coreos/etcd/releases/download/v2.1.1/etcd-v2.1.1-linux-amd64.tar.gz | tar zxf - -C /tmp
   curl -L https://github.com/nats-io/gnatsd/releases/download/v0.6.0/gnatsd-v0.6.0-linux-amd64.tar.gz | tar zxf - -C /tmp
 
   mkdir -p "${GOPATH}/src/github.com/cloudfoundry-incubator"
@@ -15,10 +15,10 @@ function main() {
       export PATH="${PWD}/Godeps/_workspace/bin:${PATH}"
 
       mkdir -p "${PWD}/Godeps/_workspace/bin"
-      cp /tmp/etcd-v2.0.0-linux-amd64/etcd "${PWD}/Godeps/_workspace/bin/"
+      cp /tmp/etcd-v2.1.1-linux-amd64/etcd "${PWD}/Godeps/_workspace/bin/"
       cp /tmp/gnatsd "${PWD}/Godeps/_workspace/bin/"
 
-      ginkgo -r -race -failOnPending -randomizeAllSpecs
+      ginkgo -r -race -randomizeAllSpecs -randomizeSuites
     popd > /dev/null
 
   popd > /dev/null
