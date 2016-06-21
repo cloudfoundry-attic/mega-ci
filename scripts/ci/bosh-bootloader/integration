@@ -26,13 +26,9 @@ EOF
 }
 
 function finish() {
-  if [ ! "$(ls -A ${STATE_DIR})" ]; then
-       echo "no assets to save"
-  else
-    pushd "${ROOT}/bbl-integration-s3" > /dev/null
-      tar -cvzf "${CURRENT_TIME}.tgz" "${CURRENT_TIME}"
-    popd > /dev/null
-  fi
+  pushd "${ROOT}/bbl-integration-s3" > /dev/null
+    tar -cvzf "${CURRENT_TIME}.tgz" "${CURRENT_TIME}"
+  popd > /dev/null
 }
 trap finish EXIT
 

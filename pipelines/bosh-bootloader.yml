@@ -50,9 +50,10 @@ jobs:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
         AWS_REGION: {{aws_region}}
-  - put: bbl-integration-s3
-    params:
-      file: bbl-integration-s3/*.tgz
+    on_failure:
+      put: bbl-integration-s3
+      params:
+        file: bbl-integration-s3/*.tgz
 
 - name: concourse-integration-tests
   public: true
@@ -69,6 +70,7 @@ jobs:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
         AWS_REGION: {{aws_region}}
-  - put: bbl-integration-s3
-    params:
-      file: bbl-integration-s3/*.tgz
+    on_failure:
+      put: bbl-integration-s3
+      params:
+        file: bbl-integration-s3/*.tgz
