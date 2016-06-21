@@ -4,8 +4,10 @@ platform: linux
 image: docker:///cfinfrastructure/deployment
 
 inputs:
-- name: bosh-bootloader
-- name: mega-ci
+  - name: bosh-bootloader
+  - name: mega-ci
+outputs:
+  - name: bbl-integration-s3
 
 run:
   path: mega-ci/scripts/ci/bosh-bootloader/integration

@@ -16,6 +16,13 @@ resources:
   source:
     branch: master
     uri: https://github.com/cloudfoundry/mega-ci.git
+- name: bbl-integration-s3
+  type: s3
+  source:
+    bucket: bbl-integration-tests
+    regexp: (.*).tgz
+    access_key_id: {{bbl_integration_tests_s3_access_key_id}}
+    secret_access_key: {{bbl_integration_tests_s3_secret_access_key}}
 
 jobs:
 - name: test-bosh-bootloader
@@ -43,6 +50,9 @@ jobs:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
         AWS_REGION: {{aws_region}}
+  - put: bbl-integration-s3
+    params:
+      file: bbl-integration-s3/*.tgz
 
 - name: concourse-integration-tests
   public: true
@@ -59,3 +69,6 @@ jobs:
         AWS_ACCESS_KEY_ID: {{aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{aws_secret_access_key}}
         AWS_REGION: {{aws_region}}
+  - put: bbl-integration-s3
+    params:
+      file: bbl-integration-s3/*.tgz
