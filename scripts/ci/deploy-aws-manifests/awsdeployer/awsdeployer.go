@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cloudfoundry-incubator/candiedyaml"
+	"gopkg.in/yaml.v2"
+
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/clients"
 	"github.com/cloudfoundry/mega-ci/scripts/ci/deploy-aws-manifests/manifests"
 )
@@ -58,7 +59,7 @@ func (a AWSDeployer) deployManifest(manifestFilename string) error {
 		return err
 	}
 
-	buf, err := candiedyaml.Marshal(manifest)
+	buf, err := yaml.Marshal(manifest)
 	if err != nil {
 		return err
 	}

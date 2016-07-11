@@ -76,6 +76,22 @@ var _ = Describe("manifests", func() {
 			Expect(networks[1].Subnets[0].CloudProperties.Subnet).To(Equal("subnet-2"))
 			Expect(networks[1].Subnets[0].Range).To(Equal("10.1.20.0/24"))
 		})
+
+		Context("failure cases", func() {
+			It("returns an error when given invalid yaml", func() {
+				manifestFile := filepath.Join(manifestsDirectory, "invalid_manifest.yml")
+				err := ioutil.WriteFile(manifestFile, []byte("not: valid: yaml:"), os.ModePerm)
+				Expect(err).NotTo(HaveOccurred())
+
+				_, err = manifests.ReadNetworksFromManifest(manifestFile)
+				Expect(err.Error()).To(ContainSubstring("mapping values are not allowed in this context"))
+			})
+
+			It("returns an error when the file doesn't exist", func() {
+				_, err = manifests.ReadNetworksFromManifest("/nonexistent/file")
+				Expect(err.Error()).To(ContainSubstring("no such file or directory"))
+			})
+		})
 	})
 
 })

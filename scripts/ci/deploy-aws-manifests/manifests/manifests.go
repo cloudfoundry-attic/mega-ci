@@ -1,9 +1,9 @@
 package manifests
 
 import (
-	"os"
+	"io/ioutil"
 
-	"github.com/cloudfoundry-incubator/candiedyaml"
+	"gopkg.in/yaml.v2"
 )
 
 type Manifest struct {
@@ -19,16 +19,14 @@ type Network struct {
 	}
 }
 
-func ReadManifest(manifestFile string) (map[string]interface{}, error) {
-	file, err := os.Open(manifestFile)
+func ReadManifest(manifestFilename string) (map[string]interface{}, error) {
+	contents, err := ioutil.ReadFile(manifestFilename)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
 	var document map[string]interface{}
-	err = candiedyaml.NewDecoder(file).Decode(&document)
-
+	err = yaml.Unmarshal(contents, &document)
 	if err != nil {
 		return nil, err
 	}
@@ -37,14 +35,13 @@ func ReadManifest(manifestFile string) (map[string]interface{}, error) {
 }
 
 func ReadNetworksFromManifest(manifestFilename string) ([]Network, error) {
-	file, err := os.Open(manifestFilename)
+	contents, err := ioutil.ReadFile(manifestFilename)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
 	var manifest Manifest
-	err = candiedyaml.NewDecoder(file).Decode(&manifest)
+	err = yaml.Unmarshal(contents, &manifest)
 	if err != nil {
 		return nil, err
 	}

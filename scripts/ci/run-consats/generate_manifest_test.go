@@ -60,7 +60,7 @@ var _ = Describe("Generate", func() {
 
 		It("returns an error when the example manifest is malformed", func() {
 			_, err := Generate("fixtures/malformed.yml")
-			Expect(err).To(MatchError(ContainSubstring("Invalid timestamp")))
+			Expect(err).To(MatchError(ContainSubstring("cannot unmarshal !!str `this is...`")))
 		})
 	})
 })

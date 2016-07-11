@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/cloudfoundry-incubator/candiedyaml"
+	"gopkg.in/yaml.v2"
 )
 
 func main() {
@@ -25,7 +25,7 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	}
 
 	var manifest Manifest
-	err = candiedyaml.Unmarshal(contents, &manifest)
+	err = yaml.Unmarshal(contents, &manifest)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.Registry.Password = os.Getenv("REGISTRY_PASSWORD")
 	manifest.ResourcePools[0].CloudProperties.AvailibilityZone = os.Getenv("AWS_AVAILIBILITY_ZONE")
 
-	contents, err = candiedyaml.Marshal(manifest)
+	contents, err = yaml.Marshal(manifest)
 	if err != nil {
 		return nil, err
 	}
