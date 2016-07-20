@@ -23,7 +23,7 @@ compilation:
   network: consats
   reuse_compilation_vms: true
   cloud_properties:
-    availability_zone: some-aws-availability-zone
+    availability_zone: some-az-1
     ephemeral_disk:
       size: 2048
       type: gp2
@@ -33,13 +33,13 @@ networks:
 - name: consats
   type: manual
   subnets:
-  - range: 10.0.4.0/24
-    gateway: 10.0.4.1
+  - gateway: 10.0.4.1
+    range: 10.0.4.0/24
     static: []
     reserved:
     - 10.0.4.2-10.0.4.240
     cloud_properties:
-      subnet: some-aws-subnet-id
+      subnet: some-subnet-1
 
 properties:
   consul:
@@ -51,7 +51,13 @@ properties:
         default_key_name: bosh
         default_security_groups:
         - some-aws-security-group-name
-        subnet: some-aws-subnet-id
+        subnets:
+        - id: some-subnet-1
+          range: 10.0.4.0/24
+          az: some-az-1
+        - id: some-subnet-2
+          range: 10.0.5.0/24
+          az: some-az-2
       bosh:
         target: some-bosh-target
         username: some-bosh-username
@@ -70,7 +76,7 @@ resource_pools:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
     version: latest
   cloud_properties:
-    availability_zone: some-aws-availability-zone
+    availability_zone: some-az-1
     ephemeral_disk:
       size: 10240
       type: gp2

@@ -33,13 +33,13 @@ networks:
 - name: consats
   type: manual
   subnets:
-  - cloud_properties:
-      subnet: AWS_SUBNET_ID
-    gateway: 10.0.4.1
+  - gateway: 10.0.4.1
     range: 10.0.4.0/24
+    static: []
     reserved:
     - 10.0.4.2-10.0.4.240
-    static: []
+    cloud_properties:
+      subnet: AWS_SUBNET_ID
 
 properties:
   consul:
@@ -51,7 +51,10 @@ properties:
         default_key_name: bosh
         default_security_groups:
         - AWS_SECURITY_GROUP_NAME
-        subnet: AWS_SUBNET_ID
+        subnets:
+        - id: AWS_SUBNET_ID
+          range: AWS_SUBNET_RANGE
+          az: AWS_SUBNET_AZ
       bosh:
         target: BOSH_TARGET
         username: BOSH_USERNAME

@@ -16,7 +16,7 @@ var _ = Describe("Generate", func() {
 	BeforeEach(func() {
 		variables = map[string]string{
 			"AWS_AVAILIBILITY_ZONE":   "some-aws-availability-zone",
-			"AWS_SUBNET_ID":           "some-aws-subnet-id",
+			"AWS_SUBNETS":             `[{"id":"some-subnet-1","range":"10.0.4.0/24","az":"some-az-1"},{"id":"some-subnet-2","range":"10.0.5.0/24","az":"some-az-2"}]`,
 			"AWS_ACCESS_KEY_ID":       "some-aws-access-key-id",
 			"AWS_SECRET_ACCESS_KEY":   "some-aws-secret-access-key",
 			"AWS_REGION":              "some-aws-region",
@@ -61,6 +61,12 @@ var _ = Describe("Generate", func() {
 		It("returns an error when the example manifest is malformed", func() {
 			_, err := Generate("fixtures/malformed.yml")
 			Expect(err).To(MatchError(ContainSubstring("cannot unmarshal !!str `this is...`")))
+		})
+
+		It("returns an error when the AWS_SUBNETS are not valid json", func() {
+			os.Setenv("AWS_SUBNETS", "%%%%%")
+			_, err := Generate("fixtures/example.yml")
+			Expect(err).To(MatchError(ContainSubstring("invalid character '%' looking for beginning of value")))
 		})
 	})
 })

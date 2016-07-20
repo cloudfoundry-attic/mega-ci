@@ -173,7 +173,7 @@ jobs:
         AWS_REGION: {{mega_ci_account_aws_default_region}}
         AWS_AVAILIBILITY_ZONE: {{mega_ci_account_aws_availability_zone}}
         AWS_SECURITY_GROUP_NAME: {{mega_ci_account_aws_security_group_name}}
-        AWS_SUBNET_ID: {{mega_ci_account_aws_subnet_id}}
+        AWS_SUBNETS: {{mega_ci_account_aws_subnet_id}}
         BOSH_TARGET: {{bosh_target}}
         BOSH_DIRECTOR_UUID: {{bosh_director_uuid}}
         BOSH_USERNAME: {{bosh_username}}

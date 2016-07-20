@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -31,12 +32,9 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	}
 
 	manifest.DirectorUUID = os.Getenv("BOSH_DIRECTOR_UUID")
-	manifest.Compilation.CloudProperties.AvailibilityZone = os.Getenv("AWS_AVAILIBILITY_ZONE")
-	manifest.Networks[0].Subnets[0].CloudProperties.Subnet = os.Getenv("AWS_SUBNET_ID")
 	manifest.Properties.Consul.AcceptanceTests.AWS.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
 	manifest.Properties.Consul.AcceptanceTests.AWS.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 	manifest.Properties.Consul.AcceptanceTests.AWS.Region = os.Getenv("AWS_REGION")
-	manifest.Properties.Consul.AcceptanceTests.AWS.Subnet = os.Getenv("AWS_SUBNET_ID")
 	manifest.Properties.Consul.AcceptanceTests.AWS.DefaultSecurityGroups = []string{os.Getenv("AWS_SECURITY_GROUP_NAME")}
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Target = os.Getenv("BOSH_TARGET")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Username = os.Getenv("BOSH_USERNAME")
@@ -44,7 +42,15 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.BOSH.DirectorCACert = os.Getenv("BOSH_DIRECTOR_CA_CERT")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Username = os.Getenv("REGISTRY_USERNAME")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Password = os.Getenv("REGISTRY_PASSWORD")
-	manifest.ResourcePools[0].CloudProperties.AvailibilityZone = os.Getenv("AWS_AVAILIBILITY_ZONE")
+
+	if err := json.Unmarshal([]byte(os.Getenv("AWS_SUBNETS")), &manifest.Properties.Consul.AcceptanceTests.AWS.Subnets); err != nil {
+		return nil, err
+	}
+
+	subnet := manifest.Properties.Consul.AcceptanceTests.AWS.Subnets[0]
+	manifest.Compilation.CloudProperties.AvailibilityZone = subnet.AZ
+	manifest.Networks[0].Subnets[0].CloudProperties.Subnet = subnet.ID
+	manifest.ResourcePools[0].CloudProperties.AvailibilityZone = subnet.AZ
 
 	contents, err = yaml.Marshal(manifest)
 	if err != nil {
@@ -91,7 +97,11 @@ type Manifest struct {
 					Region                string      `yaml:"region"`
 					DefaultKeyName        interface{} `yaml:"default_key_name"`
 					DefaultSecurityGroups []string    `yaml:"default_security_groups"`
-					Subnet                string      `yaml:"subnet"`
+					Subnets               []struct {
+						ID    string `yaml:"id"`
+						Range string `yaml:"range"`
+						AZ    string `yaml:"az"`
+					} `yaml:"subnets"`
 				} `yaml:"aws"`
 				BOSH struct {
 					Target         string `yaml:"target"`
