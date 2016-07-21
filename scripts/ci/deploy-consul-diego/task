@@ -29,8 +29,8 @@ function upload_release() {
 
 function main() {
   upload_release "cloudfoundry/cflinuxfs2-rootfs-release"
-  upload_release "cloudfoundry-incubator/diego-release"
-  upload_release "cloudfoundry-incubator/garden-linux-release"
+  upload_release "cloudfoundry/diego-release"
+  upload_release "cloudfoundry/garden-linux-release"
   upload_release "cloudfoundry-incubator/etcd-release"
 
   deploy_diego
