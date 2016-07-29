@@ -181,7 +181,7 @@ jobs:
         BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
-        PARALLEL_NODES: 2
+        PARALLEL_NODES: 1
 
 - name: deploy-with-cf
   public: true
