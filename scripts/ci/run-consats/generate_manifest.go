@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	"gopkg.in/yaml.v2"
 )
@@ -42,6 +43,12 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.BOSH.DirectorCACert = os.Getenv("BOSH_DIRECTOR_CA_CERT")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Username = os.Getenv("REGISTRY_USERNAME")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Password = os.Getenv("REGISTRY_PASSWORD")
+
+	parallelNodes, err := strconv.Atoi(os.Getenv("PARALLEL_NODES"))
+	if err != nil {
+		return nil, err
+	}
+	manifest.Properties.Consul.AcceptanceTests.ParallelNodes = parallelNodes
 
 	if err := json.Unmarshal([]byte(os.Getenv("AWS_SUBNETS")), &manifest.Properties.Consul.AcceptanceTests.AWS.Subnets); err != nil {
 		return nil, err
@@ -115,6 +122,7 @@ type Manifest struct {
 					Host     interface{} `yaml:"host"`
 					Port     interface{} `yaml:"port"`
 				} `yaml:"registry"`
+				ParallelNodes int `yaml:"parallel_nodes"`
 			} `yaml:"acceptance_tests"`
 		} `yaml:"consul"`
 	} `yaml:"properties"`

@@ -28,6 +28,7 @@ var _ = Describe("Generate", func() {
 			"BOSH_DIRECTOR_CA_CERT":   "some-bosh-director-ca-cert",
 			"REGISTRY_USERNAME":       "some-registry-username",
 			"REGISTRY_PASSWORD":       "some-registry-password",
+			"PARALLEL_NODES":          "1",
 		}
 
 		for name, value := range variables {
@@ -53,6 +54,12 @@ var _ = Describe("Generate", func() {
 	})
 
 	Context("failure cases", func() {
+		It("returns an error when the parallel nodes is not an int", func() {
+			os.Setenv("PARALLEL_NODES", "not an int")
+			_, err := Generate("fixtures/example.yml")
+			Expect(err).To(MatchError(ContainSubstring(`parsing "not an int": invalid syntax`)))
+		})
+
 		It("returns an error when the example manifest does not exist", func() {
 			_, err := Generate("fixtures/doesnotexist.yml")
 			Expect(err).To(MatchError(ContainSubstring("no such file or directory")))

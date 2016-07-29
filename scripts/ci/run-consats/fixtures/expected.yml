@@ -68,6 +68,7 @@ properties:
         password: some-registry-password
         host: 10.0.0.6
         port: 25777
+      parallel_nodes: 1
 
 resource_pools:
 - name: consats

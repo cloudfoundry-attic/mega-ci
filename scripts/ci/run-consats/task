@@ -1,6 +1,7 @@
 #!/bin/bash -exu
 
 export ROOT="${PWD}"
+consul_release_version="99999+dev.$(date +%s)"
 
 set +ux
 source ~/.bashrc
@@ -13,14 +14,16 @@ function main() {
   generate_manifest
 
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh -n create release
-    bosh upload release --rebase
+    bosh -n create release --force --version "${consul_release_version}"
+    bosh upload release
 
     bosh upload release \
       "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
 
     bosh upload release \
       "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=44"
+
+    force_compilation
 
     bosh deployment aws/consats.yml
     bosh -n deploy
@@ -32,6 +35,19 @@ function main() {
   cleanup_deployment "turbulence-consul"
 
   bosh -n cleanup --all
+}
+
+function force_compilation() {
+  local stemcell_version
+  stemcell_version=$(curl -k https://${BOSH_USER}:${BOSH_PASSWORD}@${BOSH_DIRECTOR}:25555/stemcells | jq -r .[0].version)
+
+  pushd /tmp > /dev/null
+	sed "s/REPLACE_ME_DIRECTOR_UUID/$(bosh status --uuid)/g" "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"
+
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n deploy
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n delete deployment compilation
+  popd > /dev/null
 }
 
 function generate_manifest() {
