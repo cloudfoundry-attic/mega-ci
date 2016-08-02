@@ -2,6 +2,8 @@
 
 export ROOT="${PWD}"
 consul_release_version="99999+dev.$(date +%s)"
+turbulence_release_version="0.4"
+bosh_aws_cpi_release_version="44"
 
 set +ux
 source ~/.bashrc
@@ -18,10 +20,10 @@ function main() {
     bosh upload release
 
     bosh upload release \
-      "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=0.4"
+      "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=${turbulence_release_version}"
 
     bosh upload release \
-      "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=44"
+      "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=${bosh_aws_cpi_release_version}"
 
     force_compilation
 
@@ -46,6 +48,8 @@ function force_compilation() {
 
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n deploy
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "turbulence/${turbulence_release_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "bosh-aws-cpi/${bosh_aws_cpi_release_version}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n delete deployment compilation
   popd > /dev/null
 }
