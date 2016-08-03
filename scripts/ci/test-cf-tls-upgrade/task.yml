@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: mega-ci
+  - name: etcd-release
+
+run:
+  path: mega-ci/scripts/ci/test-cf-tls-upgrade/task
+
+params:
+  CF_DOMAIN:
+  CF_USER:
+  CF_PASSWORD:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
+  DEPLOYMENT_NAME:

@@ -1,0 +1,44 @@
+#!/bin/bash -exu
+
+export GOPATH="$PWD/etcd-release"
+
+function create_integration_config() {
+  cat > eats_config.json <<EOF
+  {
+    "bosh":{
+      "target": "${BOSH_DIRECTOR}",
+      "username": "${BOSH_USER}",
+      "password": "${BOSH_PASSWORD}",
+      "deployment_name": "${DEPLOYMENT_NAME}"
+    },
+    "cf": {
+      "domain": "${CF_DOMAIN}",
+      "username": "${CF_USER}",
+      "password": "${CF_PASSWORD}"
+    }
+  }
+EOF
+}
+
+function main() {
+  local ROOT=$1
+  curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx
+
+  chmod +x cf
+  mv cf /usr/local/bin/
+
+  pushd "${ROOT}/etcd-release" > /dev/null
+    create_integration_config
+    EATS_CONFIG="${PWD}/eats_config.json" ginkgo \
+      -r \
+      -race \
+      -randomizeAllSpecs \
+      -randomizeSuites \
+      -failFast \
+      -succinct \
+      -slowSpecThreshold 300 \
+      ./src/acceptance-tests/cf-tls-upgrade/
+  popd > /dev/null
+}
+
+main "${PWD}"
