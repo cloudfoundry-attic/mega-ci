@@ -101,6 +101,11 @@ jobs:
       db: *db
       cpi_job: aws_cpi
       max_threads: 10
+      user_management:
+        local:
+          users:
+          - name: admin
+            password: ((bosh_credentials.director_password))
       ssl:
         key: (( bosh_certs.key ))
         cert: (( bosh_certs.crt ))
