@@ -31,13 +31,12 @@ function main() {
     create_integration_config
     EATS_CONFIG="${PWD}/eats_config.json" ginkgo \
       -r \
-      -race \
       -randomizeAllSpecs \
       -randomizeSuites \
       -failFast \
       -succinct \
       -slowSpecThreshold 300 \
-      ./src/acceptance-tests/cf-tls-upgrade/
+      ./src/cf-tls-upgrade/
   popd > /dev/null
 }
 
