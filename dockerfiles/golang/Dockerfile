@@ -2,9 +2,9 @@ FROM cfinfrastructure/minimal
 MAINTAINER https://github.com/cloudfoundry/mega-ci
 
 # Install go
-RUN wget https://storage.googleapis.com/golang/go1.6.1.linux-amd64.tar.gz && \
-  tar -C /usr/local -xzf go1.6.1.linux-amd64.tar.gz && \
-  rm -rf go1.6.1.linux-amd64.tar.gz
+RUN wget https://storage.googleapis.com/golang/go1.6.3.linux-amd64.tar.gz && \
+  tar -C /usr/local -xzf go1.6.3.linux-amd64.tar.gz && \
+  rm -rf go1.6.3.linux-amd64.tar.gz
 
 # Create directory for GOPATH
 RUN mkdir -p /go/bin
