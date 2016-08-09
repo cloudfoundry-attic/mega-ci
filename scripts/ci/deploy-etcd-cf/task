@@ -62,9 +62,21 @@ meta:
     release: etcd
   - name: etcd_metrics_server
     release: etcd
-  consul_templates:
-  - name: consul_agent
-    release: cf
+jobs:
+  - name: router_z1
+    instances: 2
+  - name: postgres_z1
+    templates:
+    - name: postgres
+      release: cf
+  - name: consul_z1
+    templates:
+    - name: consul_agent
+      release: cf
+  - name: consul_z2
+    templates:
+    - name: consul_agent
+      release: cf
 EOF
 }
 
