@@ -100,7 +100,6 @@ jobs:
       name: my-bosh
       db: *db
       cpi_job: aws_cpi
-      max_threads: 10
       workers: 6
       user_management:
         local:
