@@ -14,7 +14,7 @@ function main() {
   bosh target "${BOSH_DIRECTOR}"
 
   pushd "${ROOT}/stemcell" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
   popd > /dev/null
 
   generate_manifest
