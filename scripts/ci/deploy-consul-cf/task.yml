@@ -8,6 +8,7 @@ inputs:
   - name: consul-cf-env
   - name: consul-release
   - name: mega-ci
+  - name: stemcell
 
 run:
   path: mega-ci/scripts/ci/deploy-consul-cf/task

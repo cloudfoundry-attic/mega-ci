@@ -13,6 +13,10 @@ set -ux
 function main() {
   bosh target "${BOSH_DIRECTOR}"
 
+  pushd "${ROOT}/stemcell" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz
+  popd > /dev/null
+
   generate_manifest
 
   pushd "${ROOT}/consul-release" > /dev/null
@@ -41,7 +45,7 @@ function main() {
 
 function force_compilation() {
   local stemcell_version
-  stemcell_version=$(curl -k https://${BOSH_USER}:${BOSH_PASSWORD}@${BOSH_DIRECTOR}:25555/stemcells | jq -r .[0].version)
+  stemcell_version=$(cat ${ROOT}/stemcell/version)
 
   pushd /tmp > /dev/null
 	sed "s/REPLACE_ME_DIRECTOR_UUID/$(bosh status --uuid)/g" "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"

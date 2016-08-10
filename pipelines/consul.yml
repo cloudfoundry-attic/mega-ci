@@ -75,6 +75,10 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+- name: aws-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-ubuntu-trusty-go_agent
 
 jobs:
 - name: check-git-submodules
@@ -164,6 +168,8 @@ jobs:
       resource: consul-release-develop
       passed: [test-confab]
       trigger: true
+    - get: stemcell
+      resource: aws-stemcell
   - task: run-consats
     file: mega-ci/scripts/ci/run-consats/task.yml
     config:
@@ -195,6 +201,8 @@ jobs:
       passed: [test-consul]
       trigger: true
     - get: cf-release
+    - get: stemcell
+      resource: aws-stemcell
   - task: deploy-consul-cf
     file: mega-ci/scripts/ci/deploy-consul-cf/task.yml
     config:
