@@ -6,15 +6,15 @@ releases:
   url: https://bosh.io/d/github.com/cloudfoundry/bosh?v=257.3
   sha1: e4442afcc64123e11f2b33cc2be799a0b59207d0
 - name: bosh-aws-cpi
-  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=54
-  sha1: 729a0a08c477d36717785bd8f991f2b37bab305b
+  url: https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=56
+  sha1: 2b85e1bdc31f41a26b454f4731bf2d1df2ea17de
 
 resource_pools:
 - name: vms
   network: private
   stemcell:
-    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3232.6
-    sha1: 971e869bd825eb0a7bee36a02fe2f61e930aaf29
+    url: https://bosh.io/d/stemcells/bosh-aws-xen-hvm-ubuntu-trusty-go_agent?v=3262.5
+    sha1: 13c73b82675742012ba3ded6528524b8f3ce9ec3
   cloud_properties:
     instance_type: m3.xlarge
     ephemeral_disk: {size: 25_000, type: gp2}
@@ -100,7 +100,8 @@ jobs:
       name: my-bosh
       db: *db
       cpi_job: aws_cpi
-      workers: 6
+      enable_dedicated_status_worker: true
+      workers: 10
       user_management:
         local:
           users:
