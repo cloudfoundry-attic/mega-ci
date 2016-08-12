@@ -29,6 +29,7 @@ var _ = Describe("Generate", func() {
 			"REGISTRY_USERNAME":       "some-registry-username",
 			"REGISTRY_PASSWORD":       "some-registry-password",
 			"PARALLEL_NODES":          "1",
+			"CONSUL_RELEASE_VERSION":  "some-consul-release-version",
 		}
 
 		for name, value := range variables {

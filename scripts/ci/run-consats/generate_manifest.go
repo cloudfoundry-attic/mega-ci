@@ -43,6 +43,7 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.BOSH.DirectorCACert = os.Getenv("BOSH_DIRECTOR_CA_CERT")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Username = os.Getenv("REGISTRY_USERNAME")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Password = os.Getenv("REGISTRY_PASSWORD")
+	manifest.Properties.Consul.AcceptanceTests.ConsulReleaseVersion = os.Getenv("CONSUL_RELEASE_VERSION")
 
 	parallelNodes, err := strconv.Atoi(os.Getenv("PARALLEL_NODES"))
 	if err != nil {
@@ -122,7 +123,8 @@ type Manifest struct {
 					Host     interface{} `yaml:"host"`
 					Port     interface{} `yaml:"port"`
 				} `yaml:"registry"`
-				ParallelNodes int `yaml:"parallel_nodes"`
+				ParallelNodes        int    `yaml:"parallel_nodes"`
+				ConsulReleaseVersion string `yaml:"consul_release_version"`
 			} `yaml:"acceptance_tests"`
 		} `yaml:"consul"`
 	} `yaml:"properties"`

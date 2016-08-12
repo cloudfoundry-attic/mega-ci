@@ -48,7 +48,7 @@ function force_compilation() {
   stemcell_version=$(cat ${ROOT}/stemcell/version)
 
   pushd /tmp > /dev/null
-	sed "s/REPLACE_ME_DIRECTOR_UUID/$(bosh status --uuid)/g" "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"
+    sed "s/REPLACE_ME_DIRECTOR_UUID/$(bosh status --uuid)/g" "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"
 
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n deploy
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"

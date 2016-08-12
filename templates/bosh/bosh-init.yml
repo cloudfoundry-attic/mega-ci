@@ -101,7 +101,7 @@ jobs:
       db: *db
       cpi_job: aws_cpi
       enable_dedicated_status_worker: true
-      workers: 10
+      workers: 11
       user_management:
         local:
           users:

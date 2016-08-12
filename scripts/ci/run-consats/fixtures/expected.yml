@@ -69,6 +69,7 @@ properties:
         host: 10.0.0.6
         port: 25777
       parallel_nodes: 1
+      consul_release_version: some-consul-release-version
 
 resource_pools:
 - name: consats
