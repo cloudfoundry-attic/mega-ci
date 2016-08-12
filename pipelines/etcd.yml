@@ -266,7 +266,6 @@ jobs:
         DEPLOYMENT_NAME: etcd-cf-deployment
 
 - name: test-cf-tls-upgrade
-  public: true
   serial_group: [cf]
   plan:
   - aggregate:
