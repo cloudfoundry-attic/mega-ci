@@ -20,7 +20,7 @@ function main() {
   generate_manifest
 
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh -n create release --force --version "${consul_release_version}"
+    bosh -n create release --force --version "${CONSUL_RELEASE_VERSION}"
     bosh upload release
 
     bosh upload release \
@@ -51,7 +51,7 @@ function force_compilation() {
     sed "s/REPLACE_ME_DIRECTOR_UUID/$(bosh status --uuid)/g" "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"
 
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n deploy
-    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "turbulence/${turbulence_release_version}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "bosh-aws-cpi/${bosh_aws_cpi_release_version}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n delete deployment compilation
