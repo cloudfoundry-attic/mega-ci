@@ -61,7 +61,7 @@ EOF
 
 upload_stemcell() {
   pushd "${ROOT}/stemcell" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
   popd > /dev/null
 }
 
