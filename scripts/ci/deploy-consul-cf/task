@@ -35,10 +35,6 @@ EOF
 }
 
 generate_stemcell_stub() {
-  pushd "${ROOT}/stemcell" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz
-  popd > /dev/null
-
   cat <<EOF
 ---
 meta:
@@ -63,6 +59,12 @@ meta:
 EOF
 }
 
+upload_stemcell() {
+  pushd "${ROOT}/stemcell" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz
+  popd > /dev/null
+}
+
 main() {
   local root_dir
   root_dir=$PWD
@@ -70,6 +72,8 @@ main() {
   preflight_check
 
   mkdir stubs
+
+  upload_stemcell
 
   pushd stubs > /dev/null
     generate_releases_stub ${root_dir} > releases.yml
