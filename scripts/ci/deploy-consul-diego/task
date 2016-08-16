@@ -27,7 +27,15 @@ function upload_release() {
   bosh -t ${BOSH_DIRECTOR} upload release https://bosh.io/d/github.com/${release}
 }
 
+function upload_stemcell() {
+  pushd "${ROOT}/stemcell" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
+  popd > /dev/null
+}
+
 function main() {
+  upload_stemcell
+
   upload_release "cloudfoundry/cflinuxfs2-rootfs-release"
   upload_release "cloudfoundry/diego-release"
   upload_release "cloudfoundry/garden-linux-release"

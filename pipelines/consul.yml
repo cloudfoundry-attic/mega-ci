@@ -225,6 +225,8 @@ jobs:
       resource: consul-release-develop
       passed: [deploy-with-cf]
       trigger: true
+    - get: stemcell
+      resource: aws-stemcell
   - task: deploy-consul-diego
     file: mega-ci/scripts/ci/deploy-consul-diego/task.yml
     config:
