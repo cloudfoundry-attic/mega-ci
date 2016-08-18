@@ -82,6 +82,10 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-warden-boshlite-ubuntu-trusty-go_agent
+- name: aws-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-ubuntu-trusty-go_agent
 
 jobs:
 - name: check-git-submodules
@@ -182,8 +186,10 @@ jobs:
       resource: etcd-release-develop
       passed: [test-etcd-metrics-server]
       trigger: true
+    - get: stemcell
+      resource: aws-stemcell
   - task: run-eats
-    file: mega-ci/scripts/ci/run-eats.yml
+    file: mega-ci/scripts/ci/run-eats/task.yml
     config:
       params:
         BOSH_TARGET: {{cf_bosh_director}}
