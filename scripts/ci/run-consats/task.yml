@@ -5,7 +5,6 @@ image: docker:///cfinfrastructure/deployment
 
 inputs:
   - name: mega-ci
-  - name: private-credentials
   - name: consul-release
   - name: stemcell
 
@@ -20,10 +19,13 @@ params:
   AWS_SECURITY_GROUP_NAME:
   AWS_SUBNETS:
   BOSH_DIRECTOR_CA_CERT:
-  BOSH_DIRECTOR_UUID:
   BOSH_PASSWORD:
-  BOSH_TARGET:
-  BOSH_USERNAME:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME:
+  BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP:
+  BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ:
   REGISTRY_PASSWORD:
   REGISTRY_USERNAME:
+  REGISTRY_HOST:
   PARALLEL_NODES:

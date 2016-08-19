@@ -2,16 +2,13 @@
 
 export ROOT="${PWD}"
 export CONSUL_RELEASE_VERSION="99999+dev.$(date +%s)"
+export STEMCELL_VERSION=$(cat ${ROOT}/stemcell/version)
 turbulence_release_version="0.4"
 bosh_aws_cpi_release_version="44"
 
-set +ux
-source ~/.bashrc
-source private-credentials/bosh_environment
-set -ux
-
 function main() {
   bosh target "${BOSH_DIRECTOR}"
+  export BOSH_DIRECTOR_UUID="$(bosh -t "${BOSH_DIRECTOR}" status --uuid)"
 
   pushd "${ROOT}/stemcell" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
@@ -20,40 +17,42 @@ function main() {
   generate_manifest
 
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh -n create release --force --version "${CONSUL_RELEASE_VERSION}"
-    bosh upload release
+    bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${CONSUL_RELEASE_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" upload release
 
-    bosh upload release \
+    bosh -t "${BOSH_DIRECTOR}" upload release \
       "https://bosh.io/d/github.com/cppforlife/turbulence-release?v=${turbulence_release_version}"
 
-    bosh upload release \
+    bosh -t "${BOSH_DIRECTOR}" upload release \
       "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=${bosh_aws_cpi_release_version}"
 
     force_compilation
 
-    bosh deployment aws/consats.yml
-    bosh -n deploy
+    bosh -t "${BOSH_DIRECTOR}" deployment aws/consats.yml
+    bosh -t "${BOSH_DIRECTOR}" -n deploy
 
-    bosh run errand acceptance-tests
+    bosh -t "${BOSH_DIRECTOR}" run errand acceptance-tests
   popd > /dev/null
 
   cleanup_deployment "consul"
   cleanup_deployment "turbulence-consul"
 
-  bosh -n cleanup --all
+  bosh -t "${BOSH_DIRECTOR}" -n cleanup --all
 }
 
 function force_compilation() {
-  local stemcell_version
-  stemcell_version=$(cat ${ROOT}/stemcell/version)
-
   pushd /tmp > /dev/null
-    sed "s/REPLACE_ME_DIRECTOR_UUID/$(bosh status --uuid)/g" "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"
+    sed -e "s/REPLACE_ME_DIRECTOR_UUID/${BOSH_DIRECTOR_UUID}/g" \
+      -e "s/CONSUL_RELEASE_VERSION/${CONSUL_RELEASE_VERSION}/g" \
+      -e "s/TURBULENCE_RELEASE_VERSION/${turbulence_release_version}/g" \
+      -e "s/CPI_RELEASE_VERSION/${bosh_aws_cpi_release_version}/g" \
+      -e "s/STEMCELL_VERSION/${STEMCELL_VERSION}/g" \
+      "${ROOT}/mega-ci/scripts/ci/run-consats/fixtures/consul_compilation.yml" > "consul_compilation.yml"
 
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n deploy
-    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${stemcell_version}"
-    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "turbulence/${turbulence_release_version}" "ubuntu-trusty/${stemcell_version}"
-    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "bosh-aws-cpi/${bosh_aws_cpi_release_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "turbulence/${turbulence_release_version}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" export release "bosh-aws-cpi/${bosh_aws_cpi_release_version}" "ubuntu-trusty/${STEMCELL_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" -d "consul_compilation.yml" -n delete deployment compilation
   popd > /dev/null
 }
@@ -63,14 +62,14 @@ function generate_manifest() {
   mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
 
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
-    ln -s "${ROOT}/mega-ci"
+  ln -s "${ROOT}/mega-ci"
 
-    pushd "${GOPATH}/src/github.com/cloudfoundry/mega-ci" > /dev/null
-      GO15VENDOREXPERIMENT=1 go run \
-        "./scripts/ci/run-consats/generate_manifest.go" \
-        "${ROOT}/consul-release/manifests/aws/consats.yml" \
-        > "${ROOT}/consul-release/aws/consats.yml"
-    popd > /dev/null
+  pushd "${GOPATH}/src/github.com/cloudfoundry/mega-ci" > /dev/null
+    GO15VENDOREXPERIMENT=1 go run \
+    "./scripts/ci/run-consats/generate_manifest.go" \
+    "${ROOT}/consul-release/manifests/aws/consats.yml" \
+    > "${ROOT}/consul-release/aws/consats.yml"
+  popd > /dev/null
   popd > /dev/null
 }
 
@@ -78,20 +77,20 @@ function cleanup_deployment() {
   local deployment
   deployment="${1}-[A-Za-z0-9]\{8\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{4\}-[A-Za-z0-9]\{12\}"
 
-  for i in $(bosh deployments | grep -o "${deployment}" | uniq); do
-    bosh -n delete deployment $i
+  for i in $(bosh -t "${BOSH_DIRECTOR}" deployments | grep -o "${deployment}" | uniq); do
+    bosh -t "${BOSH_DIRECTOR}" -n delete deployment $i
   done
 
-  test -z "$(bosh deployments | grep "${deployment}")"
+  test -z "$(bosh -t "${BOSH_DIRECTOR}" deployments | grep "${deployment}")"
 }
 
 function teardown() {
   set +e
-  bosh -n delete deployment consats
+  bosh -t "${BOSH_DIRECTOR}" -n delete deployment consats
 
-  bosh -n delete release turbulence
-  bosh -n delete release bosh-aws-cpi
-  bosh -n delete release consul
+  bosh -t "${BOSH_DIRECTOR}" -n delete release turbulence
+  bosh -t "${BOSH_DIRECTOR}" -n delete release bosh-aws-cpi
+  bosh -t "${BOSH_DIRECTOR}" -n delete release consul
   set -e
 }
 

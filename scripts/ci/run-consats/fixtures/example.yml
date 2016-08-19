@@ -5,41 +5,27 @@ director_uuid: BOSH_DIRECTOR_UUID
 
 releases:
 - name: consul
-  version: latest
+  version: CONSUL_RELEASE_VERSION
 
-jobs:
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: STEMCELL_VERSION
+
+instance_groups:
 - name: acceptance-tests
   instances: 1
   lifecycle: errand
-  resource_pool: consats
+  azs: [BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ]
+  vm_type: m3.medium
+  vm_extensions: [10GB_ephemeral_disk]
+  stemcell: default
   networks:
-  - name: consats
-  templates:
+  - name: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME
+    static_ips: [BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP]
+  jobs:
   - name: acceptance-tests
     release: consul
-
-compilation:
-  workers: 3
-  network: consats
-  reuse_compilation_vms: true
-  cloud_properties:
-    availability_zone: AWS_AVAILABILITY_ZONE
-    ephemeral_disk:
-      size: 2048
-      type: gp2
-    instance_type: m3.medium
-
-networks:
-- name: consats
-  type: manual
-  subnets:
-  - gateway: 10.0.4.1
-    range: 10.0.4.0/24
-    static: []
-    reserved:
-    - 10.0.4.2-10.0.4.240
-    cloud_properties:
-      subnet: AWS_SUBNET_ID
 
 properties:
   consul:
@@ -55,31 +41,24 @@ properties:
         - id: AWS_SUBNET_ID
           range: AWS_SUBNET_RANGE
           az: AWS_SUBNET_AZ
+          security_group: AWS_SUBNET_SECURITY_GROUP
       bosh:
-        target: BOSH_TARGET
-        username: BOSH_USERNAME
+        target: BOSH_DIRECTOR
+        username: BOSH_USER
         password: BOSH_PASSWORD
         director_ca_cert: BOSH_DIRECTOR_CA_CERT
+        errand:
+         network:
+           name: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME
+           static_ip: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP
+           az: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ
       registry:
         username: REGISTRY_USERNAME
         password: REGISTRY_PASSWORD
-        host: 10.0.0.6
+        host: REGISTRY_HOST
         port: 25777
       parallel_nodes: 1
-      consul_release_version: latest
-
-resource_pools:
-- name: consats
-  network: consats
-  stemcell:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-    version: latest
-  cloud_properties:
-    availability_zone: AWS_AVAILABILITY_ZONE
-    ephemeral_disk:
-      size: 10240
-      type: gp2
-    instance_type: m3.medium
+      consul_release_version: CONSUL_RELEASE_VERSION
 
 update:
   serial: true

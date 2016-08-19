@@ -5,41 +5,27 @@ director_uuid: some-bosh-director-uuid
 
 releases:
 - name: consul
-  version: latest
+  version: some-consul-release-version
 
-jobs:
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: some-stemcell-version
+
+instance_groups:
 - name: acceptance-tests
   instances: 1
   lifecycle: errand
-  resource_pool: consats
+  azs: [some-errand-az]
+  vm_type: m3.medium
+  vm_extensions: [10GB_ephemeral_disk]
+  stemcell: default
   networks:
-  - name: consats
-  templates:
+  - name: some-errand-network-name
+    static_ips: [some-errand-network-static-ip]
+  jobs:
   - name: acceptance-tests
     release: consul
-
-compilation:
-  workers: 3
-  network: consats
-  reuse_compilation_vms: true
-  cloud_properties:
-    availability_zone: some-az-1
-    ephemeral_disk:
-      size: 2048
-      type: gp2
-    instance_type: m3.medium
-
-networks:
-- name: consats
-  type: manual
-  subnets:
-  - gateway: 10.0.4.1
-    range: 10.0.4.0/24
-    static: []
-    reserved:
-    - 10.0.4.2-10.0.4.240
-    cloud_properties:
-      subnet: some-subnet-1
 
 properties:
   consul:
@@ -55,34 +41,28 @@ properties:
         - id: some-subnet-1
           range: 10.0.4.0/24
           az: some-az-1
+          security_group: some-security-group-1
         - id: some-subnet-2
           range: 10.0.5.0/24
           az: some-az-2
+          security_group: some-security-group-2
       bosh:
         target: some-bosh-target
         username: some-bosh-username
         password: some-bosh-password
         director_ca_cert: some-bosh-director-ca-cert
+        errand:
+          network:
+            name: some-errand-network-name
+            static_ip: some-errand-network-static-ip
+            az: some-errand-az
       registry:
         username: some-registry-username
         password: some-registry-password
-        host: 10.0.0.6
+        host: some-registry-host
         port: 25777
-      parallel_nodes: 1
+      parallel_nodes: 10
       consul_release_version: some-consul-release-version
-
-resource_pools:
-- name: consats
-  network: consats
-  stemcell:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-    version: latest
-  cloud_properties:
-    availability_zone: some-az-1
-    ephemeral_disk:
-      size: 10240
-      type: gp2
-    instance_type: m3.medium
 
 update:
   serial: true

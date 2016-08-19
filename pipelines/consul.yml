@@ -135,12 +135,12 @@ jobs:
     file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-consul-aws-manifests.yml
     config:
       params:
-        BOSH_DIRECTOR: {{cf_bosh_director_url}}
-        BOSH_USER: {{cf_bosh_user}}
-        BOSH_PASSWORD: {{cf_bosh_password}}
-        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
-        AWS_DEFAULT_REGION: {{mega_ci_account_aws_default_region}}
+        BOSH_DIRECTOR: {{bosh_url}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+        AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{infrastructure_account_aws_default_region}}
         MANIFEST_PATH: manifests/aws/multi-az-ssl.yml
 
 - name: test-confab
@@ -161,8 +161,6 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
@@ -174,19 +172,22 @@ jobs:
     file: mega-ci/scripts/ci/run-consats/task.yml
     config:
       params:
-        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
-        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
-        AWS_REGION: {{mega_ci_account_aws_default_region}}
-        AWS_AVAILIBILITY_ZONE: {{mega_ci_account_aws_availability_zone}}
-        AWS_SECURITY_GROUP_NAME: {{mega_ci_account_aws_security_group_name}}
-        AWS_SUBNETS: {{mega_ci_account_aws_subnets}}
-        BOSH_TARGET: {{bosh_target}}
-        BOSH_DIRECTOR_UUID: {{bosh_director_uuid}}
+        AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
+        AWS_REGION: {{infrastructure_account_aws_default_region}}
+        AWS_AVAILIBILITY_ZONE: {{infrastructure_account_aws_availability_zone}}
+        AWS_SECURITY_GROUP_NAME: {{infrastructure_account_aws_security_group_name}}
+        AWS_SUBNETS: {{infrastructure_account_aws_subnets}}
+        BOSH_DIRECTOR: {{bosh_director}}
         BOSH_USERNAME: {{bosh_username}}
         BOSH_PASSWORD: {{bosh_password}}
         BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP: {{bosh_errand_cloud_config_network_static_ip}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ: {{bosh_errand_cloud_config_network_az}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME: {{bosh_errand_cloud_config_network_name}}
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
+        REGISTRY_HOST: 10.0.0.6
         PARALLEL_NODES: 7
 
 - name: deploy-with-cf

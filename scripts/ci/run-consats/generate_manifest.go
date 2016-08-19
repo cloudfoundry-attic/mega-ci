@@ -10,6 +10,80 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type Network struct {
+	Name      string   `yaml:"name"`
+	StaticIPs []string `yaml:"static_ips"`
+}
+
+type Manifest struct {
+	Name         interface{} `yaml:"name"`
+	DirectorUUID string      `yaml:"director_uuid"`
+	Releases     []struct {
+		Name    string `yaml:"name"`
+		Version string `yaml:"version"`
+	} `yaml:"releases"`
+	Stemcells []struct {
+		Alias   string `yaml:"alias"`
+		OS      string `yaml:"os"`
+		Version string `yaml:"version"`
+	} `yaml:"stemcells"`
+	InstanceGroups []struct {
+		Instances    int       `yaml:"instances"`
+		Name         string    `yaml:"name"`
+		Lifecycle    string    `yaml:"lifecycle"`
+		VMExtensions []string  `yaml:"vm_extensions"`
+		VMType       string    `yaml:"vm_type"`
+		Stemcell     string    `yaml:"stemcell"`
+		AZs          []string  `yaml:"azs"`
+		Networks     []Network `yaml:"networks"`
+		Jobs         []struct {
+			Name    string `yaml:"name'`
+			Release string `yaml:"release'`
+		} `yaml:"jobs"`
+	} `yaml:"instance_groups"`
+	Properties struct {
+		Consul struct {
+			AcceptanceTests struct {
+				AWS struct {
+					AccessKeyID           string      `yaml:"access_key_id"`
+					SecretAccessKey       string      `yaml:"secret_access_key"`
+					Region                string      `yaml:"region"`
+					DefaultKeyName        interface{} `yaml:"default_key_name"`
+					DefaultSecurityGroups []string    `yaml:"default_security_groups"`
+					Subnets               []struct {
+						ID            string `yaml:"id"`
+						Range         string `yaml:"range"`
+						AZ            string `yaml:"az"`
+						SecurityGroup string `yaml:"security_group"`
+					} `yaml:"subnets"`
+				} `yaml:"aws"`
+				BOSH struct {
+					Target         string `yaml:"target"`
+					Username       string `yaml:"username"`
+					Password       string `yaml:"password"`
+					DirectorCACert string `yaml:"director_ca_cert"`
+					Errand         struct {
+						Network struct {
+							Name     string `yaml:"name"`
+							StaticIP string `yaml:"static_ip"`
+							AZ       string `yaml:"az"`
+						} `yaml:"network"`
+					} `yaml:"errand"`
+				} `yaml:"bosh"`
+				Registry struct {
+					Username string      `yaml:"username"`
+					Password string      `yaml:"password"`
+					Host     interface{} `yaml:"host"`
+					Port     interface{} `yaml:"port"`
+				} `yaml:"registry"`
+				ParallelNodes        int    `yaml:"parallel_nodes"`
+				ConsulReleaseVersion string `yaml:"consul_release_version"`
+			} `yaml:"acceptance_tests"`
+		} `yaml:"consul"`
+	} `yaml:"properties"`
+	Update interface{} `yaml:"update"`
+}
+
 func main() {
 	output, err := Generate(os.Args[1])
 	if err != nil {
@@ -33,14 +107,28 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	}
 
 	manifest.DirectorUUID = os.Getenv("BOSH_DIRECTOR_UUID")
+	manifest.Releases[0].Version = os.Getenv("CONSUL_RELEASE_VERSION")
+	manifest.Stemcells[0].Version = os.Getenv("STEMCELL_VERSION")
+	manifest.InstanceGroups[0].AZs = []string{os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ")}
+	manifest.InstanceGroups[0].Networks = []Network{
+		{
+			Name:      os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME"),
+			StaticIPs: []string{os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP")},
+		},
+	}
 	manifest.Properties.Consul.AcceptanceTests.AWS.AccessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
 	manifest.Properties.Consul.AcceptanceTests.AWS.SecretAccessKey = os.Getenv("AWS_SECRET_ACCESS_KEY")
 	manifest.Properties.Consul.AcceptanceTests.AWS.Region = os.Getenv("AWS_REGION")
 	manifest.Properties.Consul.AcceptanceTests.AWS.DefaultSecurityGroups = []string{os.Getenv("AWS_SECURITY_GROUP_NAME")}
-	manifest.Properties.Consul.AcceptanceTests.BOSH.Target = os.Getenv("BOSH_TARGET")
-	manifest.Properties.Consul.AcceptanceTests.BOSH.Username = os.Getenv("BOSH_USERNAME")
+	manifest.Properties.Consul.AcceptanceTests.AWS.DefaultSecurityGroups = []string{os.Getenv("AWS_SECURITY_GROUP_NAME")}
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Target = os.Getenv("BOSH_DIRECTOR")
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Username = os.Getenv("BOSH_USER")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Password = os.Getenv("BOSH_PASSWORD")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.DirectorCACert = os.Getenv("BOSH_DIRECTOR_CA_CERT")
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.Network.AZ = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ")
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.Network.Name = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME")
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.Network.StaticIP = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP")
+	manifest.Properties.Consul.AcceptanceTests.Registry.Host = os.Getenv("REGISTRY_HOST")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Username = os.Getenv("REGISTRY_USERNAME")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Password = os.Getenv("REGISTRY_PASSWORD")
 	manifest.Properties.Consul.AcceptanceTests.ConsulReleaseVersion = os.Getenv("CONSUL_RELEASE_VERSION")
@@ -55,88 +143,10 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 		return nil, err
 	}
 
-	subnet := manifest.Properties.Consul.AcceptanceTests.AWS.Subnets[0]
-	manifest.Compilation.CloudProperties.AvailibilityZone = subnet.AZ
-	manifest.Networks[0].Subnets[0].CloudProperties.Subnet = subnet.ID
-	manifest.ResourcePools[0].CloudProperties.AvailibilityZone = subnet.AZ
-
 	contents, err = yaml.Marshal(manifest)
 	if err != nil {
 		return nil, err
 	}
 
 	return contents, nil
-}
-
-type Manifest struct {
-	Name         interface{} `yaml:"name"`
-	DirectorUUID string      `yaml:"director_uuid"`
-	Releases     interface{} `yaml:"releases"`
-	Jobs         interface{} `yaml:"jobs"`
-	Compilation  struct {
-		Workers             interface{} `yaml:"workers"`
-		Network             interface{} `yaml:"network"`
-		ReuseCompilationVMs interface{} `yaml:"reuse_compilation_vms"`
-		CloudProperties     struct {
-			AvailibilityZone string      `yaml:"availability_zone"`
-			EphemeralDisk    interface{} `yaml:"ephemeral_disk"`
-			InstanceType     interface{} `yaml:"instance_type"`
-		} `yaml:"cloud_properties"`
-	} `yaml:"compilation"`
-	Networks []struct {
-		Name    interface{} `yaml:"name"`
-		Type    interface{} `yaml:"type"`
-		Subnets []struct {
-			Range           interface{} `yaml:"range"`
-			Gateway         interface{} `yaml:"gateway"`
-			Static          interface{} `yaml:"static"`
-			Reserved        interface{} `yaml:"reserved"`
-			CloudProperties struct {
-				Subnet string `yaml:"subnet"`
-			} `yaml:"cloud_properties"`
-		} `yaml:"subnets"`
-	} `yaml:"networks"`
-	Properties struct {
-		Consul struct {
-			AcceptanceTests struct {
-				AWS struct {
-					AccessKeyID           string      `yaml:"access_key_id"`
-					SecretAccessKey       string      `yaml:"secret_access_key"`
-					Region                string      `yaml:"region"`
-					DefaultKeyName        interface{} `yaml:"default_key_name"`
-					DefaultSecurityGroups []string    `yaml:"default_security_groups"`
-					Subnets               []struct {
-						ID    string `yaml:"id"`
-						Range string `yaml:"range"`
-						AZ    string `yaml:"az"`
-					} `yaml:"subnets"`
-				} `yaml:"aws"`
-				BOSH struct {
-					Target         string `yaml:"target"`
-					Username       string `yaml:"username"`
-					Password       string `yaml:"password"`
-					DirectorCACert string `yaml:"director_ca_cert"`
-				} `yaml:"bosh"`
-				Registry struct {
-					Username string      `yaml:"username"`
-					Password string      `yaml:"password"`
-					Host     interface{} `yaml:"host"`
-					Port     interface{} `yaml:"port"`
-				} `yaml:"registry"`
-				ParallelNodes        int    `yaml:"parallel_nodes"`
-				ConsulReleaseVersion string `yaml:"consul_release_version"`
-			} `yaml:"acceptance_tests"`
-		} `yaml:"consul"`
-	} `yaml:"properties"`
-	ResourcePools []struct {
-		Name            interface{} `yaml:"name"`
-		Network         interface{} `yaml:"network"`
-		Stemcell        interface{} `yaml:"stemcell"`
-		CloudProperties struct {
-			AvailibilityZone string      `yaml:"availability_zone"`
-			EphemeralDisk    interface{} `yaml:"ephemeral_disk"`
-			InstanceType     interface{} `yaml:"instance_type"`
-		} `yaml:"cloud_properties"`
-	} `yaml:"resource_pools"`
-	Update interface{} `yaml:"update"`
 }
