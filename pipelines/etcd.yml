@@ -206,6 +206,7 @@ jobs:
         REGISTRY_PORT: {{registry_port}}
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
+        PARALLEL_NODES: 7
 
 - name: deploy-with-cf
   public: true
