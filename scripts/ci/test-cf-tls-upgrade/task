@@ -22,10 +22,6 @@ EOF
 
 function main() {
   local ROOT=$1
-  curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx
-
-  chmod +x cf
-  mv cf /usr/local/bin/
 
   pushd "${ROOT}/etcd-release" > /dev/null
     create_integration_config
