@@ -43,3 +43,7 @@ RUN wget https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.
 RUN wget https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd64 && \
   mv bosh-init-0.0.81-linux-amd64 /usr/local/bin/bosh-init && \
   chmod +x /usr/local/bin/bosh-init
+
+RUN curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx && \
+  chmod +x cf-* && \
+  mv cf-* /usr/local/bin/cf

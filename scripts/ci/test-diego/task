@@ -1,10 +1,6 @@
 #!/bin/bash -exu
 
 function main() {
-  curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx
-
-  chmod +x cf
-  mv cf /usr/local/bin/
 
   cf api api.$CF_DOMAIN --skip-ssl-validation
 
