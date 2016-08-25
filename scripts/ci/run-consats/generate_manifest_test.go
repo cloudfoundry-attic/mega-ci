@@ -17,6 +17,7 @@ var _ = Describe("Generate", func() {
 		variables = map[string]string{
 			"AWS_AVAILIBILITY_ZONE":                      "some-aws-availability-zone",
 			"AWS_SUBNETS":                                `[{"id":"some-subnet-1","range":"10.0.4.0/24","az":"some-az-1","securityGroup":"some-security-group-1"},{"id":"some-subnet-2","range":"10.0.5.0/24","az":"some-az-2","securityGroup":"some-security-group-2"}]`,
+			"AWS_CLOUD_CONFIG_SUBNETS":                   `[{"id":"some-cloud-config-subnet-1","range":"10.0.6.0/24","az":"some-cloud-config-az-1","securityGroup":"some-cloud-config-security-group-1"},{"id":"some-cloud-config-subnet-2","range":"10.0.7.0/24","az":"some-cloud-config-az-2","securityGroup":"some-cloud-config-security-group-2"}]`,
 			"AWS_ACCESS_KEY_ID":                          "some-aws-access-key-id",
 			"AWS_SECRET_ACCESS_KEY":                      "some-aws-secret-access-key",
 			"AWS_REGION":                                 "some-aws-region",
@@ -78,6 +79,12 @@ var _ = Describe("Generate", func() {
 
 		It("returns an error when the AWS_SUBNETS are not valid json", func() {
 			os.Setenv("AWS_SUBNETS", "%%%%%")
+			_, err := Generate("fixtures/example.yml")
+			Expect(err).To(MatchError(ContainSubstring("invalid character '%' looking for beginning of value")))
+		})
+
+		It("returns an error when the AWS_CLOUD_CONFIG_SUBNETS are not valid json", func() {
+			os.Setenv("AWS_CLOUD_CONFIG_SUBNETS", "%%%%%")
 			_, err := Generate("fixtures/example.yml")
 			Expect(err).To(MatchError(ContainSubstring("invalid character '%' looking for beginning of value")))
 		})

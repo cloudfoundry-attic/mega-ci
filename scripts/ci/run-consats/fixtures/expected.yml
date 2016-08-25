@@ -46,6 +46,15 @@ properties:
           range: 10.0.5.0/24
           az: some-az-2
           security_group: some-security-group-2
+        cloud_config_subnets:
+        - id: some-cloud-config-subnet-1
+          range: 10.0.6.0/24
+          az: some-cloud-config-az-1
+          security_group: some-cloud-config-security-group-1
+        - id: some-cloud-config-subnet-2
+          range: 10.0.7.0/24
+          az: some-cloud-config-az-2
+          security_group: some-cloud-config-security-group-2
       bosh:
         target: some-bosh-target
         username: some-bosh-username

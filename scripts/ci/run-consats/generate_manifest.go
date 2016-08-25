@@ -56,6 +56,12 @@ type Manifest struct {
 						AZ            string `yaml:"az"`
 						SecurityGroup string `yaml:"security_group"`
 					} `yaml:"subnets"`
+					CloudConfigSubnets []struct {
+						ID            string `yaml:"id"`
+						Range         string `yaml:"range"`
+						AZ            string `yaml:"az"`
+						SecurityGroup string `yaml:"security_group"`
+					} `yaml:"cloud_config_subnets"`
 				} `yaml:"aws"`
 				BOSH struct {
 					Target         string `yaml:"target"`
@@ -140,6 +146,10 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.ParallelNodes = parallelNodes
 
 	if err := json.Unmarshal([]byte(os.Getenv("AWS_SUBNETS")), &manifest.Properties.Consul.AcceptanceTests.AWS.Subnets); err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal([]byte(os.Getenv("AWS_CLOUD_CONFIG_SUBNETS")), &manifest.Properties.Consul.AcceptanceTests.AWS.CloudConfigSubnets); err != nil {
 		return nil, err
 	}
 

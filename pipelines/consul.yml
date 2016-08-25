@@ -178,6 +178,7 @@ jobs:
         AWS_AVAILIBILITY_ZONE: {{infrastructure_account_aws_availability_zone}}
         AWS_SECURITY_GROUP_NAME: {{infrastructure_account_aws_security_group_name}}
         AWS_SUBNETS: {{infrastructure_account_aws_subnets}}
+        AWS_CLOUD_CONFIG_SUBNETS: {{infrastructure_account_aws_cloud_config_subnets}}
         BOSH_DIRECTOR: {{bosh_director}}
         BOSH_USER: {{bosh_username}}
         BOSH_PASSWORD: {{bosh_password}}

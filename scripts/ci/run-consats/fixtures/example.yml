@@ -42,6 +42,11 @@ properties:
           range: AWS_SUBNET_RANGE
           az: AWS_SUBNET_AZ
           security_group: AWS_SUBNET_SECURITY_GROUP
+        cloud_config_subnets:
+        - id: AWS_CLOUD_CONFIG_SUBNET_ID
+          range: AWS_CLOUD_CONFIG_SUBNET_RANGE
+          az: AWS_CLOUD_CONFIG_SUBNET_AZ
+          security_group: AWS_CLOUD_CONFIG_SUBNET_SECURITY_GROUP
       bosh:
         target: BOSH_DIRECTOR
         username: BOSH_USER
