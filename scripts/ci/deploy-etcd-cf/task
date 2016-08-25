@@ -1,5 +1,7 @@
 #!/bin/bash -exu
 
+ROOT="${PWD}"
+
 preflight_check() {
   set +x
   test -n "${BOSH_DIRECTOR}"
