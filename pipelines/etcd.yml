@@ -220,6 +220,8 @@ jobs:
       passed: [test-etcd]
       trigger: true
     - get: cf-release
+    - get: stemcell
+      resource: aws-stemcell
   - task: deploy-etcd-cf
     file: mega-ci/scripts/ci/deploy-etcd-cf/task.yml
     config:
@@ -242,6 +244,8 @@ jobs:
       resource: etcd-release-develop
       passed: [deploy-with-cf]
       trigger: true
+    - get: stemcell
+      resource: aws-stemcell
   - task: deploy-etcd-diego
     file: mega-ci/scripts/ci/deploy-etcd-diego/task.yml
     config:

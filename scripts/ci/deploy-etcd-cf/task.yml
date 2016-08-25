@@ -8,6 +8,7 @@ inputs:
   - name: etcd-cf-env
   - name: etcd-release
   - name: mega-ci
+  - name: stemcell
 
 run:
   path: mega-ci/scripts/ci/deploy-etcd-cf/task
