@@ -45,5 +45,5 @@ RUN wget https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd
   chmod +x /usr/local/bin/bosh-init
 
 RUN curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx && \
-  chmod +x cf-* && \
-  mv cf-* /usr/local/bin/cf
+  chmod +x cf && \
+  mv cf /usr/local/bin/cf
