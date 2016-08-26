@@ -34,7 +34,7 @@ properties:
         access_key_id: AWS_ACCESS_KEY_ID
         secret_access_key: AWS_SECRET_ACCESS_KEY
         region: AWS_REGION
-        default_key_name: bosh
+        default_key_name: AWS_DEFAULT_KEY_NAME
         default_security_groups:
         - AWS_SECURITY_GROUP_NAME
         subnets:

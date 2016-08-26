@@ -22,6 +22,7 @@ var _ = Describe("Generate", func() {
 			"AWS_SECRET_ACCESS_KEY":                      "some-aws-secret-access-key",
 			"AWS_REGION":                                 "some-aws-region",
 			"AWS_SECURITY_GROUP_NAME":                    "some-aws-security-group-name",
+			"AWS_DEFAULT_KEY_NAME":                       "some-aws-default-key-name",
 			"BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME":      "some-errand-network-name",
 			"BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP": "some-errand-network-static-ip",
 			"BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ":        "some-errand-az",

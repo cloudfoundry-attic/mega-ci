@@ -34,7 +34,7 @@ properties:
         access_key_id: some-aws-access-key-id
         secret_access_key: some-aws-secret-access-key
         region: some-aws-region
-        default_key_name: bosh
+        default_key_name: some-aws-default-key-name
         default_security_groups:
         - some-aws-security-group-name
         subnets:
