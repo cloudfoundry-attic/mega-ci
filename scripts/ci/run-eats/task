@@ -19,7 +19,7 @@ function main() {
   upload_stemcell
   write_configuration
   upload_releases
-  #force_compilation
+  force_compilation
 
   pushd etcd-release > /dev/null
     EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes $PARALLEL_NODES
