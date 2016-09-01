@@ -1,0 +1,16 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: mega-ci
+  - name: release
+
+run:
+  path: mega-ci/scripts/ci/create-dev-release/task
+
+params:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:

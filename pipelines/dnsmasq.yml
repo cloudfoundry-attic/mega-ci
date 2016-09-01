@@ -1,0 +1,81 @@
+groups:
+- name: dnsmasq
+  jobs:
+  - deploy-dnsmasq
+  - delete-deployment
+
+resources:
+- name: mega-ci
+  type: git
+  source:
+    branch: testing-dnsmasq
+    uri: https://github.com/cloudfoundry/mega-ci.git
+- name: dnsmasq-release-develop
+  type: git
+  source:
+    branch: develop
+    uri: https://github.com/cloudfoundry-incubator/dnsmasq-release.git
+- name: aws-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+- name: bosh-deployment
+  type: bosh-deployment-resource
+  source:
+    target: {{bosh_director}}
+    username: {{bosh_username}}
+    password: {{bosh_password}}
+    deployment: dnsmasq
+
+jobs:
+- name: deploy-dnsmasq
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: release
+      resource: dnsmasq-release-develop
+      trigger: true
+    - get: stemcell
+      resource: aws-stemcell
+  - task: create-dev-release
+    file: mega-ci/scripts/ci/create-dev-release/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{bosh_director}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+  - task: deploy-manifest
+    file: release/ci/scripts/deploy-test-manifest/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{bosh_director}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+
+- name: delete-deployment
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: release
+      resource: dnsmasq-release-develop
+      passed:
+      - deploy-dnsmasq
+      trigger: true
+  - task: delete-cf-deployment
+    file: mega-ci/scripts/ci/run-bosh-command.yml
+    config:
+      params:
+        DEPLOYMENT_NAME: dnsmasq
+        COMMAND: delete deployment dnsmasq
+        BOSH_DIRECTOR: {{bosh_director}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+  - task: cleanup-releases
+    file: mega-ci/scripts/ci/run-bosh-cleanup.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{bosh_director}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
