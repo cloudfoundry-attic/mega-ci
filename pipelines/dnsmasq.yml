@@ -8,7 +8,7 @@ resources:
 - name: mega-ci
   type: git
   source:
-    branch: testing-dnsmasq
+    branch: master
     uri: https://github.com/cloudfoundry/mega-ci.git
 - name: dnsmasq-release-develop
   type: git
