@@ -8,8 +8,8 @@ set -ux
 export ROOT="${PWD}"
 export GOPATH="$PWD/etcd-release"
 export GO15VENDOREXPERIMENT=1
+export ETCD_RELEASE_VERSION="99999+dev.${RANDOM}"
 
-etcd_release_version="99999+dev.${RANDOM}"
 aws_cpi_version="42"
 turbulence_version="0.4"
 consul_release_version="0"
@@ -37,14 +37,14 @@ function force_compilation() {
   pushd /tmp > /dev/null
     sed \
       -e "s/REPLACE_ME_DIRECTOR_UUID/$(bosh -t "${BOSH_DIRECTOR}" status --uuid)/g" \
-      -e "s/REPLACE_ME_ETCD_VERSION/${etcd_release_version}/g" \
+      -e "s/REPLACE_ME_ETCD_VERSION/${ETCD_RELEASE_VERSION}/g" \
       -e "s/REPLACE_ME_CONSUL_VERSION/${consul_release_version}/g" \
       -e "s/REPLACE_ME_TURBULENCE_VERSION/${turbulence_version}/g" \
       -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${aws_cpi_version}/g" \
       "${ROOT}/mega-ci/scripts/ci/run-eats/fixtures/etcd_compilation.yml" > "etcd_compilation.yml"
 
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n deploy
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "etcd/${etcd_release_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "turbulence/${turbulence_version}" "ubuntu-trusty/${stemcell_version}"
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "bosh-aws-cpi/${aws_cpi_version}" "ubuntu-trusty/${stemcell_version}"
@@ -81,7 +81,7 @@ EOF
 
 function upload_releases() {
   pushd etcd-release > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${etcd_release_version}"
+    bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${ETCD_RELEASE_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" -n upload release
   popd > /dev/null
 

@@ -193,7 +193,7 @@ jobs:
     config:
       params:
         BOSH_TARGET: {{cf_bosh_director}}
-        BOSH_USERNAME: {{cf_bosh_user}}
+        BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
         BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
         AWS_SUBNET: {{mega_ci_account_aws_subnet}}
