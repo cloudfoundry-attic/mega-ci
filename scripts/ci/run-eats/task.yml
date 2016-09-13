@@ -15,7 +15,7 @@ run:
   path: mega-ci/scripts/ci/run-eats/task
 
 params:
-  BOSH_TARGET:
+  BOSH_DIRECTOR:
   BOSH_USER:
   BOSH_PASSWORD:
   BOSH_DIRECTOR_CA_CERT:
