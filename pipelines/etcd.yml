@@ -15,12 +15,6 @@ groups:
   - merge-master-into-develop
 
 resources:
-- name: mega-ci-env
-  type: git
-  source:
-    branch: master
-    private_key: {{mega-ci-env-private-key}}
-    uri: git@github.com:cloudfoundry/mega-ci-env.git
 - name: etcd-cf-env
   type: git
   source:
@@ -86,6 +80,18 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+- name: turbulence-release
+  type: bosh-io-release
+  source:
+    repository: cppforlife/turbulence-release
+- name: bosh-aws-cpi-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-incubator/bosh-aws-cpi-release
+- name: consul-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-incubator/consul-release
 
 jobs:
 - name: check-git-submodules
@@ -179,8 +185,6 @@ jobs:
   serial: true
   plan:
   - aggregate:
-    - get: private-credentials
-      resource: mega-ci-env
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
@@ -188,6 +192,9 @@ jobs:
       trigger: true
     - get: stemcell
       resource: aws-stemcell
+    - get: turbulence-release
+    - get: bosh-aws-cpi-release
+    - get: consul-release
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats/task.yml
     config:

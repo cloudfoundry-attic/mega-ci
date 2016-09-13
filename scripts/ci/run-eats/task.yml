@@ -5,8 +5,10 @@ image: docker:///cfinfrastructure/deployment
 
 inputs:
   - name: mega-ci
-  - name: private-credentials
   - name: etcd-release
+  - name: consul-release
+  - name: turbulence-release
+  - name: bosh-aws-cpi-release
   - name: stemcell
 
 run:

@@ -1,35 +1,22 @@
 #!/bin/bash -exu
 
-set +ux
-source ~/.bashrc
-source private-credentials/bosh_environment
-set -ux
-
 export ROOT="${PWD}"
 export GOPATH="$PWD/etcd-release"
 export GO15VENDOREXPERIMENT=1
-export ETCD_RELEASE_VERSION="99999+dev.${RANDOM}"
-
-aws_cpi_version="42"
-turbulence_version="0.4"
-consul_release_version="0"
-stemcell_version="0"
+export ETCD_RELEASE_VERSION="99999+dev.$(date +%s)"
+export STEMCELL_VERSION=$(cat "${ROOT}"/stemcell/version)
+export TURBULENCE_RELEASE_VERSION=$(cat "${ROOT}"/turbulence-release/version)
+export CONSUL_RELEASE_VERSION=$(cat "${ROOT}"/consul-release/version)
+export BOSH_AWS_CPI_RELEASE_VERSION=$(cat "${ROOT}"/bosh-aws-cpi-release/version)
 
 function main() {
   upload_stemcell
-  write_configuration
   upload_releases
+  write_configuration
   force_compilation
 
   pushd etcd-release > /dev/null
-    EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes $PARALLEL_NODES
-  popd > /dev/null
-}
-
-function upload_stemcell() {
-  pushd "${ROOT}/stemcell" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
-    stemcell_version=$(cat version)
+    EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}"
   popd > /dev/null
 }
 
@@ -38,16 +25,16 @@ function force_compilation() {
     sed \
       -e "s/REPLACE_ME_DIRECTOR_UUID/$(bosh -t "${BOSH_DIRECTOR}" status --uuid)/g" \
       -e "s/REPLACE_ME_ETCD_VERSION/${ETCD_RELEASE_VERSION}/g" \
-      -e "s/REPLACE_ME_CONSUL_VERSION/${consul_release_version}/g" \
-      -e "s/REPLACE_ME_TURBULENCE_VERSION/${turbulence_version}/g" \
-      -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${aws_cpi_version}/g" \
+      -e "s/REPLACE_ME_CONSUL_VERSION/${CONSUL_RELEASE_VERSION}/g" \
+      -e "s/REPLACE_ME_TURBULENCE_VERSION/${TURBULENCE_VERSION}/g" \
+      -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${AWS_CPI_VERSION}/g" \
       "${ROOT}/mega-ci/scripts/ci/run-eats/fixtures/etcd_compilation.yml" > "etcd_compilation.yml"
 
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n deploy
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${stemcell_version}"
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "consul/${consul_release_version}" "ubuntu-trusty/${stemcell_version}"
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "turbulence/${turbulence_version}" "ubuntu-trusty/${stemcell_version}"
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "bosh-aws-cpi/${aws_cpi_version}" "ubuntu-trusty/${stemcell_version}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "turbulence/${TURBULENCE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "bosh-aws-cpi/${AWS_CPI_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n delete deployment etcd-compilation
   popd > /dev/null
 }
@@ -79,32 +66,34 @@ function write_configuration() {
 EOF
 }
 
+
+function upload_stemcell() {
+  pushd "${ROOT}/stemcell" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
+  popd > /dev/null
+}
+
 function upload_releases() {
-  pushd etcd-release > /dev/null
+  pushd "${ROOT}/etcd-release" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${ETCD_RELEASE_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" -n upload release
   popd > /dev/null
 
-  local latest_consul_release
-  latest_consul_release=$(curl -k http://bosh.io/api/v1/releases/github.com/cloudfoundry-incubator/consul-release | jq .[0])
+  pushd "${ROOT}/turbulence-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
+  popd > /dev/null
 
-  local consul_release_url
-  consul_release_url=$(echo ${latest_consul_release} | jq -r .url)
+  pushd "${ROOT}/bosh-aws-cpi-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
+  popd > /dev/null
 
-  consul_release_version=$(echo ${latest_consul_release} | jq -r .version)
-
-  wget -O "/tmp/consul-release.tgz" "${consul_release_url}"
-  bosh -t ${BOSH_DIRECTOR} upload release "/tmp/consul-release.tgz" --skip-if-exists
-
-  wget -O "/tmp/bosh-aws-cpi-release.tgz" "http://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=${aws_cpi_version}"
-  bosh -t ${BOSH_DIRECTOR} upload release "/tmp/bosh-aws-cpi-release.tgz" --skip-if-exists
-
-  wget -O "/tmp/turbulence-release.tgz" "http://bosh.io/d/github.com/cppforlife/turbulence-release?v=${turbulence_version}"
-  bosh -t ${BOSH_DIRECTOR} upload release "/tmp/turbulence-release.tgz" --skip-if-exists
+  pushd "${ROOT}/consul-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
+  popd > /dev/null
 }
 
 function cleanup_releases() {
-  bosh -t ${BOSH_DIRECTOR} -n cleanup --all
+  bosh -t "${BOSH_DIRECTOR}" -n cleanup
 }
 
 function rollup() {
