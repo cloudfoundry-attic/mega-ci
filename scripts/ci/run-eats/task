@@ -26,15 +26,15 @@ function force_compilation() {
       -e "s/REPLACE_ME_DIRECTOR_UUID/$(bosh -t "${BOSH_DIRECTOR}" status --uuid)/g" \
       -e "s/REPLACE_ME_ETCD_VERSION/${ETCD_RELEASE_VERSION}/g" \
       -e "s/REPLACE_ME_CONSUL_VERSION/${CONSUL_RELEASE_VERSION}/g" \
-      -e "s/REPLACE_ME_TURBULENCE_VERSION/${TURBULENCE_VERSION}/g" \
-      -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${AWS_CPI_VERSION}/g" \
+      -e "s/REPLACE_ME_TURBULENCE_VERSION/${TURBULENCE_RELEASE_VERSION}/g" \
+      -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${BOSH_AWS_CPI_RELEASE_VERSION}/g" \
       "${ROOT}/mega-ci/scripts/ci/run-eats/fixtures/etcd_compilation.yml" > "etcd_compilation.yml"
 
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n deploy
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "turbulence/${TURBULENCE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "bosh-aws-cpi/${AWS_CPI_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "turbulence/${TURBULENCE_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "bosh-aws-cpi/${BOSH_AWS_CPI_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n delete deployment etcd-compilation
   popd > /dev/null
 }
