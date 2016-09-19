@@ -102,6 +102,7 @@ jobs:
       cpi_job: aws_cpi
       enable_dedicated_status_worker: true
       workers: 11
+      flush_arp: true
       user_management:
         local:
           users:
