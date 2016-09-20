@@ -10,7 +10,7 @@ resources:
   type: git
   source:
     branch: develop
-    uri: https://github.com/pivotal-cf-experimental/bosh-bootloader.git
+    uri: https://github.com/cloudfoundry/bosh-bootloader.git
 - name: mega-ci
   type: git
   source:
