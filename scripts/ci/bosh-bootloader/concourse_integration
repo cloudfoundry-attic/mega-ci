@@ -5,11 +5,11 @@ CURRENT_TIME=$(date +%s)
 STATE_DIR="${ROOT}/bbl-integration-s3/${CURRENT_TIME}"
 
 function main() {
-  mkdir -p "${GOPATH}/src/github.com/pivotal-cf-experimental"
+  mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
 
   mkdir -p "${STATE_DIR}"
 
-  pushd "${GOPATH}/src/github.com/pivotal-cf-experimental" > /dev/null
+  pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/bosh-bootloader"
     set +x
     cat > bit_config.json << EOF

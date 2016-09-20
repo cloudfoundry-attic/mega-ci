@@ -2,9 +2,9 @@
 
 ROOT="${PWD}"
 
-mkdir -p "${GOPATH}/src/github.com/pivotal-cf-experimental"
+mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
 
-pushd "${GOPATH}/src/github.com/pivotal-cf-experimental" > /dev/null
+pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
   ln -s "${ROOT}/bosh-bootloader"
   chpst -u testuser:testuser ./bosh-bootloader/scripts/test
 popd > /dev/null
