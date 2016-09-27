@@ -13,6 +13,9 @@ groups:
   - delete-deployments
   - create-final-release
   - merge-master-into-develop
+- name: cleanup
+  jobs:
+  - delete-etcd-deployments
 
 resources:
 - name: etcd-cf-env
@@ -94,6 +97,20 @@ resources:
     repository: cloudfoundry-incubator/consul-release
 
 jobs:
+- name: delete-etcd-deployments
+  public: false
+  plan:
+  - aggregate:
+    - get: mega-ci
+  - task: delete-deployments
+    file: mega-ci/scripts/ci/delete-deployments/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        DEPLOYMENTS_WITH_WORD: etcd
+
 - name: check-git-submodules
   public: true
   serial: true
