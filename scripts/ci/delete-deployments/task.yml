@@ -4,7 +4,7 @@ platform: linux
 image: docker:///cfinfrastructure/deployment
 
 run:
-  path: mega-ci/scripts/ci/delete-deployments/task
+  path: mega-ci/scripts/ci/delete-deployments/task.sh
 
 params:
   BOSH_PASSWORD:
