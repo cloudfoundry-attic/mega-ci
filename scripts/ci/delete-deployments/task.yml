@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+run:
+  path: mega-ci/scripts/ci/delete-deployments/task
+
+params:
+  BOSH_PASSWORD:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  DEPLOYMENTS_WITH_WORD:

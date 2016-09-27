@@ -12,6 +12,9 @@ groups:
   - delete-deployments
   - create-final-release
   - merge-master-into-develop
+- name: cleanup
+  jobs:
+  - delete-consul-deployments
 
 resources:
 - name: mega-ci-env
@@ -89,6 +92,20 @@ resources:
     repository: cloudfoundry-incubator/bosh-aws-cpi-release
 
 jobs:
+- name: delete-consul-deployments
+  public: false
+  plan:
+  - aggregate:
+    - get: mega-ci
+  - task: delete-deployments
+    file: mega-ci/scripts/ci/delete-deployments/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{bosh_director}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+        DEPLOYMENTS_WITH_WORD: consul
+
 - name: check-git-submodules
   public: true
   serial: true
