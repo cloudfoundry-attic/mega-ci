@@ -12,6 +12,7 @@ function deploy_diego() {
       -p $ROOT/consul-cf-env/stubs/diego/property-overrides.yml \
       -n $ROOT/consul-cf-env/stubs/diego/instance-count-overrides.yml \
       -v $ROOT/consul-cf-env/stubs/diego/release-versions.yml \
+      -g \
       > $ROOT/diego.yml
   popd > /dev/null
 
@@ -38,7 +39,7 @@ function main() {
 
   upload_release "cloudfoundry/cflinuxfs2-rootfs-release"
   upload_release "cloudfoundry/diego-release"
-  upload_release "cloudfoundry/garden-linux-release"
+  upload_release "cloudfoundry/garden-runc-release"
   upload_release "cloudfoundry-incubator/etcd-release"
 
   deploy_diego
