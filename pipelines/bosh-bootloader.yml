@@ -4,13 +4,21 @@ groups:
   - test-bosh-bootloader
   - integration-tests
   - concourse-integration-tests
+- name: final-release
+  jobs:
+  - bump-bbl-version-patch
 
 resources:
-- name: bosh-bootloader
+- name: bosh-bootloader-develop
   type: git
   source:
     branch: develop
     uri: https://github.com/cloudfoundry/bosh-bootloader.git
+- name: bosh-bootloader-master
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/christianang/bosh-bootloader.git
 - name: mega-ci
   type: git
   source:
@@ -23,6 +31,15 @@ resources:
     regexp: (.*).tgz
     access_key_id: {{bbl_integration_tests_s3_access_key_id}}
     secret_access_key: {{bbl_integration_tests_s3_secret_access_key}}
+- name: bbl-version
+  type: semver
+  source:
+    initial_version: 0.0.1
+    driver: s3
+    bucket: bbl-version
+    key: bbl-version
+    access_key_id: {{bbl_version_s3_access_key_id}}
+    secret_access_key: {{bbl_version_s3_secret_access_key}}
 
 jobs:
 - name: test-bosh-bootloader
@@ -31,6 +48,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: bosh-bootloader
+      resource: bosh-bootloader-develop
       trigger: true
   - task: test
     file: mega-ci/scripts/ci/bosh-bootloader/test.yml
@@ -41,6 +59,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: bosh-bootloader
+      resource: bosh-bootloader-develop
       passed: [test-bosh-bootloader]
       trigger: true
   - task: test
@@ -61,6 +80,7 @@ jobs:
   - aggregate:
     - get: mega-ci
     - get: bosh-bootloader
+      resource: bosh-bootloader-develop
       passed: [integration-tests]
       trigger: true
   - task: test
@@ -74,3 +94,10 @@ jobs:
       put: bbl-integration-s3
       params:
         file: bbl-integration-s3/*.tgz
+
+- name: bump-bbl-version-patch
+  public: false
+  plan:
+  - put: bbl-version
+    params:
+      bump: patch
