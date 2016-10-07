@@ -6,7 +6,7 @@ export GO15VENDOREXPERIMENT=1
 export ETCD_RELEASE_VERSION="99999+dev.$(date +%s)"
 export STEMCELL_VERSION=$(cat "${ROOT}"/stemcell/version)
 export TURBULENCE_RELEASE_VERSION=$(cat "${ROOT}"/turbulence-release/version)
-export CONSUL_RELEASE_VERSION=$(cat "${ROOT}"/consul-release/version)
+export CONSUL_RELEASE_VERSION="110"
 export BOSH_AWS_CPI_RELEASE_VERSION=$(cat "${ROOT}"/bosh-aws-cpi-release/version)
 
 function main() {
@@ -88,7 +88,8 @@ function upload_releases() {
   popd > /dev/null
 
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
+    #bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
+    bosh -t "${BOSH_DIRECTOR}" upload release https://bosh.io/d/github.com/cloudfoundry-incubator/consul-release?v=110
   popd > /dev/null
 }
 
