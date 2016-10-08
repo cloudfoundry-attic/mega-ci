@@ -101,7 +101,7 @@ jobs:
     - put: minimal-docker-image
       params:
         build: mega-ci/dockerfiles/minimal
-        cache: true
+        cache: false
 
 - name: golang-docker-image
   public: true
@@ -119,7 +119,7 @@ jobs:
     - put: golang-docker-image
       params:
         build: mega-ci/dockerfiles/golang
-        cache: true
+        cache: false
 
 - name: deployment-docker-image
   public: true
@@ -137,7 +137,7 @@ jobs:
     - put: deployment-docker-image
       params:
         build: mega-ci/dockerfiles/deployment
-        cache: true
+        cache: false
 
 - name: vagrant-docker-image
   public: true
@@ -155,7 +155,7 @@ jobs:
     - put: vagrant-docker-image
       params:
         build: mega-ci/dockerfiles/vagrant
-        cache: true
+        cache: false
 
 - name: mega-ci-unit-tests
   public: true
