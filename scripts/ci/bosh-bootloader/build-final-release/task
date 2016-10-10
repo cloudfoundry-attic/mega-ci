@@ -21,6 +21,12 @@ function main() {
 }
 
 function build_bbl() {
+  echo "Building 64-bit Linux"
+  CGO_ENABLED=0 GOARCH=amd64 GOOS=linux \
+    go build -a -tags netgo -installsuffix netgo \
+    -ldflags "-X main.Version=${BBL_VERSION}" \
+    -o "${ROOT}/builds/bin/bbl-v${BBL_VERSION}_linux_x86-64" .
+
   echo "Building 64-bit Darwin"
   GOARCH=amd64 GOOS=darwin \
     go build \
