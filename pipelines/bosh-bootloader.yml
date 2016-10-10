@@ -6,7 +6,10 @@ groups:
   - concourse-integration-tests
 - name: final-release
   jobs:
-  - push-release
+  - major
+  - minor
+  - patch
+  - github-release
 
 resources:
 - name: bosh-bootloader-develop
@@ -31,7 +34,7 @@ resources:
     regexp: (.*).tgz
     access_key_id: {{bbl_integration_tests_s3_access_key_id}}
     secret_access_key: {{bbl_integration_tests_s3_secret_access_key}}
-- name: bbl-version
+- name: version
   type: semver
   source:
     initial_version: 0.0.2
@@ -101,17 +104,37 @@ jobs:
       params:
         file: bbl-integration-s3/*.tgz
 
-- name: push-release
+- name: major
+  public: false
+  plan:
+  - get: version
+  - put: version
+    params: {bump: major}
+
+- name: minor
+  public: false
+  plan:
+  - get: version
+  - put: version
+    params: {bump: minor}
+
+- name: patch
+  public: false
+  plan:
+  - get: version
+  - put: version
+    params: {bump: patch}
+
+- name: github-release
   public: false
   plan:
   - aggregate:
     - get: mega-ci
-    - put: bbl-version
-      params:
-        bump: patch
+    - get: bbl-version
+      trigger: true
+      resource: version
     - get: bosh-bootloader
       resource: bosh-bootloader-master
-      #trigger: true
   - task: build-binaries
     file: mega-ci/scripts/ci/bosh-bootloader/build-final-release/task.yml
   - put: bbl-release
