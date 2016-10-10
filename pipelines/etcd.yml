@@ -9,7 +9,7 @@ groups:
   - deploy-with-cf
   - deploy-with-diego
   - test-with-diego
-  #- test-cf-tls-upgrade
+  - test-cf-tls-upgrade
   - delete-deployments
   - create-final-release
   - merge-master-into-develop
@@ -330,8 +330,7 @@ jobs:
     - get: etcd-release
       resource: etcd-release-develop
       passed:
-      #- test-cf-tls-upgrade
-      - test-with-diego
+      - test-cf-tls-upgrade
       trigger: true
   - task: delete-diego-deployment
     file: mega-ci/scripts/ci/run-bosh-command.yml
