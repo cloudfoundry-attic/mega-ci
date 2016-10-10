@@ -6,11 +6,11 @@ BBL_VERSION=$(cat "${ROOT}/bbl-version/number")
 function main() {
   local commit_sha
 
-  mkdir -p "${GOPATH}/src/github.com/cloudfoundry/"
-  ln -s "${ROOT}/bosh-bootloader" "${GOPATH}/src/github.com/cloudfoundry/"
+  mkdir -p "${GOPATH}/src/github.com/pivotal-cf-experimental"
+  ln -s "${ROOT}/bosh-bootloader" "${GOPATH}/src/github.com/pivotal-cf-experimental"
   commit_sha=$(git -C "${ROOT}/bosh-bootloader" rev-parse HEAD)
 
-  pushd "${GOPATH}/src/github.com/cloudfoundry/bosh-bootloader/bbl" > /dev/null
+  pushd "${GOPATH}/src/github.com/pivotal-cf-experimental/bosh-bootloader/bbl" > /dev/null
     build_bbl
   popd > /dev/null
 
