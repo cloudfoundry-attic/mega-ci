@@ -1,0 +1,15 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: bosh-bootloader
+  - name: bbl-version
+  - name: mega-ci
+
+outputs:
+  - name: build
+
+run:
+  path: mega-ci/scripts/ci/bosh-bootloader/build-final-release/task

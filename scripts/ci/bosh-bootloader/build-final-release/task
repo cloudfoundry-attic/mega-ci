@@ -1,0 +1,36 @@
+#!/bin/bash -exu
+
+ROOT=${PWD}
+BBL_VERSION=$(cat "${ROOT}/bbl-version/bbl-version")
+
+function main() {
+  local commit_sha
+
+  mkdir -p "${ROOT}/builds"
+  mkdir -p "${GOPATH}/src/github.com/cloudfoundry/bosh-bootloader/"
+
+  pushd "${GOPATH}/src/github.com/cloudfoundry/bosh-bootloader" > /dev/null
+    cp -r "${ROOT}/bosh-bootloader/." .
+
+    commit_sha=$(git rev-parse HEAD)
+
+    build_bbl "darwin" "amd64"
+  popd > /dev/null
+
+  pushd "${ROOT}/build" > /dev/null
+    echo -n "v${BBL_VERSION}" > name
+  popd > /dev/null
+}
+
+function build_bbl() {
+  local goos
+  goos=${1}
+  local goarch
+  goarch=${2}
+
+  GOOS="${goos}" GOARCH="${goarch}" go build -ldflags "-X main.Version=${BBL_VERSION}" \
+    -o "${ROOT}/build/bin/bbl-v${BBL_VERSION}-${goos}-${goarch}" \
+    "github.com/cloudfoundry/bosh-bootloader/bbl"
+}
+
+main
