@@ -9,7 +9,7 @@ inputs:
   - name: mega-ci
 
 outputs:
-  - name: build
+  - name: builds
 
 run:
   path: mega-ci/scripts/ci/bosh-bootloader/build-final-release/task
