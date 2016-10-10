@@ -6,7 +6,7 @@ groups:
   - concourse-integration-tests
 - name: final-release
   jobs:
-  - bump-bbl-version-patch
+  - push-release
 
 resources:
 - name: bosh-bootloader-develop
@@ -34,12 +34,18 @@ resources:
 - name: bbl-version
   type: semver
   source:
-    initial_version: 0.0.1
+    initial_version: 0.0.2
     driver: s3
     bucket: bbl-version
     key: bbl-version
     access_key_id: {{bbl_version_s3_access_key_id}}
     secret_access_key: {{bbl_version_s3_secret_access_key}}
+- name: bbl-release
+  type: github-release
+  source:
+    user: cloudfoundry
+    repository: bosh-bootloader
+    access_token: {{cf_infra_bot_user_access_token}}
 
 jobs:
 - name: test-bosh-bootloader
@@ -95,9 +101,23 @@ jobs:
       params:
         file: bbl-integration-s3/*.tgz
 
-- name: bump-bbl-version-patch
+- name: push-release
   public: false
   plan:
-  - put: bbl-version
+  - aggregate:
+    - get: mega-ci
+    - put: bbl-version
+      params:
+        bump: patch
+    - get: bosh-bootloader
+      resource: bosh-bootloader-master
+      #trigger: true
+  - task: build-binaries
+    file: mega-ci/scripts/ci/bosh-bootloader/build-final-release/task.yml
+  - put: bbl-release
     params:
-      bump: patch
+      name: builds/name
+      tag: builds/name
+      commitish: builds/commitish
+      globs:
+      - builds/bin/bbl-*
