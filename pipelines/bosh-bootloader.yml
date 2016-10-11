@@ -4,6 +4,7 @@ groups:
   - test-bosh-bootloader
   - integration-tests
   - concourse-integration-tests
+  - build-compiled-bosh-release
 - name: final-release
   jobs:
   - major
@@ -49,6 +50,21 @@ resources:
     user: cloudfoundry
     repository: bosh-bootloader
     access_token: {{cf_infra_bot_user_access_token}}
+- name: bbl-compiled-bosh-release-s3
+  type: s3
+  source:
+    bucket: bbl-s3-bucket-user
+    regexp: (.*).tgz
+    access_key_id: {{bbl_compiled_bosh_release_s3_access_key_id}}
+    secret_access_key: {{bbl_compiled_bosh_release_s3_secret_access_key}}
+- name: bosh
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/bosh
+- name: aws-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 jobs:
 - name: test-bosh-bootloader
@@ -103,6 +119,24 @@ jobs:
       put: bbl-integration-s3
       params:
         file: bbl-integration-s3/*.tgz
+
+- name: build-compiled-bosh-release
+  public: false
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: bosh
+    - get: aws-stemcell
+  - task: build-compiled-bosh-release
+    file: mega-ci/scripts/ci/bosh-bootloader/build-compiled-bosh-release/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{mega_bosh_director}}
+        BOSH_USER: {{mega_bosh_user}}
+        BOSH_PASSWORD: {{mega_bosh_password}}
+  - put: bbl-compiled-bosh-release-s3
+    params:
+      file: bbl-compiled-bosh-release-s3/*.tgz
 
 - name: major
   public: false

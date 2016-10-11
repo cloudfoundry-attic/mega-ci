@@ -1,0 +1,17 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+- name: mega-ci
+- name: bosh
+- name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/bosh-bootloader/build-compiled-bosh-release/task
+
+params:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
