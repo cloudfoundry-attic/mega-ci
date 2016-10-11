@@ -28,7 +28,6 @@ function upload_stemcell() {
 }
 
 function export_bosh_release() {
-  mkdir -p "${ROOT}/bbl-compiled-bosh-release-s3"
   pushd "${ROOT}/bbl-compiled-bosh-release-s3" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" -d "${ROOT}/bbl_compilation.yml" export release "bosh/${BOSH_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
   popd > /dev/null

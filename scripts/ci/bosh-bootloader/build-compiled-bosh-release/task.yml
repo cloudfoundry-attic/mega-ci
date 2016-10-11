@@ -8,6 +8,9 @@ inputs:
 - name: bosh
 - name: stemcell
 
+outputs:
+- name: bbl-compiled-bosh-release-s3
+
 run:
   path: mega-ci/scripts/ci/bosh-bootloader/build-compiled-bosh-release/task
 
