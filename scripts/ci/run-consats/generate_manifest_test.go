@@ -15,7 +15,6 @@ var _ = Describe("Generate", func() {
 
 	BeforeEach(func() {
 		variables = map[string]string{
-			"AWS_AVAILIBILITY_ZONE":                      "some-aws-availability-zone",
 			"AWS_SUBNETS":                                `[{"id":"some-subnet-1","range":"10.0.4.0/24","az":"some-az-1","securityGroup":"some-security-group-1"},{"id":"some-subnet-2","range":"10.0.5.0/24","az":"some-az-2","securityGroup":"some-security-group-2"}]`,
 			"AWS_CLOUD_CONFIG_SUBNETS":                   `[{"id":"some-cloud-config-subnet-1","range":"10.0.6.0/24","az":"some-cloud-config-az-1","securityGroup":"some-cloud-config-security-group-1"},{"id":"some-cloud-config-subnet-2","range":"10.0.7.0/24","az":"some-cloud-config-az-2","securityGroup":"some-cloud-config-security-group-2"}]`,
 			"AWS_ACCESS_KEY_ID":                          "some-aws-access-key-id",
