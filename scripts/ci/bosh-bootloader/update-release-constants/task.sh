@@ -52,6 +52,8 @@ EOF
     git add versions.go
     git commit -m "Update constants"
   popd > /dev/null
+
+  git clone file://${ROOT}/bosh-bootloader ${ROOT}/bosh-bootloader-develop-write
 }
 
 main
