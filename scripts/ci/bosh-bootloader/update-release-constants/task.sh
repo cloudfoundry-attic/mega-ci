@@ -8,7 +8,7 @@ function main() {
     local bosh_aws_cpi_sha1
 
     bosh_aws_cpi_url=$(cat url)
-    bosh_aws_cpi_sha1=$(cat sha1)
+    bosh_aws_cpi_sha1="$(sha1sum release.tgz | cut -f1 -d" ")"
   popd > /dev/null
 
   pushd "${ROOT}/stemcell" > /dev/null
@@ -16,7 +16,7 @@ function main() {
     local stemcell_sha1
 
     stemcell_url="$(cat url)"
-    stemcell_sha1="$(cat sha1)"
+    stemcell_sha1="$(sha1sum stemcell.tgz | cut -f1 -d" ")"
   popd > /dev/null
 
   pushd "${ROOT}/bbl-compiled-bosh-release-s3" > /dev/null
@@ -46,6 +46,8 @@ function main() {
 EOF
     go fmt versions.go
 
+    git config --global user.name "fizzy bot"
+    git config --global user.email cf-infrastructure@pivotal.io
     git commit -m "Update constants"
   popd > /dev/null
 }
