@@ -1,0 +1,14 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/golang
+
+inputs:
+- name: bosh-bootloader
+- name: mega-ci
+- name: bosh-aws-cpi-release
+- name: bbl-compiled-bosh-release-s3
+- name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/bosh-bootloader/update-release-constants/task.sh

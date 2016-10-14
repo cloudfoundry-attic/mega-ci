@@ -1,10 +1,11 @@
 groups:
 - name: bosh-bootloader
   jobs:
+  - build-compiled-bosh-release
+  - update-release-constants
   - test-bosh-bootloader
   - integration-tests
   - concourse-integration-tests
-  - build-compiled-bosh-release
 - name: final-release
   jobs:
   - major
@@ -18,6 +19,12 @@ resources:
   source:
     branch: develop
     uri: https://github.com/cloudfoundry/bosh-bootloader.git
+- name: bosh-bootloader-develop-write
+  type: git
+  source:
+    branch: test-branch
+    uri: git@github.com:cloudfoundry/bosh-bootloader.git
+    private_key: {{cf_infra_bot_user_github_private_key}}
 - name: bosh-bootloader-master
   type: git
   source:
@@ -26,7 +33,7 @@ resources:
 - name: mega-ci
   type: git
   source:
-    branch: master
+    branch: test-branch
     uri: https://github.com/cloudfoundry/mega-ci.git
 - name: bbl-integration-s3
   type: s3
@@ -49,7 +56,7 @@ resources:
   source:
     user: cloudfoundry
     repository: bosh-bootloader
-    access_token: {{cf_infra_bot_user_access_token}}
+    access_token: {{cf_infra_bot_user_github_access_token}}
 - name: bbl-compiled-bosh-release-s3
   type: s3
   source:
@@ -90,14 +97,7 @@ jobs:
       resource: bosh-bootloader-develop
       passed: [test-bosh-bootloader]
       trigger: true
-    - get: bbl-compiled-bosh-release-s3
-      passed: [build-compiled-bosh-release]
-      trigger: true
-    - get: bosh-aws-cpi-release
-      trigger: true
     - get: mega-ci
-    - get: stemcell
-      resource: aws-stemcell
   - task: test
     file: mega-ci/scripts/ci/bosh-bootloader/integration.yml
     config:
@@ -153,6 +153,25 @@ jobs:
     params:
       file: bbl-compiled-bosh-release-s3/*.tgz
       acl: public-read
+
+- name: update-release-constants
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: stemcell
+      resource: aws-stemcell
+      passed: [build-compiled-bosh-release]
+    - get: bbl-compiled-bosh-release-s3
+      trigger: true
+      passed: [build-compiled-bosh-release]
+    - get: bosh-aws-cpi-release
+      trigger: true
+  - task: update-release-constants
+    file: mega-ci/scripts/ci/bosh-bootloader/update-release-constants/task.yml
+  - put: bosh-bootloader-develop-write
+    params:
+      repository: bosh-bootloader
 
 - name: major
   public: true
