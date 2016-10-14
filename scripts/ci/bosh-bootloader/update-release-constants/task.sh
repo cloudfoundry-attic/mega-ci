@@ -48,6 +48,8 @@ EOF
 
     git config --global user.name "fizzy bot"
     git config --global user.email cf-infrastructure@pivotal.io
+
+    git add versions.go
     git commit -m "Update constants"
   popd > /dev/null
 }

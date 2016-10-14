@@ -10,8 +10,5 @@ inputs:
 - name: bbl-compiled-bosh-release-s3
 - name: stemcell
 
-outputs:
-- name: bosh-bootloader
-
 run:
   path: mega-ci/scripts/ci/bosh-bootloader/update-release-constants/task.sh
