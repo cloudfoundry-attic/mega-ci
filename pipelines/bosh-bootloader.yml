@@ -159,6 +159,8 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
+    - get: bosh-bootloader
+      resource: bosh-bootloader-develop
     - get: stemcell
       resource: aws-stemcell
       passed: [build-compiled-bosh-release]
@@ -171,7 +173,7 @@ jobs:
     file: mega-ci/scripts/ci/bosh-bootloader/update-release-constants/task.yml
   - put: bosh-bootloader-develop-write
     params:
-      repository: bosh-bootloader
+      repository: bosh-bootloader-develop-write
 
 - name: major
   public: true

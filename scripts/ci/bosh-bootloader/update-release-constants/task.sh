@@ -30,8 +30,6 @@ function main() {
   popd > /dev/null
 
   pushd "${ROOT}/bosh-bootloader/bbl/constants" > /dev/null
-    git checkout -b test-branch
-
     cat > versions.go << EOF
     package constants
 
@@ -46,7 +44,7 @@ function main() {
 EOF
     go fmt versions.go
 
-    git config --global user.name "fizzy bot"
+    git config --global user.name "cf-infra-bot"
     git config --global user.email cf-infrastructure@pivotal.io
 
     git add versions.go
