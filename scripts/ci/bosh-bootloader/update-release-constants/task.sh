@@ -30,8 +30,6 @@ function main() {
   popd > /dev/null
 
   pushd "${ROOT}/bosh-bootloader/bbl/constants" > /dev/null
-    git checkout test-branch
-
     cat > versions.go << EOF
     package constants
 
