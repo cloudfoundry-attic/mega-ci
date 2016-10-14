@@ -31,7 +31,7 @@ resources:
   type: git
   source:
     branch: master
-    uri: https://github.com/christianang/bosh-bootloader.git
+    uri: https://github.com/cloudfoundry/bosh-bootloader.git
 - name: mega-ci
   type: git
   source:
@@ -47,7 +47,7 @@ resources:
 - name: version
   type: semver
   source:
-    initial_version: 0.0.2
+    initial_version: 0.0.1
     driver: s3
     bucket: bbl-version
     key: bbl-version
