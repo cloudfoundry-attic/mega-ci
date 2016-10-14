@@ -54,10 +54,10 @@ resources:
   type: s3
   source:
     bucket: bbl-precompiled-bosh-releases
-    regexp: (.*).tgz
+    regexp: release-bosh-(.*)-on-ubuntu-trusty-stemcell-(.*).tgz
     access_key_id: {{bbl_compiled_bosh_release_s3_access_key_id}}
     secret_access_key: {{bbl_compiled_bosh_release_s3_secret_access_key}}
-- name: bosh
+- name: bosh-release
   type: bosh-io-release
   source:
     repository: cloudfoundry/bosh
@@ -65,6 +65,10 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+- name: bosh-aws-cpi-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-incubator/bosh-aws-cpi-release
 
 jobs:
 - name: test-bosh-bootloader
@@ -82,11 +86,18 @@ jobs:
   public: true
   plan:
   - aggregate:
-    - get: mega-ci
     - get: bosh-bootloader
       resource: bosh-bootloader-develop
       passed: [test-bosh-bootloader]
       trigger: true
+    - get: bbl-compiled-bosh-release-s3
+      passed: [build-compiled-bosh-release]
+      trigger: true
+    - get: bosh-aws-cpi-release
+      trigger: true
+    - get: mega-ci
+    - get: stemcell
+      resource: aws-stemcell
   - task: test
     file: mega-ci/scripts/ci/bosh-bootloader/integration.yml
     config:
@@ -121,13 +132,16 @@ jobs:
         file: bbl-integration-s3/*.tgz
 
 - name: build-compiled-bosh-release
-  public: false
+  public: true
   plan:
   - aggregate:
     - get: mega-ci
     - get: bosh
+      resource: bosh-release
+      trigger: true
     - get: stemcell
       resource: aws-stemcell
+      trigger: true
   - task: build-compiled-bosh-release
     file: mega-ci/scripts/ci/bosh-bootloader/build-compiled-bosh-release/task.yml
     config:
@@ -138,30 +152,31 @@ jobs:
   - put: bbl-compiled-bosh-release-s3
     params:
       file: bbl-compiled-bosh-release-s3/*.tgz
+      acl: public-read
 
 - name: major
-  public: false
+  public: true
   plan:
   - get: version
   - put: version
     params: {bump: major}
 
 - name: minor
-  public: false
+  public: true
   plan:
   - get: version
   - put: version
     params: {bump: minor}
 
 - name: patch
-  public: false
+  public: true
   plan:
   - get: version
   - put: version
     params: {bump: patch}
 
 - name: github-release
-  public: false
+  public: true
   plan:
   - aggregate:
     - get: mega-ci
