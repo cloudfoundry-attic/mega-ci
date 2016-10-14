@@ -33,7 +33,7 @@ resources:
 - name: mega-ci
   type: git
   source:
-    branch: develop
+    branch: master
     uri: https://github.com/cloudfoundry/mega-ci.git
 - name: bbl-integration-s3
   type: s3
