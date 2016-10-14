@@ -22,7 +22,7 @@ resources:
 - name: bosh-bootloader-develop-write
   type: git
   source:
-    branch: test-branch
+    branch: develop
     uri: git@github.com:cloudfoundry/bosh-bootloader.git
     private_key: {{cf_infra_bot_user_github_private_key}}
 - name: bosh-bootloader-master
@@ -33,7 +33,7 @@ resources:
 - name: mega-ci
   type: git
   source:
-    branch: test-branch
+    branch: develop
     uri: https://github.com/cloudfoundry/mega-ci.git
 - name: bbl-integration-s3
   type: s3
