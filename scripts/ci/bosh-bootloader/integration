@@ -4,7 +4,6 @@ ROOT="${PWD}"
 CURRENT_TIME=$(date +%s)
 STATE_DIR="${ROOT}/bbl-integration-s3/${CURRENT_TIME}"
 
-
 function install_bosh_cli() {
   pushd "${ROOT}" > /dev/null
     wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.69-linux-amd64
@@ -16,25 +15,7 @@ function install_bosh_cli() {
 function main() {
   install_bosh_cli
 
-  pushd "${ROOT}/bosh-aws-cpi-release" > /dev/null
-    export BOSH_AWS_CPI_URL=$(cat url)
-    export BOSH_AWS_CPI_SHA1=$(cat sha1)
-  popd > /dev/null
-
-  pushd "${ROOT}/stemcell" > /dev/null
-    export STEMCELL_URL="$(cat url)"
-    export STEMCELL_SHA1="$(cat sha1)"
-  popd > /dev/null
-
-  pushd "${ROOT}/bbl-compiled-bosh-release-s3" > /dev/null
-    export BOSH_URL="$(cat url)"
-    local release_name
-    release_name=$(cat url | cut -f 5 -d"/")
-    export BOSH_SHA1="$(sha1sum ${release_name} | cut -f1 -d" ")"
-  popd > /dev/null
-
   mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
-
   mkdir -p "${STATE_DIR}"
 
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null

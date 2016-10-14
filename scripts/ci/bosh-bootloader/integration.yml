@@ -6,9 +6,6 @@ image: docker:///cfinfrastructure/deployment
 inputs:
   - name: bosh-bootloader
   - name: mega-ci
-  - name: bbl-compiled-bosh-release-s3
-  - name: stemcell
-  - name: bosh-aws-cpi-release
 outputs:
   - name: bbl-integration-s3
 
