@@ -1,8 +1,6 @@
 groups:
 - name: bosh-bootloader
   jobs:
-  - build-compiled-bosh-release
-  - update-release-constants
   - test-bosh-bootloader
   - integration-tests
   - concourse-integration-tests
@@ -12,6 +10,10 @@ groups:
   - minor
   - patch
   - github-release
+- name: release-updates
+  jobs:
+  - build-compiled-bosh-release
+  - update-release-constants
 
 resources:
 - name: bosh-bootloader-develop

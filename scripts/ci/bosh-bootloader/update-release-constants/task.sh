@@ -33,6 +33,8 @@ function main() {
     cat > versions.go << EOF
     package constants
 
+    // THIS FILE IS GENERATED AUTOMATICALLY, NO TOUCHING!!!!!
+
     const (
       BOSHURL        = "${bosh_url}"
       BOSHSHA1       = "${bosh_sha1}"
