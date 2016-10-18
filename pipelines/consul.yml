@@ -298,7 +298,7 @@ jobs:
       - test-with-diego
       trigger: true
   - task: delete-deployments
-    file: mega-ci/scripts/ci/delete-deployments.yml
+    file: mega-ci/scripts/ci/delete-deployments/task.yml
     config:
       params:
         DEPLOYMENTS_WITH_WORD: consul-cf-deployment

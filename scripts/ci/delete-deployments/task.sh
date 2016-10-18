@@ -9,7 +9,7 @@ function main() {
   local deployments
   deployments=$(echo "${raw_deployments}" | jq 'map(select(.name | contains('\"${DEPLOYMENTS_WITH_WORD}\"')))' | jq .[].name)
 
-  if [ -z "${deployments}" ]
+  if [ -n "${deployments}" ]
   then
     echo "${deployments}" | xargs -n 1 -P 5  bosh -t "${BOSH_DIRECTOR}" -n delete deployment
   fi
