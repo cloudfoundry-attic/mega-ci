@@ -297,28 +297,11 @@ jobs:
       passed:
       - test-with-diego
       trigger: true
-  - task: delete-diego-deployment
-    file: mega-ci/scripts/ci/run-bosh-command.yml
+  - task: delete-deployments
+    file: mega-ci/scripts/ci/delete-deployments.yml
     config:
       params:
-        DEPLOYMENT_NAME: consul-cf-deployment-diego
-        COMMAND: delete deployment consul-cf-deployment-diego
-        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
-        BOSH_USER: {{consul_cf_bosh_user}}
-        BOSH_PASSWORD: {{consul_cf_bosh_password}}
-  - task: delete-cf-deployment
-    file: mega-ci/scripts/ci/run-bosh-command.yml
-    config:
-      params:
-        DEPLOYMENT_NAME: consul-cf-deployment
-        COMMAND: delete deployment consul-cf-deployment
-        BOSH_DIRECTOR: {{consul_cf_bosh_director}}
-        BOSH_USER: {{consul_cf_bosh_user}}
-        BOSH_PASSWORD: {{consul_cf_bosh_password}}
-  - task: cleanup-releases
-    file: mega-ci/scripts/ci/run-bosh-cleanup.yml
-    config:
-      params:
+        DEPLOYMENTS_WITH_WORD: consul-cf-deployment
         BOSH_DIRECTOR: {{consul_cf_bosh_director}}
         BOSH_USER: {{consul_cf_bosh_user}}
         BOSH_PASSWORD: {{consul_cf_bosh_password}}

@@ -1,16 +1,21 @@
 #!/bin/bash -exu
 
 function main() {
-  local deployments
+  local raw_deployments
   set +x
-  deployments=$(curl -sk https://${BOSH_USER}:${BOSH_PASSWORD}@${BOSH_DIRECTOR}:25555/deployments)
+  raw_deployments=$(curl -sk https://${BOSH_USER}:${BOSH_PASSWORD}@${BOSH_DIRECTOR}:25555/deployments)
   set -x
 
-  echo "${deployments}" | jq .[].name | grep ${DEPLOYMENTS_WITH_WORD} | xargs -n 1 -P 5  bosh -t ${BOSH_DIRECTOR} -n delete deployment
+  local deployments
+  deployments=$(echo "${raw_deployments}" | jq 'map(select(.name | contains('\"${DEPLOYMENTS_WITH_WORD}\"')))' | jq .[].name)
+
+  if [ -z "${deployments}" ]
+  then
+    echo "${deployments}" | xargs -n 1 -P 5  bosh -t "${BOSH_DIRECTOR}" -n delete deployment
+  fi
 
   echo "cleaning up orphaned disks and releases"
-  bosh -t ${BOSH_DIRECTOR} cleanup --all
+  bosh -t "${BOSH_DIRECTOR}" cleanup
 }
 
 main
-
