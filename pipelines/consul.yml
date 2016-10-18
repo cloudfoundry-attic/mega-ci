@@ -5,6 +5,7 @@ groups:
   - deploy-bosh-lite-manifests
   - deploy-aws-manifests
   - test-confab
+  - test-confab-windows
   - test-consul
   - deploy-with-cf
   - deploy-with-diego
@@ -181,6 +182,19 @@ jobs:
   - task: test-confab
     file: mega-ci/scripts/ci/confab/test.yml
 
+- name: test-confab-windows
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [check-git-submodules]
+      trigger: true
+  - task: test-confab-windows
+    file: mega-ci/scripts/ci/confab-windows/test.yml
+
 - name: test-consul
   public: true
   serial: true
@@ -189,7 +203,9 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
-      passed: [test-confab]
+      passed:
+      - test-confab
+      - test-confab-windows
       trigger: true
     - get: stemcell
       resource: aws-stemcell
