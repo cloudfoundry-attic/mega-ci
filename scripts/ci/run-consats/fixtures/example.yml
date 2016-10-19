@@ -64,6 +64,7 @@ properties:
         port: 25777
       parallel_nodes: 1
       consul_release_version: CONSUL_RELEASE_VERSION
+      latest_consul_release_version: LATEST_CONSUL_RELEASE_VERSION
 
 update:
   serial: true

@@ -36,6 +36,7 @@ var _ = Describe("Generate", func() {
 			"PARALLEL_NODES":                             "10",
 			"CONSUL_RELEASE_VERSION":                     "some-consul-release-version",
 			"STEMCELL_VERSION":                           "some-stemcell-version",
+			"LATEST_CONSUL_RELEASE_VERSION":              "some-latest-consul-release-version",
 		}
 
 		for name, value := range variables {

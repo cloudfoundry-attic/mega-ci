@@ -5,6 +5,7 @@ export CONSUL_RELEASE_VERSION="99999+dev.$(date +%s)"
 export STEMCELL_VERSION=$(cat ${ROOT}/stemcell/version)
 export TURBULENCE_RELEASE_VERSION=$(cat ${ROOT}/turbulence-release/version)
 export BOSH_AWS_CPI_RELEASE_VERSION=$(cat ${ROOT}/bosh-aws-cpi-release/version)
+export LATEST_CONSUL_RELEASE_VERSION=$(cat ${ROOT}/latest-consul-release/version)
 
 function main() {
   bosh target "${BOSH_DIRECTOR}"
@@ -44,6 +45,11 @@ function upload_releases() {
     bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${CONSUL_RELEASE_VERSION}"
     bosh -t "${BOSH_DIRECTOR}" upload release
   popd > /dev/null
+
+  pushd "${ROOT}/latest-consul-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
+  popd > /dev/null
+
 }
 
 function force_compilation() {

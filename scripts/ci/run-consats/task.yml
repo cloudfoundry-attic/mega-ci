@@ -9,6 +9,7 @@ inputs:
   - name: stemcell
   - name: turbulence-release
   - name: bosh-aws-cpi-release
+  - name: latest-consul-release
 
 run:
   path: mega-ci/scripts/ci/run-consats/task

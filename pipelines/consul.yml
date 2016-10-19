@@ -195,6 +195,7 @@ jobs:
       resource: aws-stemcell
     - get: turbulence-release
     - get: bosh-aws-cpi-release
+    - get: latest-consul-release
   - task: run-consats
     file: mega-ci/scripts/ci/run-consats/task.yml
     config:
