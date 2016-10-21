@@ -90,6 +90,10 @@ resources:
   type: bosh-io-release
   source:
     repository: cloudfoundry-incubator/bosh-aws-cpi-release
+- name: latest-consul-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-incubator/consul-release
 
 jobs:
 - name: delete-consul-deployments
