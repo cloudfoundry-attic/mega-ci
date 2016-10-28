@@ -223,6 +223,7 @@ jobs:
         REGISTRY_PASSWORD: {{registry_password}}
         REGISTRY_HOST: 10.0.0.6
         PARALLEL_NODES: 7
+        ENABLE_TURBULENCE_TESTS: false
 
 - name: test-consul-with-turbulence
   public: true
