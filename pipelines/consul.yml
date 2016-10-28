@@ -6,6 +6,7 @@ groups:
   - deploy-aws-manifests
   - test-confab
   - test-consul
+  - test-consul-with-turbulence
   - deploy-with-cf
   - deploy-with-diego
   - test-with-diego
@@ -134,7 +135,7 @@ jobs:
     - get: bosh-lite-stemcell
     - get: release
       resource: consul-release-develop
-      passed: [test-consul]
+      passed: [test-consul-with-turbulence]
       trigger: true
   - task: deploy-bosh-lite-manifests
     file: mega-ci/scripts/ci/deploy-bosh-lite-manifests.yml
@@ -158,7 +159,7 @@ jobs:
     - get: mega-ci
     - get: release
       resource: consul-release-develop
-      passed: [test-consul]
+      passed: [test-consul-with-turbulence]
       trigger: true
   - task: deploy-aws-manifests
     file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-consul-aws-manifests.yml
