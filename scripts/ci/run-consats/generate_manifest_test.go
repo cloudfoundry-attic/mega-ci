@@ -37,6 +37,7 @@ var _ = Describe("Generate", func() {
 			"CONSUL_RELEASE_VERSION":                     "some-consul-release-version",
 			"STEMCELL_VERSION":                           "some-stemcell-version",
 			"LATEST_CONSUL_RELEASE_VERSION":              "some-latest-consul-release-version",
+			"ENABLE_TURBULENCE_TESTS":                    "true",
 		}
 
 		for name, value := range variables {
