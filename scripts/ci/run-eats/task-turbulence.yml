@@ -1,0 +1,28 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: mega-ci
+  - name: etcd-release
+  - name: consul-release
+  - name: turbulence-release
+  - name: bosh-aws-cpi-release
+  - name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/run-eats/task-turbulence
+
+params:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
+  BOSH_DIRECTOR_CA_CERT:
+  AWS_SUBNET:
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  AWS_DEFAULT_KEY_NAME:
+  AWS_DEFAULT_SECURITY_GROUPS:
+  AWS_REGION:
+  PARALLEL_NODES:

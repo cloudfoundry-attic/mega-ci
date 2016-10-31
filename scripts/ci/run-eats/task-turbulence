@@ -11,7 +11,7 @@ function main() {
   force_compilation
 
   pushd etcd-release > /dev/null
-    EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}" --skipPackage=turbulence
+    EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}" turbulence
   popd > /dev/null
 }
 
@@ -44,6 +44,12 @@ function write_configuration() {
       "default_key_name": "$AWS_DEFAULT_KEY_NAME",
       "default_security_groups": ["$AWS_DEFAULT_SECURITY_GROUPS"],
       "region": "$AWS_REGION"
+    },
+    "registry": {
+      "host": "$REGISTRY_HOST",
+      "port": $REGISTRY_PORT,
+      "username": "$REGISTRY_USERNAME",
+      "password": "$REGISTRY_PASSWORD"
     }
   }
 EOF
@@ -57,6 +63,14 @@ function upload_releases() {
   popd > /dev/null
 
   pushd "${ROOT}/consul-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload release release-*.tgz --skip-if-exists
+  popd > /dev/null
+
+  pushd "${ROOT}/turbulence-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload release release-*.tgz --skip-if-exists
+  popd > /dev/null
+
+  pushd "${ROOT}/bosh-aws-cpi-release" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" upload release release-*.tgz --skip-if-exists
   popd > /dev/null
 }
