@@ -6,7 +6,6 @@ export GO15VENDOREXPERIMENT=1
 export ETCD_RELEASE_VERSION="99999+dev.$(date +%s)"
 
 function main() {
-  upload_stemcell
   upload_releases
   write_configuration
   force_compilation
