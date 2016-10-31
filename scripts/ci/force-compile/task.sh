@@ -20,7 +20,7 @@ function force_compilation() {
       -e "s/REPLACE_ME_TURBULENCE_VERSION/${TURBULENCE_RELEASE_VERSION}/g" \
       -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${BOSH_AWS_CPI_RELEASE_VERSION}/g" \
       "${ROOT}/mega-ci/scripts/ci/force-compile/fixtures/compilation.yml" > "compilation.yml"
-    bosh deployment compilation.yml
+    bosh -t "${BOSH_DIRECTOR}" deployment compilation.yml
 
     bosh -t "${BOSH_DIRECTOR}" -n deploy
   popd > /dev/null
