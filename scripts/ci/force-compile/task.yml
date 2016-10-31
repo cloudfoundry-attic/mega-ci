@@ -1,0 +1,25 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: mega-ci
+  - name: consul-release
+  - name: turbulence-release
+  - name: bosh-aws-cpi-release
+  - name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/force-compile/task.sh
+
+params:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
+  BOSH_DIRECTOR_CA_CERT:
+
+outputs:
+  - name: compiled-consul-release
+  - name: compiled-turbulence-release
+  - name: compiled-bosh-aws-cpi-release
