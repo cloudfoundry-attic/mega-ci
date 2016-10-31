@@ -8,23 +8,9 @@ export ETCD_RELEASE_VERSION="99999+dev.$(date +%s)"
 function main() {
   upload_releases
   write_configuration
-  force_compilation
 
   pushd etcd-release > /dev/null
     EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}" turbulence
-  popd > /dev/null
-}
-
-function force_compilation() {
-  pushd /tmp > /dev/null
-    sed \
-      -e "s/REPLACE_ME_DIRECTOR_UUID/$(bosh -t "${BOSH_DIRECTOR}" status --uuid)/g" \
-      -e "s/REPLACE_ME_ETCD_VERSION/${ETCD_RELEASE_VERSION}/g" \
-      "${ROOT}/mega-ci/scripts/ci/run-eats/fixtures/etcd_compilation.yml" > "etcd_compilation.yml"
-
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n deploy
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" export release "etcd/${ETCD_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
-    bosh -t "${BOSH_DIRECTOR}" -d "etcd_compilation.yml" -n delete deployment etcd-compilation
   popd > /dev/null
 }
 
@@ -57,9 +43,8 @@ EOF
 
 
 function upload_releases() {
-  pushd "${ROOT}/etcd-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" -n create release --force --version "${ETCD_RELEASE_VERSION}"
-    bosh -t "${BOSH_DIRECTOR}" -n upload release
+  pushd "${ROOT}/compiled-etcd-release" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" -n upload release release-*.tgz
   popd > /dev/null
 
   pushd "${ROOT}/consul-release" > /dev/null

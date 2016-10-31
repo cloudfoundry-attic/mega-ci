@@ -5,11 +5,10 @@ image: docker:///cfinfrastructure/deployment
 
 inputs:
   - name: mega-ci
-  - name: etcd-release
+  - name: compiled-etcd-release
   - name: consul-release
   - name: turbulence-release
   - name: bosh-aws-cpi-release
-  - name: stemcell
 
 run:
   path: mega-ci/scripts/ci/run-eats/task-turbulence

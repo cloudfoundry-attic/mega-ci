@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: mega-ci
+  - name: release-repo
+  - name: stemcell
+
+run:
+  path: mega-ci/scripts/ci/compile-bosh-release/task-from-repo.sh
+
+params:
+  BOSH_DIRECTOR:
+  BOSH_USER:
+  BOSH_PASSWORD:
+  BOSH_DIRECTOR_CA_CERT:
+  RELEASE_NAME:
+
+outputs:
+  - name: compiled-bosh-release
