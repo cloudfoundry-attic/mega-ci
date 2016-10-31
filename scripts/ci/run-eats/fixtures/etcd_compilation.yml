@@ -6,12 +6,6 @@ name: etcd-compilation
 releases:
 - name: etcd
   version: REPLACE_ME_ETCD_VERSION
-- name: consul
-  version: REPLACE_ME_CONSUL_VERSION
-- name: turbulence
-  version: REPLACE_ME_TURBULENCE_VERSION
-- name: bosh-aws-cpi
-  version: REPLACE_ME_BOSHAWSCPI_VERSION
 
 update:
   canaries: 1
