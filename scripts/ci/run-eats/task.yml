@@ -7,6 +7,7 @@ inputs:
   - name: mega-ci
   - name: etcd-release
   - name: compiled-etcd-release
+  - name: consul-release
 
 run:
   path: mega-ci/scripts/ci/run-eats/task
