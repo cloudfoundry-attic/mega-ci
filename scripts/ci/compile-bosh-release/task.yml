@@ -16,6 +16,7 @@ params:
   BOSH_USER:
   BOSH_PASSWORD:
   BOSH_DIRECTOR_CA_CERT:
+  RELEASE_NAME:
 
 outputs:
   - name: compiled-bosh-release

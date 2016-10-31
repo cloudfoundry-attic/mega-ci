@@ -19,19 +19,12 @@ function force_compilation() {
       "${ROOT}/mega-ci/scripts/ci/force-compile/fixtures/compilation.yml" > "compilation.yml"
     bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" -n deploy
   popd > /dev/null
+
   pushd "${ROOT}/compiled-bosh-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
+    bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "${RELEASE_NAME}/${RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
   popd > /dev/null
 
-  pushd "${ROOT}/compiled-turbulence-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "turbulence/${TURBULENCE_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
-  popd > /dev/null
-
-  pushd "${ROOT}/compiled-bosh-aws-cpi-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "bosh-aws-cpi/${BOSH_AWS_CPI_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
-  popd > /dev/null
-
-  bosh -t "${BOSH_DIRECTOR}" -n delete deployment etcd-compilation
+  bosh -t "${BOSH_DIRECTOR}" -n delete deployment compilation
 }
 
 function upload_stemcell() {
