@@ -9,7 +9,7 @@ inputs:
   - name: stemcell
 
 run:
-  path: mega-ci/scripts/ci/compile-bosh-release/task-from-repo.sh
+  path: mega-ci/scripts/ci/compile-bosh-release/task-release-from-repo.sh
 
 params:
   BOSH_DIRECTOR:
