@@ -2,13 +2,11 @@
 
 export ROOT="${PWD}"
 export STEMCELL_VERSION=$(cat "${ROOT}"/stemcell/version)
-export TURBULENCE_RELEASE_VERSION=$(cat "${ROOT}"/turbulence-release/version)
-export CONSUL_RELEASE_VERSION=$(cat "${ROOT}"/consul-release/version)
-export BOSH_AWS_CPI_RELEASE_VERSION=$(cat "${ROOT}"/bosh-aws-cpi-release/version)
+export RELEASE_VERSION=$(cat "${ROOT}"/bosh-release/version)
 
 function main() {
   upload_stemcell
-  upload_releases
+  upload_release
   force_compilation
 }
 
@@ -16,13 +14,12 @@ function force_compilation() {
   pushd /tmp > /dev/null
     sed \
       -e "s/REPLACE_ME_DIRECTOR_UUID/$(bosh -t "${BOSH_DIRECTOR}" status --uuid)/g" \
-      -e "s/REPLACE_ME_CONSUL_VERSION/${CONSUL_RELEASE_VERSION}/g" \
-      -e "s/REPLACE_ME_TURBULENCE_VERSION/${TURBULENCE_RELEASE_VERSION}/g" \
-      -e "s/REPLACE_ME_BOSHAWSCPI_VERSION/${BOSH_AWS_CPI_RELEASE_VERSION}/g" \
+      -e "s/REPLACE_ME_RELEASE_VERSION/${RELEASE_VERSION}/g" \
+      -e "s/REPLACE_ME_RELEASE_NAME/${RELEASE_NAME}/g" \
       "${ROOT}/mega-ci/scripts/ci/force-compile/fixtures/compilation.yml" > "compilation.yml"
     bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" -n deploy
   popd > /dev/null
-  pushd "${ROOT}/compiled-consul-release" > /dev/null
+  pushd "${ROOT}/compiled-bosh-release" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "consul/${CONSUL_RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
   popd > /dev/null
 
@@ -43,16 +40,8 @@ function upload_stemcell() {
   popd > /dev/null
 }
 
-function upload_releases() {
-  pushd "${ROOT}/turbulence-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
-  popd > /dev/null
-
-  pushd "${ROOT}/bosh-aws-cpi-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
-  popd > /dev/null
-
-  pushd "${ROOT}/consul-release" > /dev/null
+function upload_release() {
+  pushd "${ROOT}/bosh-release" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
   popd > /dev/null
 }

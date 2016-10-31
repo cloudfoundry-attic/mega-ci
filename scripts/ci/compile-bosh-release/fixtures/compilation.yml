@@ -4,12 +4,8 @@ director_uuid: REPLACE_ME_DIRECTOR_UUID
 name: etcd-compilation
 
 releases:
-- name: consul
-  version: REPLACE_ME_CONSUL_VERSION
-- name: turbulence
-  version: REPLACE_ME_TURBULENCE_VERSION
-- name: bosh-aws-cpi
-  version: REPLACE_ME_BOSHAWSCPI_VERSION
+- name: REPLACE_ME_RELEASE_NAME
+  version: REPLACE_ME_RELEASE_VERSION
 
 update:
   canaries: 1
