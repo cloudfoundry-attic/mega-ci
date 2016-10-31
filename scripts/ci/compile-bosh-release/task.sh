@@ -16,7 +16,7 @@ function force_compilation() {
       -e "s/REPLACE_ME_DIRECTOR_UUID/$(bosh -t "${BOSH_DIRECTOR}" status --uuid)/g" \
       -e "s/REPLACE_ME_RELEASE_VERSION/${RELEASE_VERSION}/g" \
       -e "s/REPLACE_ME_RELEASE_NAME/${RELEASE_NAME}/g" \
-      "${ROOT}/mega-ci/scripts/ci/force-compile/fixtures/compilation.yml" > "compilation.yml"
+      "${ROOT}/mega-ci/scripts/ci/compile-bosh-release/fixtures/compilation.yml" > "compilation.yml"
     bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" -n deploy
   popd > /dev/null
 
