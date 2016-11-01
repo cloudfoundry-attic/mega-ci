@@ -171,6 +171,8 @@ jobs:
 
 - name: deploy-aws-manifests
   public: true
+  serial: true
+  serial_groups: [EATS]
   plan:
   - aggregate:
     - get: mega-ci
@@ -268,7 +270,7 @@ jobs:
 - name: test-etcd
   public: true
   serial: true
-  serial_group: [EATS]
+  serial_groups: [EATS]
   plan:
   - aggregate:
     - get: mega-ci
@@ -295,12 +297,12 @@ jobs:
         AWS_DEFAULT_KEY_NAME: {{mega_ci_account_aws_default_key_name}}
         AWS_DEFAULT_SECURITY_GROUPS: {{mega_ci_account_aws_default_security_groups}}
         AWS_REGION: {{mega_ci_account_aws_region}}
-        PARALLEL_NODES: 7
+        PARALLEL_NODES: 5
 
 - name: test-etcd-turbulence
   public: true
   serial: true
-  serial_group: [EATS]
+  serial_groups: [EATS]
   plan:
   - aggregate:
     - get: mega-ci
@@ -333,7 +335,7 @@ jobs:
         REGISTRY_PORT: {{registry_port}}
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
-        PARALLEL_NODES: 3
+        PARALLEL_NODES: 4
 
 - name: deploy-with-cf
   public: true
@@ -404,7 +406,7 @@ jobs:
         DEPLOYMENT_NAME: etcd-cf-deployment
 
 - name: test-cf-tls-upgrade
-  serial_group: [cf]
+  serial_groups: [cf]
   plan:
   - aggregate:
     - get: mega-ci

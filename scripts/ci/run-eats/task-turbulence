@@ -52,7 +52,7 @@ function upload_releases() {
   popd > /dev/null
 
   pushd "${ROOT}/turbulence-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload release release-*.tgz --skip-if-exists
+    bosh -t "${BOSH_DIRECTOR}" upload release release.tgz --skip-if-exists
   popd > /dev/null
 
   pushd "${ROOT}/bosh-aws-cpi-release" > /dev/null
