@@ -260,6 +260,8 @@ jobs:
         BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP: {{bosh_errand_cloud_config_network_static_ip}}
         BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ: {{bosh_errand_cloud_config_network_az}}
         BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME: {{bosh_errand_cloud_config_network_name}}
+        BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_PERSISTENT_DISK_TYPE: 1GB
+        BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_VM_TYPE: m3.medium
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
         REGISTRY_HOST: 10.0.0.6
