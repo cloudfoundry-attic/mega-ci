@@ -57,6 +57,8 @@ properties:
            name: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME
            static_ip: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP
            az: BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ
+         default_persistent_disk_type: BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_PERSISTENT_DISK_TYPE
+         default_vm_type: BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_VM_TYPE
       registry:
         username: REGISTRY_USERNAME
         password: REGISTRY_PASSWORD

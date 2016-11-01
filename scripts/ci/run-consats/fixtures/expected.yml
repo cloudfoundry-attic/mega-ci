@@ -65,6 +65,8 @@ properties:
             name: some-errand-network-name
             static_ip: some-errand-network-static-ip
             az: some-errand-az
+          default_persistent_disk_type: some-persistent-disk-type
+          default_vm_type: some-vm-type
       registry:
         username: some-registry-username
         password: some-registry-password

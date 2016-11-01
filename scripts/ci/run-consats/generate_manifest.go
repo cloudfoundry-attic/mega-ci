@@ -74,6 +74,8 @@ type Manifest struct {
 							StaticIP string `yaml:"static_ip"`
 							AZ       string `yaml:"az"`
 						} `yaml:"network"`
+						DefaultPersistentDiskType string `yaml:"default_persistent_disk_type"`
+						DefaultVMType             string `yaml:"default_vm_type"`
 					} `yaml:"errand"`
 				} `yaml:"bosh"`
 				Registry struct {
@@ -129,6 +131,7 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.AWS.Region = os.Getenv("AWS_REGION")
 	manifest.Properties.Consul.AcceptanceTests.AWS.DefaultSecurityGroups = []string{os.Getenv("AWS_SECURITY_GROUP_NAME")}
 	manifest.Properties.Consul.AcceptanceTests.AWS.DefaultKeyName = os.Getenv("AWS_DEFAULT_KEY_NAME")
+
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Target = os.Getenv("BOSH_DIRECTOR")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Username = os.Getenv("BOSH_USER")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Password = os.Getenv("BOSH_PASSWORD")
@@ -136,9 +139,13 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.Network.AZ = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.Network.Name = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME")
 	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.Network.StaticIP = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP")
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.DefaultVMType = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_VM_TYPE")
+	manifest.Properties.Consul.AcceptanceTests.BOSH.Errand.DefaultPersistentDiskType = os.Getenv("BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_PERSISTENT_DISK_TYPE")
+
 	manifest.Properties.Consul.AcceptanceTests.Registry.Host = os.Getenv("REGISTRY_HOST")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Username = os.Getenv("REGISTRY_USERNAME")
 	manifest.Properties.Consul.AcceptanceTests.Registry.Password = os.Getenv("REGISTRY_PASSWORD")
+
 	manifest.Properties.Consul.AcceptanceTests.ConsulReleaseVersion = os.Getenv("CONSUL_RELEASE_VERSION")
 	manifest.Properties.Consul.AcceptanceTests.LatestConsulReleaseVersion = os.Getenv("LATEST_CONSUL_RELEASE_VERSION")
 	manifest.Properties.Consul.AcceptanceTests.EnableTurbulenceTests = (os.Getenv("ENABLE_TURBULENCE_TESTS") == "true")
