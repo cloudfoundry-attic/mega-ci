@@ -6,6 +6,7 @@ image: docker:///cfinfrastructure/deployment
 inputs:
   - name: mega-ci
   - name: compiled-etcd-release
+  - name: etcd-release
   - name: consul-release
   - name: turbulence-release
   - name: bosh-aws-cpi-release

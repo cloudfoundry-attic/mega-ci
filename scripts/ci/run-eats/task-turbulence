@@ -9,7 +9,7 @@ function main() {
   upload_releases
   write_configuration
 
-  pushd etcd-release > /dev/null
+  pushd ${ROOT}/etcd-release > /dev/null
     EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}" turbulence
   popd > /dev/null
 }

@@ -3,8 +3,9 @@ groups:
   jobs:
   - check-git-submodules
   - test-etcd-metrics-server
-  - prepare-environment
+  - compile-etcd-develop
   - test-etcd
+  - test-etcd-turbulence
   - deploy-bosh-lite-manifests
   - deploy-aws-manifests
   - deploy-with-cf
@@ -17,6 +18,11 @@ groups:
 - name: cleanup
   jobs:
   - delete-etcd-deployments
+- name: compile-dependencies
+  jobs:
+  - compile-consul-release
+  - compile-turbulence-release
+  - compile-bosh-aws-cpi-release
 
 resources:
 - name: etcd-cf-env
@@ -103,6 +109,13 @@ resources:
     regexp: compiled-consul-releases/release-consul-(.*)-on-ubuntu-trusty-stemcell-(.*).tgz
     access_key_id: {{etcd_compiled_bosh_release_s3_access_key_id}}
     secret_access_key: {{etcd_compiled_bosh_release_s3_secret_access_key}}
+- name: compiled-etcd-release
+  type: s3
+  source:
+    bucket: etcd-compiled-releases
+    regexp: compiled-etcd-releases/release-etcd-9999+dev.(.*)-on-ubuntu-trusty-stemcell-(.*).tgz
+    access_key_id: {{etcd_compiled_bosh_release_s3_access_key_id}}
+    secret_access_key: {{etcd_compiled_bosh_release_s3_secret_access_key}}
 - name: compiled-turbulence-release
   type: s3
   source:
@@ -157,7 +170,7 @@ jobs:
     - get: bosh-lite-stemcell
     - get: release
       resource: etcd-release-develop
-      passed: [test-etcd]
+      passed: [test-etcd-turbulence]
       trigger: true
   - task: deploy-bosh-lite-manifests
     file: mega-ci/scripts/ci/deploy-bosh-lite-manifests.yml
@@ -182,7 +195,7 @@ jobs:
       resource: consul-release-master
     - get: release
       resource: etcd-release-develop
-      passed: [test-etcd]
+      passed: [test-etcd-turbulence]
       trigger: true
   - task: deploy-multi-az-no-ssl-manifest
     file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-etcd-aws-manifests.yml
@@ -219,37 +232,105 @@ jobs:
   - task: test-etcd-metrics-server
     file: mega-ci/scripts/ci/test-etcd-metrics-server/test.yml
 
-- name: prepare-environment
+- name: compile-etcd-develop
   public: true
+  serial_groups: [compilation]
   plan:
   - aggregate:
     - get: mega-ci
     - get: stemcell
       resource: aws-stemcell
+    - get: release-repo
+      resource: etcd-release-develop
+      passed: [test-etcd-metrics-server]
       trigger: true
-    - get: turbulence-release
-      trigger: true
-    - get: bosh-aws-cpi-release
-      trigger: true
-    - get: consul-release
-      trigger: true
-  - task: force-compile
-    file: mega-ci/scripts/ci/force-compile/task.yml
+  - task: compile-etcd-develop
+    file: mega-ci/scripts/ci/compile-bosh-release/task-release-from-repo.yml
     config:
       params:
         BOSH_DIRECTOR: {{cf_bosh_director}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
         BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
-  - put: compiled-consul-release
+        RELEASE_NAME: etcd
+  - put: compiled-etcd-release
     params:
-      file: compiled-consul-release/*.tgz
+      file: compiled-bosh-release/*.tgz
+
+- name: compile-turbulence-release
+  public: true
+  serial_groups: [compilation]
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: stemcell
+      resource: aws-stemcell
+      trigger: true
+    - get: bosh-release
+      resource: turbulence-release
+      trigger: true
+  - task: compile-bosh-release
+    file: mega-ci/scripts/ci/compile-bosh-release/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        RELEASE_NAME: turbulence
   - put: compiled-turbulence-release
     params:
-      file: compiled-turbulence-release/*.tgz
+      file: compiled-bosh-release/*.tgz
+
+- name: compile-consul-release
+  public: true
+  serial_groups: [compilation]
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: stemcell
+      resource: aws-stemcell
+      trigger: true
+    - get: bosh-release
+      resource: consul-release
+      trigger: true
+  - task: compile-bosh-release
+    file: mega-ci/scripts/ci/compile-bosh-release/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        RELEASE_NAME: consul
+  - put: compiled-consul-release
+    params:
+      file: compiled-bosh-release/*.tgz
+
+- name: compile-bosh-aws-cpi-release
+  public: true
+  serial_groups: [compilation]
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: stemcell
+      resource: aws-stemcell
+      trigger: true
+    - get: bosh-release
+      resource: bosh-aws-cpi-release
+      trigger: true
+  - task: compile-bosh-release
+    file: mega-ci/scripts/ci/compile-bosh-release/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        RELEASE_NAME: bosh-aws-cpi
   - put: compiled-bosh-aws-cpi-release
     params:
-      file: compiled-bosh-aws-cpi-release/*.tgz
+      file: compiled-bosh-release/*.tgz
 
 - name: test-etcd
   public: true
@@ -259,22 +340,52 @@ jobs:
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
-      passed: [test-etcd-metrics-server]
+      passed: [compile-etcd-develop]
       trigger: true
-    - get: stemcell
-      resource: aws-stemcell
-      passed: [prepare-environment]
-    - get: turbulence-release
-      passed: [prepare-environment]
-      resource: compiled-turbulence-release
-    - get: bosh-aws-cpi-release
-      passed: [prepare-environment]
-      resource: compiled-bosh-aws-cpi-release
+    - get: compiled-etcd-release
+      passed: [compile-etcd-develop]
     - get: consul-release
-      passed: [prepare-environment]
+      passed: [compile-consul-release]
       resource: compiled-consul-release
   - task: run-eats
     file: mega-ci/scripts/ci/run-eats/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{cf_bosh_director}}
+        BOSH_USER: {{cf_bosh_user}}
+        BOSH_PASSWORD: {{cf_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        AWS_SUBNET: {{mega_ci_account_aws_subnet}}
+        AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}
+        AWS_DEFAULT_KEY_NAME: {{mega_ci_account_aws_default_key_name}}
+        AWS_DEFAULT_SECURITY_GROUPS: {{mega_ci_account_aws_default_security_groups}}
+        AWS_REGION: {{mega_ci_account_aws_region}}
+        PARALLEL_NODES: 7
+
+- name: test-etcd-turbulence
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [test-etcd]
+      trigger: true
+    - get: turbulence-release
+      passed: [compile-turbulence-release]
+      resource: compiled-turbulence-release
+    - get: bosh-aws-cpi-release
+      passed: [compile-bosh-aws-cpi-release]
+      resource: compiled-bosh-aws-cpi-release
+    - get: compiled-etcd-release
+      passed: [test-etcd]
+    - get: consul-release
+      passed: [test-etcd]
+      resource: compiled-consul-release
+  - task: run-turbulence-test
+    file: mega-ci/scripts/ci/run-eats/task-turbulence.yml
     config:
       params:
         BOSH_DIRECTOR: {{cf_bosh_director}}
@@ -291,7 +402,7 @@ jobs:
         REGISTRY_PORT: {{registry_port}}
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
-        PARALLEL_NODES: 1
+        PARALLEL_NODES: 3
 
 - name: deploy-with-cf
   public: true
@@ -302,7 +413,7 @@ jobs:
     - get: mega-ci
     - get: etcd-release
       resource: etcd-release-develop
-      passed: [test-etcd]
+      passed: [test-etcd-turbulence]
       trigger: true
     - get: cf-release
     - get: stemcell
