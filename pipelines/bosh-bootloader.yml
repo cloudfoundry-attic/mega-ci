@@ -138,22 +138,22 @@ jobs:
   plan:
   - aggregate:
     - get: mega-ci
-    - get: bosh
-      resource: bosh-release
+    - get: bosh-release
       trigger: true
     - get: stemcell
       resource: aws-stemcell
       trigger: true
   - task: build-compiled-bosh-release
-    file: mega-ci/scripts/ci/bosh-bootloader/build-compiled-bosh-release/task.yml
+    file: mega-ci/scripts/ci/compile-bosh-release/task.yml
     config:
       params:
         BOSH_DIRECTOR: {{mega_bosh_director}}
         BOSH_USER: {{mega_bosh_user}}
         BOSH_PASSWORD: {{mega_bosh_password}}
+        RELEASE_NAME: bosh
   - put: bbl-compiled-bosh-release-s3
     params:
-      file: bbl-compiled-bosh-release-s3/*.tgz
+      file: compiled-bosh-release/*.tgz
       acl: public-read
 
 - name: update-release-constants
