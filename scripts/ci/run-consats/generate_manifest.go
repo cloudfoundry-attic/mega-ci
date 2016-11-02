@@ -88,6 +88,7 @@ type Manifest struct {
 				ConsulReleaseVersion       string `yaml:"consul_release_version"`
 				LatestConsulReleaseVersion string `yaml:"latest_consul_release_version"`
 				EnableTurbulenceTests      bool   `yaml:"enable_turbulence_tests"`
+				WindowsClients             bool   `yaml:"windows_clients"`
 			} `yaml:"acceptance_tests"`
 		} `yaml:"consul"`
 	} `yaml:"properties"`
@@ -149,6 +150,7 @@ func Generate(exampleManifestFilePath string) ([]byte, error) {
 	manifest.Properties.Consul.AcceptanceTests.ConsulReleaseVersion = os.Getenv("CONSUL_RELEASE_VERSION")
 	manifest.Properties.Consul.AcceptanceTests.LatestConsulReleaseVersion = os.Getenv("LATEST_CONSUL_RELEASE_VERSION")
 	manifest.Properties.Consul.AcceptanceTests.EnableTurbulenceTests = (os.Getenv("ENABLE_TURBULENCE_TESTS") == "true")
+	manifest.Properties.Consul.AcceptanceTests.WindowsClients = (os.Getenv("WINDOWS_CLIENTS") == "true")
 
 	parallelNodes, err := strconv.Atoi(os.Getenv("PARALLEL_NODES"))
 	if err != nil {

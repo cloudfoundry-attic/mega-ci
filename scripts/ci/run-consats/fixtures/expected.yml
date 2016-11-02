@@ -76,6 +76,7 @@ properties:
       consul_release_version: some-consul-release-version
       latest_consul_release_version: some-latest-consul-release-version
       enable_turbulence_tests: true
+      windows_clients: true
 
 update:
   serial: true

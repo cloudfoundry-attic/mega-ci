@@ -40,6 +40,7 @@ var _ = Describe("Generate", func() {
 			"STEMCELL_VERSION":                                      "some-stemcell-version",
 			"LATEST_CONSUL_RELEASE_VERSION":                         "some-latest-consul-release-version",
 			"ENABLE_TURBULENCE_TESTS":                               "true",
+			"WINDOWS_CLIENTS":                                       "true",
 		}
 
 		for name, value := range variables {
