@@ -12,6 +12,10 @@ function main() {
   export BOSH_DIRECTOR_UUID="$(bosh -t "${BOSH_DIRECTOR}" status --uuid)"
 
   upload_stemcell
+  if $WINDOWS_CLIENTS; then
+    upload_windows_stemcell
+  fi
+
   upload_releases
   generate_manifest
   force_compilation
@@ -29,6 +33,12 @@ function main() {
 function upload_stemcell() {
   pushd "${ROOT}/stemcell" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
+  popd > /dev/null
+}
+
+function upload_windows_stemcell() {
+  pushd "${ROOT}/windows-stemcell" > /dev/null
+    bosh -t "${BOSH_DIRECTOR}" upload stemcell light-bosh-stemcell-*-aws-xen-hvm-windows2012R2-go_agent.tgz --skip-if-exists
   popd > /dev/null
 }
 

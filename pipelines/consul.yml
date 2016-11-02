@@ -6,6 +6,7 @@ groups:
   - deploy-aws-manifests
   - test-confab
   - test-consul
+  - test-consul-windows
   - test-consul-with-turbulence
   - deploy-with-cf
   - deploy-with-diego
@@ -83,6 +84,11 @@ resources:
   type: bosh-io-stemcell
   source:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+- name: windows-stemcell
+  type: s3
+  source:
+    bucket: bosh-windows-stemcells
+    regexp: light-bosh-stemcell-(.*)-aws-xen-hvm-windows2012R2-go_agent.tgz
 - name: turbulence-release
   type: bosh-io-release
   source:
@@ -198,6 +204,7 @@ jobs:
       trigger: true
     - get: stemcell
       resource: aws-stemcell
+    - get: windows-stemcell
     - get: turbulence-release
     - get: bosh-aws-cpi-release
     - get: latest-consul-release
@@ -227,6 +234,49 @@ jobs:
         PARALLEL_NODES: 7
         ENABLE_TURBULENCE_TESTS: false
 
+- name: test-consul-windows
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [test-confab]
+      trigger: true
+    - get: stemcell
+      resource: aws-stemcell
+    - get: windows-stemcell
+    - get: turbulence-release
+    - get: bosh-aws-cpi-release
+    - get: latest-consul-release
+  - task: run-consats
+    file: mega-ci/scripts/ci/run-consats/task.yml
+    config:
+      params:
+        AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
+        AWS_REGION: {{windows_aws_default_region}}
+        AWS_SECURITY_GROUP_NAME: {{windows_aws_security_group_name}}
+        AWS_SUBNETS: {{windows_aws_subnets}}
+        AWS_CLOUD_CONFIG_SUBNETS: {{windows_aws_cloud_config_subnets}}
+        AWS_DEFAULT_KEY_NAME: {{windows_aws_default_key_name}}
+        BOSH_DIRECTOR: {{windows_bosh_director}}
+        BOSH_USER: {{windows_bosh_username}}
+        BOSH_PASSWORD: {{windows_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{windows_bosh_director_ca_cert}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP: {{windows_bosh_errand_cloud_config_network_static_ip}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ: {{windows_bosh_errand_cloud_config_network_az}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME: {{windows_bosh_errand_cloud_config_network_name}}
+        BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_PERSISTENT_DISK_TYPE: 1GB
+        BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_VM_TYPE: m3.medium
+        REGISTRY_USERNAME: {{windows_registry_username}}
+        REGISTRY_PASSWORD: {{windows_registry_password}}
+        REGISTRY_HOST: 10.0.0.6
+        PARALLEL_NODES: 1
+        ENABLE_TURBULENCE_TESTS: false
+        WINDOWS_CLIENTS: true
+
 - name: test-consul-with-turbulence
   public: true
   serial: true
@@ -239,6 +289,7 @@ jobs:
       trigger: true
     - get: stemcell
       resource: aws-stemcell
+    - get: windows-stemcell
     - get: turbulence-release
     - get: bosh-aws-cpi-release
     - get: latest-consul-release
@@ -265,7 +316,7 @@ jobs:
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
         REGISTRY_HOST: 10.0.0.6
-        PARALLEL_NODES: 7
+        PARALLEL_NODES: 1
         ENABLE_TURBULENCE_TESTS: true
 
 - name: deploy-with-cf
@@ -277,7 +328,7 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
-      passed: [test-consul-with-turbulence]
+      passed: [test-consul-windows, test-consul-with-turbulence]
       trigger: true
     - get: cf-release
     - get: stemcell

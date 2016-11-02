@@ -7,6 +7,7 @@ inputs:
   - name: mega-ci
   - name: consul-release
   - name: stemcell
+  - name: windows-stemcell
   - name: turbulence-release
   - name: bosh-aws-cpi-release
   - name: latest-consul-release
