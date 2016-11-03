@@ -2,10 +2,10 @@
 
 export ROOT="${PWD}"
 export CONSUL_RELEASE_VERSION="99999+dev.$(date +%s)"
-export STEMCELL_VERSION=$(cat ${ROOT}/stemcell/version)
-export TURBULENCE_RELEASE_VERSION=$(cat ${ROOT}/turbulence-release/version)
-export BOSH_AWS_CPI_RELEASE_VERSION=$(cat ${ROOT}/bosh-aws-cpi-release/version)
-export LATEST_CONSUL_RELEASE_VERSION=$(cat ${ROOT}/latest-consul-release/version)
+export STEMCELL_VERSION="$(cat ${ROOT}/stemcell/version)"
+export TURBULENCE_RELEASE_VERSION="$(cat ${ROOT}/turbulence-release/version)"
+export BOSH_AWS_CPI_RELEASE_VERSION="$(cat ${ROOT}/bosh-aws-cpi-release/version)"
+export LATEST_CONSUL_RELEASE_VERSION="$(cat ${ROOT}/latest-consul-release/version)"
 
 function main() {
   bosh target "${BOSH_DIRECTOR}"
