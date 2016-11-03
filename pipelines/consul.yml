@@ -17,6 +17,7 @@ groups:
 - name: cleanup
   jobs:
   - delete-consul-deployments
+  - delete-consul-windows-deployments
 
 resources:
 - name: mega-ci-env
@@ -103,6 +104,20 @@ resources:
     repository: cloudfoundry-incubator/consul-release
 
 jobs:
+- name: delete-consul-windows-deployments
+  public: false
+  plan:
+  - aggregate:
+    - get: mega-ci
+  - task: delete-deployments
+    file: mega-ci/scripts/ci/delete-deployments/task.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{windows_bosh_director}}
+        BOSH_USER: {{windows_bosh_username}}
+        BOSH_PASSWORD: {{windows_bosh_password}}
+        DEPLOYMENTS_WITH_WORD: consul
+
 - name: delete-consul-deployments
   public: false
   plan:
