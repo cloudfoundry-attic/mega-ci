@@ -5,11 +5,11 @@ name: compilation
 
 releases:
 - name: consul
-  version: CONSUL_RELEASE_VERSION
+  version: "CONSUL_RELEASE_VERSION"
 - name: turbulence
-  version: TURBULENCE_RELEASE_VERSION
+  version: "TURBULENCE_RELEASE_VERSION"
 - name: bosh-aws-cpi
-  version: CPI_RELEASE_VERSION
+  version: "CPI_RELEASE_VERSION"
 
 update:
   canaries: 1
@@ -21,6 +21,6 @@ update:
 stemcells:
 - alias: trusty
   os: ubuntu-trusty
-  version: STEMCELL_VERSION
+  version: "STEMCELL_VERSION"
 
 instance_groups: []
