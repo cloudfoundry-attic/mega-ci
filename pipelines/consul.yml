@@ -343,7 +343,7 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
-      passed: [test-consul-windows, test-consul-with-turbulence]
+      passed: [test-consul-with-turbulence]
       trigger: true
     - get: cf-release
     - get: stemcell
@@ -432,7 +432,7 @@ jobs:
       resource: oss-s3-buckets-stack
     - get: release-repo
       resource: consul-release-develop
-      passed: [delete-deployments]
+      passed: [test-consul-windows, delete-deployments]
       trigger: true
     - get: release-repo-master
       resource: consul-release-master
