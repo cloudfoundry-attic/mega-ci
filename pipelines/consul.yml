@@ -6,8 +6,9 @@ groups:
   - deploy-aws-manifests
   - test-confab
   - test-consul
-  - test-consul-windows
   - test-consul-with-turbulence
+  - test-consul-windows
+  - test-consul-windows-with-turbulence
   - deploy-with-cf
   - deploy-with-diego
   - test-with-diego
@@ -249,6 +250,48 @@ jobs:
         PARALLEL_NODES: 7
         ENABLE_TURBULENCE_TESTS: false
 
+- name: test-consul-with-turbulence
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: consul-release
+      resource: consul-release-develop
+      passed: [test-consul]
+      trigger: true
+    - get: stemcell
+      resource: aws-stemcell
+    - get: windows-stemcell
+    - get: turbulence-release
+    - get: bosh-aws-cpi-release
+    - get: latest-consul-release
+  - task: run-consats
+    file: mega-ci/scripts/ci/run-consats/task.yml
+    config:
+      params:
+        AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
+        AWS_REGION: {{infrastructure_account_aws_default_region}}
+        AWS_SECURITY_GROUP_NAME: {{infrastructure_account_aws_security_group_name}}
+        AWS_SUBNETS: {{infrastructure_account_aws_subnets}}
+        AWS_CLOUD_CONFIG_SUBNETS: {{infrastructure_account_aws_cloud_config_subnets}}
+        AWS_DEFAULT_KEY_NAME: {{infrastructure_account_aws_default_key_name}}
+        BOSH_DIRECTOR: {{bosh_director}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP: {{bosh_errand_cloud_config_network_static_ip}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ: {{bosh_errand_cloud_config_network_az}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME: {{bosh_errand_cloud_config_network_name}}
+        BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_PERSISTENT_DISK_TYPE: 1GB
+        BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_VM_TYPE: m3.medium
+        REGISTRY_USERNAME: {{registry_username}}
+        REGISTRY_PASSWORD: {{registry_password}}
+        REGISTRY_HOST: 10.0.0.6
+        PARALLEL_NODES: 1
+        ENABLE_TURBULENCE_TESTS: true
+
 - name: test-consul-windows
   public: true
   serial: true
@@ -292,7 +335,7 @@ jobs:
         ENABLE_TURBULENCE_TESTS: false
         WINDOWS_CLIENTS: true
 
-- name: test-consul-with-turbulence
+- name: test-consul-windows-with-turbulence
   public: true
   serial: true
   plan:
@@ -300,7 +343,7 @@ jobs:
     - get: mega-ci
     - get: consul-release
       resource: consul-release-develop
-      passed: [test-consul]
+      passed: [test-consul-windows]
       trigger: true
     - get: stemcell
       resource: aws-stemcell
@@ -314,25 +357,26 @@ jobs:
       params:
         AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
-        AWS_REGION: {{infrastructure_account_aws_default_region}}
-        AWS_SECURITY_GROUP_NAME: {{infrastructure_account_aws_security_group_name}}
-        AWS_SUBNETS: {{infrastructure_account_aws_subnets}}
-        AWS_CLOUD_CONFIG_SUBNETS: {{infrastructure_account_aws_cloud_config_subnets}}
-        AWS_DEFAULT_KEY_NAME: {{infrastructure_account_aws_default_key_name}}
-        BOSH_DIRECTOR: {{bosh_director}}
-        BOSH_USER: {{bosh_username}}
-        BOSH_PASSWORD: {{bosh_password}}
-        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
-        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP: {{bosh_errand_cloud_config_network_static_ip}}
-        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ: {{bosh_errand_cloud_config_network_az}}
-        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME: {{bosh_errand_cloud_config_network_name}}
+        AWS_REGION: {{windows_aws_default_region}}
+        AWS_SECURITY_GROUP_NAME: {{windows_aws_security_group_name}}
+        AWS_SUBNETS: {{windows_aws_subnets}}
+        AWS_CLOUD_CONFIG_SUBNETS: {{windows_aws_cloud_config_subnets}}
+        AWS_DEFAULT_KEY_NAME: {{windows_aws_default_key_name}}
+        BOSH_DIRECTOR: {{windows_bosh_director}}
+        BOSH_USER: {{windows_bosh_username}}
+        BOSH_PASSWORD: {{windows_bosh_password}}
+        BOSH_DIRECTOR_CA_CERT: {{windows_bosh_director_ca_cert}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_STATIC_IP: {{windows_bosh_errand_cloud_config_network_static_ip}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_AZ: {{windows_bosh_errand_cloud_config_network_az}}
+        BOSH_ERRAND_CLOUD_CONFIG_NETWORK_NAME: {{windows_bosh_errand_cloud_config_network_name}}
         BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_PERSISTENT_DISK_TYPE: 1GB
         BOSH_ERRAND_CLOUD_CONFIG_DEFAULT_VM_TYPE: m3.medium
-        REGISTRY_USERNAME: {{registry_username}}
-        REGISTRY_PASSWORD: {{registry_password}}
+        REGISTRY_USERNAME: {{windows_registry_username}}
+        REGISTRY_PASSWORD: {{windows_registry_password}}
         REGISTRY_HOST: 10.0.0.6
         PARALLEL_NODES: 1
         ENABLE_TURBULENCE_TESTS: true
+        WINDOWS_CLIENTS: true
 
 - name: deploy-with-cf
   public: true
@@ -432,7 +476,7 @@ jobs:
       resource: oss-s3-buckets-stack
     - get: release-repo
       resource: consul-release-develop
-      passed: [test-consul-windows, delete-deployments]
+      passed: [test-consul-windows-with-turbulence, delete-deployments]
       trigger: true
     - get: release-repo-master
       resource: consul-release-master
