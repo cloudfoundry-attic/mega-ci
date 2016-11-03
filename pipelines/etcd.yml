@@ -11,7 +11,6 @@ groups:
   - deploy-with-cf
   - deploy-with-diego
   - test-with-diego
-  - test-cf-tls-upgrade
   - delete-deployments
   - create-final-release
   - merge-master-into-develop
@@ -335,7 +334,7 @@ jobs:
         REGISTRY_PORT: {{registry_port}}
         REGISTRY_USERNAME: {{registry_username}}
         REGISTRY_PASSWORD: {{registry_password}}
-        PARALLEL_NODES: 4
+        PARALLEL_NODES: 1
 
 - name: deploy-with-cf
   public: true
@@ -405,27 +404,6 @@ jobs:
         BOSH_PASSWORD: {{etcd_cf_bosh_password}}
         DEPLOYMENT_NAME: etcd-cf-deployment
 
-- name: test-cf-tls-upgrade
-  serial_groups: [cf]
-  plan:
-  - aggregate:
-    - get: mega-ci
-    - get: etcd-release
-      resource: etcd-release-develop
-      passed: [test-with-diego]
-      trigger: true
-  - task: run-cf-tls-upgrade-test
-    file: mega-ci/scripts/ci/test-cf-tls-upgrade/task.yml
-    config:
-      params:
-        CF_DOMAIN: {{etcd_cf_domain}}
-        CF_USER: {{etcd_cf_user}}
-        CF_PASSWORD: {{etcd_cf_password}}
-        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
-        BOSH_USER: {{etcd_cf_bosh_user}}
-        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
-        DEPLOYMENT_NAME: etcd-cf-deployment
-
 - name: delete-deployments
   public: true
   serial_groups: [cf]
@@ -435,7 +413,7 @@ jobs:
     - get: etcd-release
       resource: etcd-release-develop
       passed:
-      - test-cf-tls-upgrade
+      - test-with-diego
       trigger: true
   - task: delete-deployments
     file: mega-ci/scripts/ci/delete-deployments/task.yml
