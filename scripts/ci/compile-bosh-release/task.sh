@@ -24,7 +24,7 @@ function force_compilation() {
     bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "${RELEASE_NAME}/${RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
   popd > /dev/null
 
-  bosh -t "${BOSH_DIRECTOR}" -n delete deployment compilation
+  bosh -t "${BOSH_DIRECTOR}" -n delete deployment "compilation_${RELEASE_NAME}"
 }
 
 function upload_stemcell() {

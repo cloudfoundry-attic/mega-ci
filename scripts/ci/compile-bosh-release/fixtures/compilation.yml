@@ -1,7 +1,7 @@
 ---
 director_uuid: REPLACE_ME_DIRECTOR_UUID
 
-name: compilation
+name: compilation_REPLACE_ME_RELEASE_NAME
 
 releases:
 - name: REPLACE_ME_RELEASE_NAME
