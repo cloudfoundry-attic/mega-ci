@@ -10,7 +10,7 @@ outputs:
   - name: bbl-integration-s3
 
 run:
-  path: mega-ci/scripts/ci/bosh-bootloader/integration
+  path: mega-ci/scripts/ci/bosh-bootloader/aws_integration
 
 params:
   AWS_REGION:

@@ -30,7 +30,7 @@ function main() {
     }
 EOF
     set -x
-    BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/integration_tests
+    BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/aws_integration_tests
   popd > /dev/null
 }
 

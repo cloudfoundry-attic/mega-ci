@@ -1,0 +1,51 @@
+#!/bin/bash -exu
+
+ROOT="${PWD}"
+CURRENT_TIME=$(date +%s)
+STATE_DIR="${ROOT}/bbl-integration-s3/${CURRENT_TIME}"
+
+function install_bosh_cli() {
+  pushd "${ROOT}" > /dev/null
+    wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.69-linux-amd64
+    mv bosh-cli-0.0.69-linux-amd64 /usr/local/bin/bosh
+    chmod +x /usr/local/bin/bosh
+  popd > /dev/null
+}
+
+function main() {
+  install_bosh_cli
+
+  mkdir -p "${GOPATH}/src/github.com/cloudfoundry"
+  mkdir -p "${STATE_DIR}"
+
+  set +x
+    echo "${GCP_SERVICE_ACCOUNT_KEY}" > service_account.key.json
+    local service_account_key_path
+    service_account_key_path=$PWD/service_account.key.json
+  set -x
+
+  pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
+    ln -s "${ROOT}/bosh-bootloader"
+    set +x
+    cat > bit_config.json << EOF
+    {
+      "GCPServiceAccountKey": "${service_account_key_path}",
+      "GCPProjectID": "${GCP_PROJECT_ID}",
+      "GCPRegion": "${GCP_REGION}",
+      "GCPZone": "${GCP_ZONE}",
+      "StateFileDir": "${STATE_DIR}"
+    }
+EOF
+    set -x
+    BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/gcp_integration_tests
+  popd > /dev/null
+}
+
+function finish() {
+  pushd "${ROOT}/bbl-integration-s3" > /dev/null
+    tar -cvzf "${CURRENT_TIME}.tgz" "${CURRENT_TIME}"
+  popd > /dev/null
+}
+trap finish EXIT
+
+main

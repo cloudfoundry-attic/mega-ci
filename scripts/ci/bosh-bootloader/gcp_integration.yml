@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image: docker:///cfinfrastructure/deployment
+
+inputs:
+  - name: bosh-bootloader
+  - name: mega-ci
+outputs:
+  - name: bbl-integration-s3
+
+run:
+  path: mega-ci/scripts/ci/bosh-bootloader/gcp_integration
+
+params:
+  GCP_SERVICE_ACCOUNT_KEY:
+  GCP_PROJECT_ID:
+  GCP_REGION:
+  GCP_ZONE:
