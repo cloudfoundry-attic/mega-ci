@@ -26,18 +26,9 @@ function main() {
 
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/bosh-bootloader"
-    set +x
-    cat > bit_config.json << EOF
-    {
-      "GCPServiceAccountKeyPath": "${service_account_key_path}",
-      "GCPProjectID": "${GCP_PROJECT_ID}",
-      "GCPRegion": "${GCP_REGION}",
-      "GCPZone": "${GCP_ZONE}",
-      "StateFileDir": "${STATE_DIR}"
-    }
-EOF
-    set -x
-    BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/gcp_integration_tests
+
+    export GCP_SERVICE_ACCOUNT_KEY=$service_account_key_path
+    ./bosh-bootloader/scripts/gcp_integration_tests
   popd > /dev/null
 }
 

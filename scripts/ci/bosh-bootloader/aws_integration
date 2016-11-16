@@ -20,17 +20,8 @@ function main() {
 
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/bosh-bootloader"
-    set +x
-    cat > bit_config.json << EOF
-    {
-      "AWSAccessKeyID": "${AWS_ACCESS_KEY_ID}",
-      "AWSSecretAccessKey": "${AWS_SECRET_ACCESS_KEY}",
-      "AWSRegion": "${AWS_REGION}",
-      "StateFileDir": "${STATE_DIR}"
-    }
-EOF
-    set -x
-    BIT_CONFIG=$PWD/bit_config.json ./bosh-bootloader/scripts/aws_integration_tests
+
+    ./bosh-bootloader/scripts/aws_integration_tests
   popd > /dev/null
 }
 
