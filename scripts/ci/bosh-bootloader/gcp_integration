@@ -29,7 +29,7 @@ function main() {
     set +x
     cat > bit_config.json << EOF
     {
-      "GCPServiceAccountKey": "${service_account_key_path}",
+      "GCPServiceAccountKeyPath": "${service_account_key_path}",
       "GCPProjectID": "${GCP_PROJECT_ID}",
       "GCPRegion": "${GCP_REGION}",
       "GCPZone": "${GCP_ZONE}",
