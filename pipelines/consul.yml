@@ -211,6 +211,7 @@ jobs:
 - name: test-consul
   public: true
   serial: true
+  serial_groups: [test-consul]
   plan:
   - aggregate:
     - get: mega-ci
@@ -253,6 +254,7 @@ jobs:
 - name: test-consul-with-turbulence
   public: true
   serial: true
+  serial_groups: [test-consul]
   plan:
   - aggregate:
     - get: mega-ci
@@ -295,6 +297,7 @@ jobs:
 - name: test-consul-windows
   public: true
   serial: true
+  serial_groups: [test-consul-windows]
   plan:
   - aggregate:
     - get: mega-ci
@@ -338,6 +341,7 @@ jobs:
 - name: test-consul-windows-with-turbulence
   public: true
   serial: true
+  serial_groups: [test-consul-windows]
   plan:
   - aggregate:
     - get: mega-ci
