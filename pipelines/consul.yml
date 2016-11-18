@@ -331,7 +331,7 @@ jobs:
         REGISTRY_USERNAME: {{windows_registry_username}}
         REGISTRY_PASSWORD: {{windows_registry_password}}
         REGISTRY_HOST: 10.0.0.6
-        PARALLEL_NODES: 4
+        PARALLEL_NODES: 5
         ENABLE_TURBULENCE_TESTS: false
         WINDOWS_CLIENTS: true
 
