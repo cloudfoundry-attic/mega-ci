@@ -4,6 +4,7 @@ groups:
   - check-git-submodules
   - deploy-bosh-lite-manifests
   - deploy-aws-manifests
+  - deploy-aws-2.0-manifests
   - test-confab
   - test-consul
   - test-consul-with-turbulence
@@ -121,6 +122,8 @@ jobs:
 
 - name: delete-consul-deployments
   public: false
+  serial: true
+  serial_groups: [test-consul]
   plan:
   - aggregate:
     - get: mega-ci
@@ -174,6 +177,8 @@ jobs:
 
 - name: deploy-aws-manifests
   public: true
+  serial: true
+  serial_groups: [test-consul]
   plan:
   - aggregate:
     - get: private-credentials
@@ -194,6 +199,30 @@ jobs:
         AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
         AWS_DEFAULT_REGION: {{infrastructure_account_aws_default_region}}
         MANIFEST_PATH: manifests/aws/multi-az-ssl.yml
+
+- name: deploy-aws-2.0-manifests
+  public: true
+  serial: true
+  plan:
+  - aggregate:
+    - get: private-credentials
+      resource: mega-ci-env
+    - get: mega-ci
+    - get: release
+      resource: consul-release-develop
+      passed: [test-consul-with-turbulence]
+      trigger: true
+  - task: deploy-2.0-aws-manifests
+    file: mega-ci/scripts/ci/deploy-aws-manifests/deploy-consul-aws-manifests.yml
+    config:
+      params:
+        BOSH_DIRECTOR: {{bosh_url}}
+        BOSH_USER: {{bosh_username}}
+        BOSH_PASSWORD: {{bosh_password}}
+        AWS_ACCESS_KEY_ID: {{infrastructure_account_aws_access_key_id}}
+        AWS_SECRET_ACCESS_KEY: {{infrastructure_account_aws_secret_access_key}}
+        AWS_DEFAULT_REGION: {{infrastructure_account_aws_default_region}}
+        MANIFEST_PATH: manifests/aws/multi-az-ssl-2.0.yml
 
 - name: test-confab
   public: true
