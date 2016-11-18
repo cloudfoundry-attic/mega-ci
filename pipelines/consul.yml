@@ -331,7 +331,7 @@ jobs:
         REGISTRY_USERNAME: {{windows_registry_username}}
         REGISTRY_PASSWORD: {{windows_registry_password}}
         REGISTRY_HOST: 10.0.0.6
-        PARALLEL_NODES: 1
+        PARALLEL_NODES: 4
         ENABLE_TURBULENCE_TESTS: false
         WINDOWS_CLIENTS: true
 
@@ -476,7 +476,9 @@ jobs:
       resource: oss-s3-buckets-stack
     - get: release-repo
       resource: consul-release-develop
-      passed: [delete-deployments]
+      passed:
+      - delete-deployments
+      - test-consul-windows-with-turbulence
       trigger: true
     - get: release-repo-master
       resource: consul-release-master
