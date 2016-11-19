@@ -6,6 +6,7 @@ RUN \
       apt-get -qqy install --fix-missing \
             awscli \
             openssl \
+            unzip \
       && \
       apt-get clean
 
@@ -28,6 +29,12 @@ RUN /opt/rubies/ruby-2.2.4/bin/gem install bundler --no-rdoc --no-ri
 
 # Install bosh_cli
 RUN /opt/rubies/ruby-2.2.4/bin/gem install bosh_cli --no-rdoc --no-ri
+
+# Install terraform
+RUN wget https://releases.hashicorp.com/terraform/0.7.11/terraform_0.7.11_linux_amd64.zip && \
+  unzip terraform_0.7.11_linux_amd64.zip && \
+  rm terraform_0.7.11_linux_amd64.zip && \
+  mv terraform /usr/local/bin/terraform
 
 # Install jq
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 && \
