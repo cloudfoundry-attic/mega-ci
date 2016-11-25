@@ -1,0 +1,14 @@
+---
+platform: windows
+
+inputs:
+- name: consul-release
+- name: mega-ci
+
+run:
+  path: powershell
+  args:
+  - "-ExecutionPolicy"
+  - "Bypass"
+  - "-File"
+  - mega-ci/scripts/ci/confab-windows/test.ps1
