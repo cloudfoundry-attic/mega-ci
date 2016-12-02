@@ -71,14 +71,22 @@ resources:
   type: bosh-io-release
   source:
     repository: cloudfoundry/bosh
-- name: aws-stemcell
-  type: bosh-io-stemcell
-  source:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 - name: bosh-aws-cpi-release
   type: bosh-io-release
   source:
     repository: cloudfoundry-incubator/bosh-aws-cpi-release
+- name: bosh-google-cpi-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry-incubator/bosh-google-cpi-release
+- name: aws-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+- name: gcp-stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-google-kvm-ubuntu-trusty-go_agent
 
 jobs:
 - name: test-bosh-bootloader
@@ -186,14 +194,18 @@ jobs:
     - get: mega-ci
     - get: bosh-bootloader
       resource: bosh-bootloader-develop
-    - get: stemcell
-      resource: aws-stemcell
+    - get: aws-stemcell
       passed: [build-compiled-bosh-release]
+    - get: gcp-stemcell
+      trigger: true
     - get: bbl-compiled-bosh-release-s3
       trigger: true
       passed: [build-compiled-bosh-release]
     - get: bosh-aws-cpi-release
       trigger: true
+    - get: bosh-google-cpi-release
+      trigger: true
+    - get: bosh-release
   - task: update-release-constants
     file: mega-ci/scripts/ci/bosh-bootloader/update-release-constants/task.yml
   - put: bosh-bootloader-develop-write

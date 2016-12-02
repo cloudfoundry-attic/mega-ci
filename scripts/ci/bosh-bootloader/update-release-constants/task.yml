@@ -6,9 +6,12 @@ image: docker:///cfinfrastructure/golang
 inputs:
 - name: bosh-bootloader
 - name: mega-ci
+- name: bosh-release
 - name: bosh-aws-cpi-release
+- name: bosh-google-cpi-release
 - name: bbl-compiled-bosh-release-s3
-- name: stemcell
+- name: aws-stemcell
+- name: gcp-stemcell
 
 outputs:
 - name: bosh-bootloader-develop-write
