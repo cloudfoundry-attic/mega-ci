@@ -6,8 +6,8 @@ STATE_DIR="${ROOT}/bbl-integration-s3/${CURRENT_TIME}"
 
 function install_bosh_cli() {
   pushd "${ROOT}" > /dev/null
-    wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.69-linux-amd64
-    mv bosh-cli-0.0.69-linux-amd64 /usr/local/bin/bosh
+    wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.127-linux-amd64
+    mv bosh-cli-0.0.127-linux-amd64 /usr/local/bin/bosh
     chmod +x /usr/local/bin/bosh
   popd > /dev/null
 }
