@@ -2,6 +2,7 @@ groups:
 - name: etcd
   jobs:
   - check-git-submodules
+  - test-etcd-proxy
   - test-etcd-metrics-server
   - compile-etcd-develop
   - test-etcd
@@ -205,7 +206,7 @@ jobs:
         AWS_DEFAULT_REGION: {{mega_ci_account_aws_region}}
         MANIFEST_PATH: manifests/aws/multi-az-ssl.yml
 
-- name: test-etcd-metrics-server
+- name: test-etcd-proxy
   public: true
   plan:
   - aggregate:
@@ -213,6 +214,18 @@ jobs:
     - get: etcd-release
       resource: etcd-release-develop
       passed: [check-git-submodules]
+      trigger: true
+  - task: test-etcd-proxy
+    file: mega-ci/scripts/ci/test-etcd-proxy/task.yml
+
+- name: test-etcd-metrics-server
+  public: true
+  plan:
+  - aggregate:
+    - get: mega-ci
+    - get: etcd-release
+      resource: etcd-release-develop
+      passed: [test-etcd-proxy]
       trigger: true
   - task: test-etcd-metrics-server
     file: mega-ci/scripts/ci/test-etcd-metrics-server/test.yml

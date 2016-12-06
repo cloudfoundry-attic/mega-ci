@@ -1,0 +1,10 @@
+#!/bin/bash -exu
+
+ROOT="${PWD}"
+
+mkdir -p "${GOPATH}/src/github.com/cloudfoundry-incubator"
+
+pushd "${GOPATH}/src/github.com/cloudfoundry-incubator" > /dev/null
+  ln -s "${ROOT}/etcd-release"
+  ginkgo -r etcd-release/src/etcd-proxy
+popd > /dev/null
