@@ -31,9 +31,9 @@ RUN /opt/rubies/ruby-2.2.4/bin/gem install bundler --no-rdoc --no-ri
 RUN /opt/rubies/ruby-2.2.4/bin/gem install bosh_cli --no-rdoc --no-ri
 
 # Install terraform
-RUN wget https://releases.hashicorp.com/terraform/0.7.11/terraform_0.7.11_linux_amd64.zip && \
-  unzip terraform_0.7.11_linux_amd64.zip && \
-  rm terraform_0.7.11_linux_amd64.zip && \
+RUN wget https://releases.hashicorp.com/terraform/0.7.13/terraform_0.7.13_linux_amd64.zip && \
+  unzip terraform_0.7.13_linux_amd64.zip && \
+  rm terraform_0.7.13_linux_amd64.zip && \
   mv terraform /usr/local/bin/terraform
 
 # Install jq
@@ -47,8 +47,8 @@ RUN wget https://github.com/cloudfoundry-incubator/spiff/releases/download/v1.0.
   chmod +x /usr/local/bin/spiff
 
 # Install bosh-init
-RUN wget https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.81-linux-amd64 && \
-  mv bosh-init-0.0.81-linux-amd64 /usr/local/bin/bosh-init && \
+RUN wget https://s3.amazonaws.com/bosh-init-artifacts/bosh-init-0.0.98-linux-amd64 && \
+  mv bosh-init-0.0.98-linux-amd64 /usr/local/bin/bosh-init && \
   chmod +x /usr/local/bin/bosh-init
 
 RUN curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx && \
