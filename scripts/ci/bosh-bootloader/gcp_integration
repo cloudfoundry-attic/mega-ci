@@ -27,7 +27,8 @@ function main() {
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/bosh-bootloader"
 
-    export GCP_SERVICE_ACCOUNT_KEY=$service_account_key_path
+    export GCP_SERVICE_ACCOUNT_KEY="${service_account_key_path}"
+    export STATE_DIR
     ./bosh-bootloader/scripts/gcp_integration_tests
   popd > /dev/null
 }
