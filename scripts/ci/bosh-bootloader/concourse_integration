@@ -9,9 +9,16 @@ function main() {
 
   mkdir -p "${STATE_DIR}"
 
+  set +x
+    echo "${GCP_SERVICE_ACCOUNT_KEY}" > service_account.key.json
+    local service_account_key_path
+    service_account_key_path=$PWD/service_account.key.json
+  set -x
+
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/bosh-bootloader"
 
+    export GCP_SERVICE_ACCOUNT_KEY=$service_account_key_path
     ./bosh-bootloader/scripts/concourse_integration_tests
   popd > /dev/null
 }
