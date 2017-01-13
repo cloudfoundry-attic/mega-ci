@@ -2,7 +2,7 @@
 
 ROOT="${PWD}"
 CURRENT_TIME=$(date +%s)
-STATE_DIR="${ROOT}/bbl-integration-s3/${CURRENT_TIME}"
+export STATE_DIR="${ROOT}/bbl-integration-s3/${CURRENT_TIME}"
 
 function install_bosh_cli() {
   pushd "${ROOT}" > /dev/null
@@ -28,7 +28,6 @@ function main() {
     ln -s "${ROOT}/bosh-bootloader"
 
     export GCP_SERVICE_ACCOUNT_KEY="${service_account_key_path}"
-    export STATE_DIR
     ./bosh-bootloader/scripts/gcp_integration_tests
   popd > /dev/null
 }
