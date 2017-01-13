@@ -10,6 +10,7 @@ function deploy_diego() {
       -c $ROOT/cf.yml \
       -i $ROOT/etcd-cf-env/stubs/diego/iaas-settings.yml \
       -p $ROOT/etcd-cf-env/stubs/diego/property-overrides.yml \
+      -s $ROOT/etcd-cf-env/stubs/diego/diego-sql.yml \
       -n $ROOT/etcd-cf-env/stubs/diego/instance-count-overrides.yml \
       -v $ROOT/etcd-cf-env/stubs/diego/release-versions.yml \
       -g \
