@@ -31,9 +31,9 @@ RUN /opt/rubies/ruby-2.2.4/bin/gem install bundler --no-rdoc --no-ri
 RUN /opt/rubies/ruby-2.2.4/bin/gem install bosh_cli --no-rdoc --no-ri
 
 # Install terraform
-RUN wget https://releases.hashicorp.com/terraform/0.7.13/terraform_0.7.13_linux_amd64.zip && \
-  unzip terraform_0.7.13_linux_amd64.zip && \
-  rm terraform_0.7.13_linux_amd64.zip && \
+RUN wget https://releases.hashicorp.com/terraform/0.8.4/terraform_0.8.4_linux_amd64.zip && \
+  unzip terraform_0.8.4_linux_amd64.zip && \
+  rm terraform_0.8.4_linux_amd64.zip && \
   mv terraform /usr/local/bin/terraform
 
 # Install jq
