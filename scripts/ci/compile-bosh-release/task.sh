@@ -8,6 +8,7 @@ function main() {
   upload_stemcell
   upload_release
   force_compilation
+  check_existing_release_in_bucket
 }
 
 function force_compilation() {
@@ -31,6 +32,21 @@ function force_compilation() {
   popd > /dev/null
 
   bosh -t "${BOSH_DIRECTOR}" -n delete deployment "compilation_${RELEASE_NAME}"
+}
+
+function check_existing_release_in_bucket() {
+  pushd "${ROOT}/compiled-bosh-release" > /dev/null
+    local filename
+    filename=$(ls | grep tgz)
+
+    set +e
+    curl -f https://s3.amazonaws.com/bbl-precompiled-bosh-releases/${filename} > /dev/null
+    if [ $? -eq 0 ]; then
+      echo "${filename} already exists on s3. Quitting."
+      exit 1
+    fi
+    set -e
+  popd > /dev/null
 }
 
 function upload_stemcell() {
