@@ -3,14 +3,6 @@
 ROOT=${PWD}
 
 function main() {
-  pushd "${ROOT}/bosh-release" > /dev/null
-    local bosh_release_url
-    local bosh_release_sha1
-
-    bosh_release_url=$(cat url)
-    bosh_release_sha1="$(sha1sum release.tgz | cut -f1 -d" ")"
-  popd > /dev/null
-
   pushd "${ROOT}/bosh-google-cpi-release" > /dev/null
     local bosh_google_cpi_url
     local bosh_google_cpi_sha1
@@ -44,13 +36,13 @@ function main() {
   popd > /dev/null
 
   pushd "${ROOT}/bbl-compiled-bosh-release-s3" > /dev/null
-    local compiled_aws_bosh_url
-    local compiled_aws_bosh_sha1
-    local compiled_aws_release_name
+    local compiled_bosh_url
+    local compiled_bosh_sha1
+    local compiled_release_name
 
-    compiled_aws_bosh_url="$(cat url)"
-    compiled_aws_release_name=$(cat url | cut -f 5 -d"/")
-    compiled_aws_bosh_sha1="$(sha1sum ${compiled_aws_release_name} | cut -f1 -d" ")"
+    compiled_bosh_url="$(cat url)"
+    compiled_release_name=$(cat url | cut -f 5 -d"/")
+    compiled_bosh_sha1="$(sha1sum ${compiled_release_name} | cut -f1 -d" ")"
   popd > /dev/null
 
   pushd "${ROOT}/bosh-bootloader/bbl/constants" > /dev/null
@@ -60,14 +52,12 @@ function main() {
     // THIS FILE IS GENERATED AUTOMATICALLY, NO TOUCHING!!!!!
 
     const (
-      AWSBOSHURL       = "${compiled_aws_bosh_url}"
-      AWSBOSHSHA1      = "${compiled_aws_bosh_sha1}"
+      BOSHURL          = "${compiled_bosh_url}"
+      BOSHSHA1         = "${compiled_bosh_sha1}"
       BOSHAWSCPIURL    = "${bosh_aws_cpi_url}"
       BOSHAWSCPISHA1   = "${bosh_aws_cpi_sha1}"
       AWSStemcellURL   = "${aws_stemcell_url}"
       AWSStemcellSHA1  = "${aws_stemcell_sha1}"
-      GCPBOSHURL       = "${bosh_release_url}"
-      GCPBOSHSHA1      = "${bosh_release_sha1}"
       BOSHGCPCPIURL    = "${bosh_google_cpi_url}"
       BOSHGCPCPISHA1   = "${bosh_google_cpi_sha1}"
       GCPStemcellURL   = "${gcp_stemcell_url}"
