@@ -17,20 +17,25 @@
       }
 
       .col-short {
-        width: 25%;
+        width: 26%;
         float: left;
         border-right: 5px solid #1A252F;
         box-sizing: border-box;
       }
 
       .col-long {
-        width: 75%;
+        width: 74%;
         float: left;
       }
 
       .short-pipeline {
         height: 50%;
       }
+
+      .shortest-pipeline {
+        height: 33%;
+      }
+
 
       .long-pipeline {
         height: 100%;
@@ -40,8 +45,8 @@
   <body>
     <div class="row">
       <div class="col-short">
+        <iframe class="short-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/dockerfiles"></iframe>
         <iframe class="short-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/infrastructure-ci"></iframe>
-        <iframe class="short-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/bosh-test"></iframe>
       </div>
       <div class="col-long">
         <iframe class="long-pipeline" src="https://mega.ci.cf-app.com/pipelines/etcd?groups=compile-dependencies&groups=etcd"></iframe>
@@ -49,8 +54,9 @@
     </div>
     <div class="row ">
       <div class="col-short">
-        <iframe class="short-pipeline" src="https://mega.ci.cf-app.com/pipelines/destiny"></iframe>
-        <iframe class="short-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/gomegamatchers"></iframe>
+        <iframe class="shortest-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/bosh-test"></iframe>
+        <iframe class="shortest-pipeline" src="https://mega.ci.cf-app.com/pipelines/destiny"></iframe>
+        <iframe class="shortest-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/gomegamatchers"></iframe>
       </div>
       <div class="col-long">
         <iframe class="long-pipeline" src="https://p-concourse.wings.cf-app.com/teams/system-team-infra-infra1-08f1/pipelines/consul?groups=consul"></iframe>
