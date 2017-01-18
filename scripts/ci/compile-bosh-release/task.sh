@@ -23,12 +23,6 @@ function force_compilation() {
 
   pushd "${ROOT}/compiled-bosh-release" > /dev/null
     bosh -t "${BOSH_DIRECTOR}" -d "/tmp/compilation.yml" export release "${RELEASE_NAME}/${RELEASE_VERSION}" "ubuntu-trusty/${STEMCELL_VERSION}"
-
-    if [ -n ${PREFIX} ]; then
-      local filename
-      filename=$(ls | grep tgz)
-      mv {,${PREFIX}-}$filename
-    fi
   popd > /dev/null
 
   bosh -t "${BOSH_DIRECTOR}" -n delete deployment "compilation_${RELEASE_NAME}"
