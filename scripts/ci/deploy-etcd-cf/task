@@ -4,18 +4,26 @@ ROOT="${PWD}"
 
 preflight_check() {
   set +x
-  test -n "${BOSH_DIRECTOR}"
-  test -n "${BOSH_USER}"
-  test -n "${BOSH_PASSWORD}"
+  test -n "${BOSH_ENVIRONMENT}"
+  test -n "${BOSH_CLIENT}"
+  test -n "${BOSH_CLIENT_SECRET}"
+  test -n "${BOSH_CA_CERT}"
   set -x
+}
+
+function install_bosh_cli() {
+  pushd "${ROOT}" > /dev/null
+    wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.147-linux-amd64
+    mv bosh-cli-0.0.147-linux-amd64 /usr/local/bin/bosh
+    chmod +x /usr/local/bin/bosh
+  popd > /dev/null
 }
 
 deploy() {
   bosh \
     -n \
-    -t "${1}" \
-    -d "${2}" \
-    deploy
+    -d etcd-cf-deployment \
+    deploy "${@}"
 }
 
 generate_releases_stub() {
@@ -73,7 +81,7 @@ EOF
 
 upload_stemcell() {
   pushd "${ROOT}/stemcell" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload stemcell stemcell.tgz --skip-if-exists
+    bosh upload-stemcell stemcell.tgz
   popd > /dev/null
 }
 
@@ -85,6 +93,7 @@ main() {
 
   mkdir stubs
 
+  install_bosh_cli
   upload_stemcell
 
   pushd stubs > /dev/null
@@ -105,8 +114,8 @@ main() {
      > "${root_dir}/cf.yml"
 
   deploy \
-    "${BOSH_DIRECTOR}" \
-    "${root_dir}/cf.yml"
+    "${root_dir}/cf.yml" \
+    -o "${root_dir}/etcd-cf-env/stubs/cf/non_tls_ops_file.yml"
 }
 
 if [ "$(basename "${0}")" = "task" ]; then

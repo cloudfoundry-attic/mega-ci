@@ -368,9 +368,10 @@ jobs:
     file: mega-ci/scripts/ci/deploy-etcd-cf/task.yml
     config:
       params:
-        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
-        BOSH_USER: {{etcd_cf_bosh_user}}
-        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+        BOSH_ENVIRONMENT: {{etcd_cf_bosh_environment}}
+        BOSH_CLIENT: {{etcd_cf_bosh_client}}
+        BOSH_CLIENT_SECRET: {{etcd_cf_bosh_client_secret}}
+        BOSH_CA_CERT: {{etcd_cf_bosh_ca_cert}}
         CF_DEPLOYMENT_TRACE: true
 
 - name: deploy-with-diego
@@ -392,9 +393,9 @@ jobs:
     file: mega-ci/scripts/ci/deploy-etcd-diego/task.yml
     config:
       params:
-        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
-        BOSH_USER: {{etcd_cf_bosh_user}}
-        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+        BOSH_DIRECTOR: {{etcd_cf_bosh_environment}}
+        BOSH_USER: {{etcd_cf_bosh_client}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_client_secret}}
 
 - name: test-with-diego
   public: true
@@ -413,9 +414,9 @@ jobs:
         CF_DOMAIN: {{etcd_cf_domain}}
         CF_USER: {{etcd_cf_user}}
         CF_PASSWORD: {{etcd_cf_password}}
-        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
-        BOSH_USER: {{etcd_cf_bosh_user}}
-        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+        BOSH_DIRECTOR: {{etcd_cf_bosh_environment}}
+        BOSH_USER: {{etcd_cf_bosh_client}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_client_secret}}
         DEPLOYMENT_NAME: etcd-cf-deployment
 
 - name: test-cf-tls-upgrade
@@ -434,9 +435,9 @@ jobs:
         CF_DOMAIN: {{etcd_cf_domain}}
         CF_USER: {{etcd_cf_user}}
         CF_PASSWORD: {{etcd_cf_password}}
-        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
-        BOSH_USER: {{etcd_cf_bosh_user}}
-        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+        BOSH_DIRECTOR: {{etcd_cf_bosh_environment}}
+        BOSH_USER: {{etcd_cf_bosh_client}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_client_secret}}
         DEPLOYMENT_NAME: etcd-cf-deployment
 
 - name: delete-deployments
@@ -455,9 +456,9 @@ jobs:
     config:
       params:
         DEPLOYMENTS_WITH_WORD: etcd-cf-deployment
-        BOSH_DIRECTOR: {{etcd_cf_bosh_director}}
-        BOSH_USER: {{etcd_cf_bosh_user}}
-        BOSH_PASSWORD: {{etcd_cf_bosh_password}}
+        BOSH_DIRECTOR: {{etcd_cf_bosh_environment}}
+        BOSH_USER: {{etcd_cf_bosh_client}}
+        BOSH_PASSWORD: {{etcd_cf_bosh_client_secret}}
 
 - name: create-final-release
   public: true

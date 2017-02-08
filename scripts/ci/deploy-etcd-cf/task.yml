@@ -14,6 +14,7 @@ run:
   path: mega-ci/scripts/ci/deploy-etcd-cf/task
 
 params:
-  BOSH_DIRECTOR:
-  BOSH_USER:
-  BOSH_PASSWORD:
+  BOSH_ENVIRONMENT:
+  BOSH_CLIENT:
+  BOSH_CLIENT_SECRET:
+  BOSH_CA_CERT:
