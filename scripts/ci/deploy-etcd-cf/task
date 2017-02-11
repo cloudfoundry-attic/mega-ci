@@ -14,16 +14,24 @@ preflight_check() {
 function install_bosh_cli() {
   pushd "${ROOT}" > /dev/null
     wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.147-linux-amd64
-    mv bosh-cli-0.0.147-linux-amd64 /usr/local/bin/bosh
-    chmod +x /usr/local/bin/bosh
+    mv bosh-cli-0.0.147-linux-amd64 /usr/local/bin/boshv2
+    chmod +x /usr/local/bin/boshv2
   popd > /dev/null
 }
 
 deploy() {
-  bosh \
+  boshv2 \
     -n \
     -d etcd-cf-deployment \
-    deploy "${@}"
+    interpolate "${@}" > final-cf.yml
+
+
+  set +x
+  export BOSH_USER=$BOSH_CLIENT
+  export BOSH_PASSWORD=$BOSH_CLIENT_SECRET
+  set -x
+
+  bosh -n -t ${BOSH_ENVIRONMENT} -d final-cf.yml deploy
 }
 
 generate_releases_stub() {
@@ -81,7 +89,7 @@ EOF
 
 upload_stemcell() {
   pushd "${ROOT}/stemcell" > /dev/null
-    bosh upload-stemcell stemcell.tgz
+    boshv2 upload-stemcell stemcell.tgz
   popd > /dev/null
 }
 
