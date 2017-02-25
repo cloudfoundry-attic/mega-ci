@@ -300,10 +300,13 @@ jobs:
     file: mega-ci/scripts/ci/run-eats/task.yml
     config:
       params:
+        BOSH_ENVIRONMENT: {{cf_bosh_director}}
+        BOSH_CLIENT: {{cf_bosh_user}}
+        BOSH_CLIENT_SECRET: {{cf_bosh_password}}
         BOSH_DIRECTOR: {{cf_bosh_director}}
         BOSH_USER: {{cf_bosh_user}}
         BOSH_PASSWORD: {{cf_bosh_password}}
-        BOSH_DIRECTOR_CA_CERT: {{bosh_director_ca_cert}}
+        BOSH_CA_CERT: {{bosh_director_ca_cert}}
         AWS_SUBNET: {{mega_ci_account_aws_subnet}}
         AWS_ACCESS_KEY_ID: {{mega_ci_account_aws_access_key_id}}
         AWS_SECRET_ACCESS_KEY: {{mega_ci_account_aws_secret_access_key}}

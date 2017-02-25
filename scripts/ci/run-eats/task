@@ -8,20 +8,40 @@ export ETCD_RELEASE_VERSION="$(ls compiled-etcd-release/*.tgz | sed 's/compiled-
 function main() {
   upload_releases
   write_configuration
+  install_bosh_cli
+  unset_boshv1
 
   pushd etcd-release > /dev/null
     EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}" --skipPackage=turbulence
   popd > /dev/null
 }
 
+function install_bosh_cli() {
+  pushd "${ROOT}" > /dev/null
+    wget https://s3.amazonaws.com/bosh-cli-artifacts/bosh-cli-0.0.147-linux-amd64
+    mv bosh-cli-0.0.147-linux-amd64 /usr/local/bin/bosh
+    chmod +x /usr/local/bin/bosh
+  popd > /dev/null
+}
+
+function unset_boshv1() {
+  unset BOSH_USER
+  unset BOSH_PASSWORD
+}
+
+function set_boshv1() {
+  export BOSH_USER="$BOSH_CLIENT"
+  export BOSH_PASSWORD="$BOSH_CLIENT_SECRET"
+}
+
 function write_configuration() {
   cat > eats_config.json <<EOF
   {
     "bosh": {
-      "target": "$BOSH_DIRECTOR",
-      "username": "$BOSH_USER",
-      "password": "$BOSH_PASSWORD",
-      "director_ca_cert": "$(set +x; rollup "${BOSH_DIRECTOR_CA_CERT}")"
+      "target": "$BOSH_ENVIRONMENT",
+      "username": "$BOSH_CLIENT",
+      "password": "$BOSH_CLIENT_SECRET",
+      "director_ca_cert": "$(set +x; rollup "${BOSH_CA_CERT}")"
     },
     "aws": {
       "subnet": "$AWS_SUBNET",
@@ -38,16 +58,17 @@ EOF
 
 function upload_releases() {
   pushd "${ROOT}/compiled-etcd-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" -n upload release release-*.tgz
+    bosh -t "${BOSH_ENVIRONMENT}" -n upload release release-*.tgz
   popd > /dev/null
 
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh -t "${BOSH_DIRECTOR}" upload release release-*.tgz --skip-if-exists
+    bosh -t "${BOSH_ENVIRONMENT}" upload release release-*.tgz --skip-if-exists
   popd > /dev/null
 }
 
 function cleanup_releases() {
-  bosh -t "${BOSH_DIRECTOR}" -n cleanup
+  set_boshv1
+  bosh -t "${BOSH_ENVIRONMENT}" -n cleanup
 }
 
 function rollup() {
