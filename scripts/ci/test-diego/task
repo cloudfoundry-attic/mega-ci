@@ -10,9 +10,9 @@ function main() {
 
   cf enable-feature-flag diego_docker
 
-  bosh -t $BOSH_DIRECTOR download manifest $DEPLOYMENT_NAME manifest.yml
+  /opt/rubies/ruby-2.2.4/bin/bosh -t $BOSH_DIRECTOR download manifest $DEPLOYMENT_NAME manifest.yml
 
-  bosh -n --color -t $BOSH_DIRECTOR -d manifest.yml run errand acceptance_tests
+  /opt/rubies/ruby-2.2.4/bin/bosh -n --color -t $BOSH_DIRECTOR -d manifest.yml run errand acceptance_tests
 }
 
 main

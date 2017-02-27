@@ -58,17 +58,17 @@ EOF
 
 function upload_releases() {
   pushd "${ROOT}/compiled-etcd-release" > /dev/null
-    bosh -t "${BOSH_ENVIRONMENT}" -n upload release release-*.tgz
+    /opt/rubies/ruby-2.2.4/bin/bosh -t "${BOSH_ENVIRONMENT}" -n upload release release-*.tgz
   popd > /dev/null
 
   pushd "${ROOT}/consul-release" > /dev/null
-    bosh -t "${BOSH_ENVIRONMENT}" upload release release-*.tgz --skip-if-exists
+    /opt/rubies/ruby-2.2.4/bin/bosh -t "${BOSH_ENVIRONMENT}" upload release release-*.tgz --skip-if-exists
   popd > /dev/null
 }
 
 function cleanup_releases() {
   set_boshv1
-  bosh -t "${BOSH_ENVIRONMENT}" -n cleanup
+  /opt/rubies/ruby-2.2.4/bin/bosh -t "${BOSH_ENVIRONMENT}" -n cleanup
 }
 
 function rollup() {

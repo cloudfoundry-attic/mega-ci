@@ -31,7 +31,7 @@ deploy() {
   export BOSH_PASSWORD=$BOSH_CLIENT_SECRET
   set -x
 
-  bosh -n -t ${BOSH_ENVIRONMENT} -d final-cf.yml deploy
+  /opt/rubies/ruby-2.2.4/bin/bosh -n -t ${BOSH_ENVIRONMENT} -d final-cf.yml deploy
 }
 
 generate_releases_stub() {

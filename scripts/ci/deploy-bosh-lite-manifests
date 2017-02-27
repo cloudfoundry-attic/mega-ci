@@ -32,32 +32,32 @@ function target_director() {
   done
   set -e
 
-  bosh target "${BOSH_DIRECTOR}"
+  /opt/rubies/ruby-2.2.4/bin/bosh target "${BOSH_DIRECTOR}"
 }
 
 function upload_stemcell() {
-  bosh upload stemcell "${BUILD_DIR}/bosh-lite-stemcell/stemcell.tgz"
+  /opt/rubies/ruby-2.2.4/bin/bosh upload stemcell "${BUILD_DIR}/bosh-lite-stemcell/stemcell.tgz"
 }
 
 function upload_dependencies() {
   for dependency in ${DEPENDENCIES}; do
-    bosh -n upload release https://bosh.io/d/github.com/${dependency}
+    /opt/rubies/ruby-2.2.4/bin/bosh -n upload release https://bosh.io/d/github.com/${dependency}
   done
 }
 
 function create_and_upload_release() {
   pushd "${BUILD_DIR}/release" > /dev/null
-    bosh -n create release --force
-    bosh -n upload release
+    /opt/rubies/ruby-2.2.4/bin/bosh -n create release --force
+    /opt/rubies/ruby-2.2.4/bin/bosh -n upload release
   popd > /dev/null
 }
 
 function deploy_manifests() {
   pushd "${BUILD_DIR}/release" > /dev/null
     for manifest in ${MANIFESTS}; do
-      sed -i -e "s/BOSH-DIRECTOR-UUID/$(bosh status --uuid)/g" "${manifest}"
-      bosh -d "${manifest}" -n deploy
-      bosh -n delete deployment $(bosh deployments | grep bosh-warden-boshlite | awk '{print $2}')
+      sed -i -e "s/BOSH-DIRECTOR-UUID/$(/opt/rubies/ruby-2.2.4/bin/bosh status --uuid)/g" "${manifest}"
+      /opt/rubies/ruby-2.2.4/bin/bosh -d "${manifest}" -n deploy
+      /opt/rubies/ruby-2.2.4/bin/bosh -n delete deployment $(/opt/rubies/ruby-2.2.4/bin/bosh deployments | grep bosh-warden-boshlite | awk '{print $2}')
     done
   popd > /dev/null
 }

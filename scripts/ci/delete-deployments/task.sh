@@ -11,11 +11,11 @@ function main() {
 
   if [ -n "${deployments}" ]
   then
-    echo "${deployments}" | xargs -n 1 -P 5  bosh -t "${BOSH_DIRECTOR}" -n delete deployment --force
+    echo "${deployments}" | xargs -n 1 -P 5  /opt/rubies/ruby-2.2.4/bin/bosh -t "${BOSH_DIRECTOR}" -n delete deployment --force
   fi
 
   echo "cleaning up orphaned disks and releases"
-  bosh -t "${BOSH_DIRECTOR}" cleanup
+  /opt/rubies/ruby-2.2.4/bin/bosh -t "${BOSH_DIRECTOR}" cleanup
 }
 
 main
