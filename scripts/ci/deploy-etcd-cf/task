@@ -79,10 +79,12 @@ jobs:
   - name: consul_z1
     templates:
     - name: consul_agent
+      consumes: { consul: nil }
       release: cf
   - name: consul_z2
     templates:
     - name: consul_agent
+      consumes: { consul: nil }
       release: cf
 EOF
 }
