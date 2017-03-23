@@ -300,7 +300,7 @@ jobs:
     file: mega-ci/scripts/ci/run-eats/task.yml
     config:
       params:
-        BOSH_ENVIRONMENT: {{cf_bosh_director}}
+        BOSH_ENVIRONMENT: {{cf_bosh_director_url}}
         BOSH_CLIENT: {{cf_bosh_user}}
         BOSH_CLIENT_SECRET: {{cf_bosh_password}}
         BOSH_DIRECTOR: {{cf_bosh_director}}
