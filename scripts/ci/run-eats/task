@@ -1,8 +1,6 @@
 #!/bin/bash -exu
 
 export ROOT="${PWD}"
-export GOPATH="$PWD/etcd-release"
-export GO15VENDOREXPERIMENT=1
 export ETCD_RELEASE_VERSION="$(ls compiled-etcd-release/*.tgz | sed 's/compiled-etcd-release\/release-etcd-\(.*\)-on-ubuntu.*/\1/')"
 
 function main() {
