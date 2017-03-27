@@ -1,15 +1,18 @@
 #!/bin/bash -exu
 
 export ROOT="${PWD}"
-export GOPATH="$PWD/etcd-release"
-export GO15VENDOREXPERIMENT=1
 export ETCD_RELEASE_VERSION="$(ls compiled-etcd-release/*.tgz | sed 's/compiled-etcd-release\/release-etcd-\(.*\)-on-ubuntu.*/\1/')"
 
 function main() {
+  mkdir -p $GOPATH/src/github.com/cloudfoundry-incubator
+  pushd $GOPATH/src/github.com/cloudfoundry-incubator > /dev/null
+    ln -s $ROOT/etcd-release
+  popd > /dev/null
+
   upload_releases
   write_configuration
 
-  pushd ${ROOT}/etcd-release > /dev/null
+  pushd $GOPATH/src/github.com/cloudfoundry-incubator/etcd-release > /dev/null
     EATS_CONFIG=$PWD/../eats_config.json ./src/acceptance-tests/scripts/test -nodes "${PARALLEL_NODES}" turbulence
   popd > /dev/null
 }
