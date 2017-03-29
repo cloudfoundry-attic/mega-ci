@@ -1,7 +1,5 @@
 #!/bin/bash -exu
 
-export GOPATH="$PWD/etcd-release"
-
 function create_integration_config() {
   cat > eats_config.json <<EOF
   {
@@ -23,7 +21,12 @@ EOF
 function main() {
   local ROOT=$1
 
-  pushd "${ROOT}/etcd-release" > /dev/null
+  mkdir -p $GOPATH/src/github.com/cloudfoundry-incubator
+  pushd $GOPATH/src/github.com/cloudfoundry-incubator > /dev/null
+    ln -s $ROOT/etcd-release
+  popd > /dev/null
+
+  pushd $GOPATH/src/github.com/cloudfoundry-incubator/etcd-release > /dev/null
     create_integration_config
     EATS_CONFIG="${PWD}/eats_config.json" ginkgo \
       -r \
