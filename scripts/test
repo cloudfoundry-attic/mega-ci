@@ -7,7 +7,6 @@ main() {
   pushd "${GOPATH}/src/github.com/cloudfoundry" > /dev/null
     ln -s "${ROOT}/mega-ci"
     pushd mega-ci > /dev/null
-      export GO15VENDOREXPERIMENT=1
       ginkgo \
           -p \
           -r \
