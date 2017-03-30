@@ -18,6 +18,16 @@ function deploy_boshlite() {
 
     target_director
   popd > /dev/null
+
+  update_cloud_config
+}
+
+function update_cloud_config() {
+  set +e
+  pushd "${BUILD_DIR}/release" > /dev/null
+	bosh update cloud-config "${CLOUD_CONFIG}"
+  popd > /dev/null
+  set -e
 }
 
 function target_director() {

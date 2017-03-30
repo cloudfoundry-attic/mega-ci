@@ -167,6 +167,7 @@ jobs:
         BOSH_LITE_NAME: bosh-lite-etcd
         BOSH_LITE_KEYPAIR: bosh-lite-etcd
         BOSH_LITE_PRIVATE_KEY_CONTENTS: {{bosh-lite-private-key}}
+        CLOUD_CONFIG: "manifests/bosh-lite/cloud-config.yml"
         MANIFESTS: "manifests/bosh-lite/3-node-with-ssl.yml manifests/bosh-lite/3-node-no-ssl.yml"
         DEPENDENCIES: "cloudfoundry-incubator/consul-release"
 
