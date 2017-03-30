@@ -25,7 +25,7 @@ function deploy_boshlite() {
 function update_cloud_config() {
   set +e
   pushd "${BUILD_DIR}/release" > /dev/null
-	bosh update cloud-config "${CLOUD_CONFIG}"
+	/opt/rubies/ruby-2.2.4/bin/bosh update cloud-config "${CLOUD_CONFIG}"
   popd > /dev/null
   set -e
 }
